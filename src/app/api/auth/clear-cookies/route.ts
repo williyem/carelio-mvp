@@ -13,27 +13,23 @@ import {
   healthAssistantCookieObj,
   healthAssistantTempToken,
 } from '@/lib/constants';
-import { ROUTES } from '@/lib/routes';
 
-export async function POST(req: Request) {
+export async function POST() {
   const cookieStore = await cookies();
 
-  // Clear all doctor cookies
   cookieStore.delete(doctorAccessToken);
   cookieStore.delete(doctorRefreshToken);
   cookieStore.delete(doctorCookieObj);
   cookieStore.delete(doctorTempToken);
 
-  // Clear all health assistant cookies
   cookieStore.delete(healthAssistantAccessToken);
   cookieStore.delete(healthAssistantRefreshToken);
   cookieStore.delete(healthAssistantCookieObj);
   cookieStore.delete(healthAssistantTempToken);
 
-  // Clear all patient cookies
   cookieStore.delete(patientAccessToken);
   cookieStore.delete(patientRefreshToken);
   cookieStore.delete(patientCookieObj);
 
-  return NextResponse.redirect(new URL(ROUTES.AUTH.LOGIN, req.url));
+  return NextResponse.json({ message: 'Cookies cleared' });
 }

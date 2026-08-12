@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { backendApiClient, API_BASE_URL } from '@/integration/config';
 import type { GetSessionResponse } from '@/integration/auth/patient/types';
 import { cookies } from 'next/headers';
+import { patientAccessToken, patientRefreshToken } from '@/lib/constants';
 
 /**
  * GET /api/auth/patient/session
@@ -10,7 +11,7 @@ import { cookies } from 'next/headers';
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-    const accessToken = cookieStore.get('patient_access_token')?.value;
+    const accessToken = cookieStore.get(patientAccessToken)?.value;
 
     if (!accessToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -36,8 +37,8 @@ export async function GET(request: NextRequest) {
 
       if (axiosError.response?.status === 401) {
         const cookieStore = await cookies();
-        cookieStore.delete('patient_access_token');
-        cookieStore.delete('patient_refresh_token');
+        cookieStore.delete(patientAccessToken);
+        cookieStore.delete(patientRefreshToken);
       }
 
       return NextResponse.json(

@@ -25,7 +25,7 @@ export interface Patient {
   patientId: string;
   fullName: string;
   dob: string;
-  dateOfBirth?: string; // Alias for dob
+  dateOfBirth?: string;
   gender: 'male' | 'female' | 'other';
   email: string;
   phone?: string;
@@ -45,7 +45,7 @@ export interface Patient {
   isRegistrationComplete?: boolean;
 }
 
-/** @deprecated Use Patient instead */
+/** Alias used by HA portal */
 export type AssignedPatient = Patient;
 
 // ============================================
@@ -56,6 +56,7 @@ export interface PatientSearchParams {
   search?: string;
   page?: number;
   limit?: number;
+  assistantId?: string;
 }
 
 export interface GetAssignedPatientsParams {

@@ -1,20 +1,20 @@
 'use client';
 
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { verifyInvite } from '../api-functions';
+import { verifyConsent } from '../api-functions';
 import type { VerifyInvitationResponse, InvitationToken } from '../types';
 import { extractResponseData } from '@/integration/utils';
 
 /**
  * Query key factory for verify invitation
  */
-export const getVerifyInvitationQueryKey = (token: InvitationToken) =>
-  ['patient', 'auth', 'verify-invitation', token] as const;
+export const getVerifyConsentQueryKey = (token: InvitationToken) =>
+  ['patient', 'auth', 'verify-consent', token] as const;
 
 /**
- * Hook to verify invitation token
+ * Hook to verify consent token
  */
-export const useVerifyInvitation = (
+export const useVerifyConsent = (
   token: InvitationToken | null,
   isOnboardingComplete: boolean,
   options?: Omit<
@@ -23,12 +23,12 @@ export const useVerifyInvitation = (
   >
 ) => {
   return useQuery({
-    queryKey: getVerifyInvitationQueryKey(token!),
+    queryKey: getVerifyConsentQueryKey(token!),
     queryFn: async () => {
       if (!token) {
         throw new Error('Not authorized. Please contact administrator');
       }
-      const response = await verifyInvite(token);
+      const response = await verifyConsent(token);
       return extractResponseData(response);
     },
     enabled: !!token && !isOnboardingComplete,

@@ -21,10 +21,8 @@ import type {
 export const loginPatient = async (
   data: PatientLoginRequest
 ): Promise<AxiosResponse<PatientLoginResponse>> => {
-  return authApiClient.post<PatientLoginResponse>(
-    PATIENT_ENDPOINTS.LOGIN,
-    data
-  );
+  // Hit Next BFF so dummy mode can set cookies in one step
+  return apiClient.post<PatientLoginResponse>(PATIENT_ENDPOINTS.LOGIN, data);
 };
 
 /**
@@ -65,6 +63,22 @@ export const verifyInvitation = async (
 ): Promise<AxiosResponse<VerifyInvitationResponse>> => {
   return apiClient.get<VerifyInvitationResponse>(
     `${PATIENT_ENDPOINTS.VERIFY_INVITATION}?token=${token}`
+  );
+};
+
+export const verifyConsent = async (
+  token: InvitationToken
+): Promise<AxiosResponse<VerifyInvitationResponse>> => {
+  return apiClient.get<VerifyInvitationResponse>(
+    `${PATIENT_ENDPOINTS.VERIFY_CONSENT}?token=${token}`
+  );
+};
+
+export const verifyInvite = async (
+  token: InvitationToken
+): Promise<AxiosResponse<VerifyInvitationResponse>> => {
+  return apiClient.get<VerifyInvitationResponse>(
+    `${PATIENT_ENDPOINTS.VERIFY_INVITE}?token=${token}`
   );
 };
 

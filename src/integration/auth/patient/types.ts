@@ -100,22 +100,30 @@ export interface VerifyInvitationRequest {
  * Verify Invitation Response
  */
 export interface VerifyInvitationResponse {
-  email: string;
-  invitedBy: string;
-  isValid: boolean;
+  email: string | null;
+  phoneNumber: string | null;
+  invitationMethod: 'email' | 'phone';
+  doctorName: string;
+  fullName: string;
+  dob: string;
+  gender: Gender;
+  address: string;
+  bloodType: BloodType;
 }
 
 /**
  * Complete Registration Request
  */
 export interface CompleteRegistrationRequest {
-  token: InvitationToken;
+  token: string;
   fullName: string;
   dob: string; // ISO date string
   gender: Gender;
   phoneNumber: string;
   address: string;
   bloodType: BloodType;
+  email?: string;
+  agreements?: Record<string, { pdf: Blob; original?: Blob | string }>;
 }
 
 /**

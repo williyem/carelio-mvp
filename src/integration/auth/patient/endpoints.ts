@@ -13,6 +13,8 @@ export const PATIENT_ENDPOINTS = {
   SESSION: `${PATIENT_AUTH_BASE}/session`,
   VERIFY_INVITATION: `${PATIENT_AUTH_BASE}/verify-invitation`,
   COMPLETE_REGISTRATION: `${PATIENT_AUTH_BASE}/complete-registration`,
+  VERIFY_CONSENT: `${PATIENT_AUTH_BASE}/verify-consent`,
+  VERIFY_INVITE: `${PATIENT_AUTH_BASE}/verify-invitation`,
 } as const;
 
 /**

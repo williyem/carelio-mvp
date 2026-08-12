@@ -5,6 +5,7 @@ import type {
   RefreshTokenResponse,
 } from '@/integration/auth/patient/types';
 import { cookies } from 'next/headers';
+import { patientAccessToken, patientRefreshToken } from '@/lib/constants';
 
 /**
  * POST /api/auth/patient/refresh
@@ -13,9 +14,7 @@ import { cookies } from 'next/headers';
 export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-    const refreshTokenFromCookie = cookieStore.get(
-      'patient_refresh_token'
-    )?.value;
+    const refreshTokenFromCookie = cookieStore.get(patientRefreshToken)?.value;
 
     const body: RefreshTokenRequest = await request.json();
     const refreshToken = refreshTokenFromCookie || body.refreshToken;
@@ -27,8 +26,7 @@ export async function POST(request: NextRequest) {
 
     const data = response.data;
 
-    // Update cookies
-    cookieStore.set('patient_access_token', data.accessToken, {
+    cookieStore.set(patientAccessToken, data.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
@@ -36,7 +34,7 @@ export async function POST(request: NextRequest) {
       path: '/',
     });
 
-    cookieStore.set('patient_refresh_token', data.refreshToken, {
+    cookieStore.set(patientRefreshToken, data.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',

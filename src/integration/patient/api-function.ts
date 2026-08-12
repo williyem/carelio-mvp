@@ -1,8 +1,10 @@
 import { extractResponseData } from '..';
-import { ApiResponse, apiClient } from '../config';
-import { PATIENT_API_ENDPOINTS } from './endpoints';
+import { HEALTH_ASSISTANT_API_ENDPOINTS } from '../auth/health-assistant/endpoints';
+import { ApiResponse, apiClient, backendApiClient } from '../config';
+import { PATIENT_API_ENDPOINTS, PATIENT_ENDPOINTS } from './endpoints';
 import type {
   Patient,
+  AssignedPatient,
   PatientSearchParams,
   PatientSearchResponse,
   GetAssignedPatientsParams,
@@ -10,10 +12,11 @@ import type {
   InvitePatientRequest,
   InvitePatientResponse,
   UnassignPatientResponse,
+  PatientConsultationTokenResponse,
 } from './type';
 
 /**
- * Search all patients (paginated)
+ * Search all patients (doctor portal)
  */
 export const searchPatients = async (
   params?: PatientSearchParams
@@ -26,7 +29,7 @@ export const searchPatients = async (
 };
 
 /**
- * Get patients assigned to a health assistant
+ * Get patients assigned to a health assistant (doctor view)
  */
 export const getAssignedPatients = async (
   params?: GetAssignedPatientsParams
@@ -38,18 +41,78 @@ export const getAssignedPatients = async (
   return extractResponseData(response);
 };
 
-/**
- * Get a single patient by ID
- */
-export const getPatientById = async (id: string): Promise<Patient> => {
-  const endpoint = PATIENT_API_ENDPOINTS.GET_PATIENT_BY_ID.replace(':id', id);
-  const response = await apiClient.get<ApiResponse<Patient>>(endpoint);
+export const searchAssignedPatients = async (
+  params: PatientSearchParams & { assistantId: string }
+): Promise<PatientSearchResponse> => {
+  const response = await apiClient.get<ApiResponse<PatientSearchResponse>>(
+    HEALTH_ASSISTANT_API_ENDPOINTS.SEARCH_ASSIGNED_PATIENTS,
+    {
+      params: {
+        search: params.search,
+        page: params.page,
+        limit: params.limit,
+        assistantId: params.assistantId,
+      },
+    }
+  );
   return extractResponseData(response);
 };
 
-/**
- * Assign a patient to a health assistant
- */
+export const searchUnAssignedPatients = async (
+  params: PatientSearchParams
+): Promise<PatientSearchResponse> => {
+  const response = await apiClient.get<ApiResponse<PatientSearchResponse>>(
+    PATIENT_API_ENDPOINTS.SEARCH_UNASSIGNED_PATIENTS,
+    {
+      params: {
+        search: params.search,
+        page: params.page,
+        limit: params.limit,
+      },
+    }
+  );
+  return extractResponseData(response);
+};
+
+export const searchAssignedHealthAssistantsPatients = async (
+  params: PatientSearchParams
+): Promise<PatientSearchResponse> => {
+  const response = await apiClient.get<ApiResponse<PatientSearchResponse>>(
+    PATIENT_API_ENDPOINTS.SEARCH_ASSIGNED_HEALTH_ASSISTANTS_PATIENTS,
+    {
+      params: {
+        search: params.search,
+        page: params.page,
+        limit: params.limit,
+      },
+    }
+  );
+  return extractResponseData(response);
+};
+
+export const searchAllPatients = async (
+  params: PatientSearchParams
+): Promise<PatientSearchResponse> => {
+  const response = await apiClient.get<ApiResponse<PatientSearchResponse>>(
+    PATIENT_API_ENDPOINTS.SEARCH_ALL,
+    {
+      params: {
+        search: params.search,
+        page: params.page,
+        limit: params.limit,
+      },
+    }
+  );
+  return extractResponseData(response);
+};
+
+export const getPatientById = async (id: string): Promise<AssignedPatient> => {
+  const response = await apiClient.get<ApiResponse<AssignedPatient>>(
+    PATIENT_API_ENDPOINTS.GET_PATIENT_BY_ID.replace(':id', id)
+  );
+  return extractResponseData(response);
+};
+
 export const assignPatient = async (
   data: AssignPatientRequest
 ): Promise<Patient> => {
@@ -60,9 +123,6 @@ export const assignPatient = async (
   return extractResponseData(response);
 };
 
-/**
- * Unassign a patient from their health assistant
- */
 export const unassignPatient = async (
   patientId: string
 ): Promise<UnassignPatientResponse> => {
@@ -75,15 +135,65 @@ export const unassignPatient = async (
   return extractResponseData(response);
 };
 
-/**
- * Invite a patient by email (doctor only)
- */
 export const invitePatient = async (
   data: InvitePatientRequest
 ): Promise<InvitePatientResponse> => {
   const response = await apiClient.post<ApiResponse<InvitePatientResponse>>(
     PATIENT_API_ENDPOINTS.INVITE_PATIENT,
     data
+  );
+  return extractResponseData(response);
+};
+
+export const getPatientConsultationToken = async (
+  patientId: string
+): Promise<PatientConsultationTokenResponse> => {
+  const response = await apiClient.get<
+    ApiResponse<PatientConsultationTokenResponse>
+  >(
+    PATIENT_API_ENDPOINTS.GET_PATIENT_CONSULTATION_TOKEN.replace(
+      ':id',
+      patientId
+    )
+  );
+  return extractResponseData(response);
+};
+
+export const submitConsentForm = async ({
+  token,
+  agreements,
+}: {
+  token: string;
+  agreements: {
+    type: string;
+    signatureUrl: string;
+    documentUrl: string;
+  }[];
+}): Promise<void> => {
+  const response = await backendApiClient.post(
+    PATIENT_ENDPOINTS.SUBMIT_CONSENT_FORM,
+    { agreements, token: token }
+  );
+  return extractResponseData(response);
+};
+
+export const submitConsentAgreement = async ({
+  token,
+  agreements,
+}: {
+  token: string;
+  agreements: {
+    type: string;
+    signatureUrl: string;
+    documentUrl: string;
+  }[];
+}): Promise<void> => {
+  const response = await apiClient.post(
+    PATIENT_API_ENDPOINTS.SUBMIT_CONSENT_AGREEMENT,
+    { agreements },
+    {
+      params: { token },
+    }
   );
   return extractResponseData(response);
 };
