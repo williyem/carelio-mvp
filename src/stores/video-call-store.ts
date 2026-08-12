@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { Patient } from '@/types/patient.types';
-import { Appointment } from '@/integration/appointments/types';
+import { Appointment } from '@/types/appointment.types';
 import ZoomVideo from '@zoom/videosdk';
 export interface PreviewSettings {
   isMuted: boolean;
@@ -30,7 +30,10 @@ interface VideoCallState {
   setPreviewSettings: (settings: PreviewSettings) => void;
   startCallFromPreview: () => void;
   closePreview: () => void;
-  setSelectedAppointment: (appointment: Appointment, patient: Patient) => void;
+  setSelectedAppointment: (
+    appointment: Appointment | null,
+    patient: Patient | null
+  ) => void;
   selectedAppointment: Appointment | null;
   selectedPatient: Patient | null;
   isMuted: boolean;
@@ -103,7 +106,10 @@ export const useVideoCallStore = create<VideoCallState>((set) => ({
       previewSettings: null,
       selectedAppointment: null,
     }),
-  setSelectedAppointment: (appointment: Appointment, patient: Patient) =>
+  setSelectedAppointment: (
+    appointment: Appointment | null,
+    patient: Patient | null
+  ) =>
     set({
       selectedAppointment: appointment,
       selectedPatient: patient,

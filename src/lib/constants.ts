@@ -24,11 +24,16 @@ export const APPOINTMENT_STATUS = {
 
 // export const DEFAULT_AVATAR = 'upload.wikimedia';
 
-export const USER_TYPE: Record<string, 'doctor' | 'patient'> = {
+export const USER_TYPE: Record<
+  string,
+  'doctor' | 'patient' | 'healthAssistant'
+> = {
   doctor: 'doctor',
   patient: 'patient',
+  healthAssistant: 'healthAssistant',
 };
 
 export const USER_TYPE_HEADER = {
   'x-user-type': 'doctor',
 };
+export const DEFAULT_PAGE = 1; export const DEFAULT_LIMIT = 10;

@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { doctorAccessToken } from '@/lib/constants';
+import {
+  doctorAccessToken,
+  healthAssistantAccessToken,
+  patientAccessToken,
+} from '@/lib/constants';
 import { ROUTES } from '@/lib/routes';
 
 export function proxy(request: NextRequest) {
@@ -10,13 +14,24 @@ export function proxy(request: NextRequest) {
     pathname.startsWith('/api/') ||
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/favicon.ico') ||
+    pathname.startsWith('/patient-invite') ||
+    pathname.startsWith('/patient/register') ||
     pathname.match(/\.(ico|png|jpg|jpeg|svg|gif|webp|woff|woff2|ttf|eot)$/)
   ) {
     return NextResponse.next();
   }
 
   const doctorToken = request.cookies.get(doctorAccessToken)?.value;
-  const isLoggedIn = !!doctorToken;
+  const healthAssistantToken = request.cookies.get(
+    healthAssistantAccessToken
+  )?.value;
+  const patientToken = request.cookies.get(patientAccessToken)?.value;
+
+  const isDoctorLoggedIn = !!doctorToken;
+  const isHealthAssistantLoggedIn = !!healthAssistantToken;
+  const isPatientLoggedIn = !!patientToken;
+  const isLoggedIn =
+    isDoctorLoggedIn || isHealthAssistantLoggedIn || isPatientLoggedIn;
 
   const authRoutes = [
     ROUTES.AUTH.ROOT,
@@ -27,28 +42,113 @@ export function proxy(request: NextRequest) {
     ROUTES.AUTH.ENABLE_2FA,
     ROUTES.AUTH.FORGOT_PASSWORD,
     ROUTES.AUTH.RESET_PASSWORD,
+    ROUTES.AUTH.FIRST_TIME_RESET_PASSWORD,
     ROUTES.AUTH.PASSWORD_RESET_SUCCESS,
   ];
 
   const isAuthRoute = authRoutes.some((route) => pathname === route);
-
-  const isProtectedRoute =
+  const isDoctorRoute =
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/doctor') ||
     pathname.startsWith('/live-consultation');
+  const isHealthAssistantRoute = pathname.startsWith('/health-assistant');
+  const isPatientRoute = pathname.startsWith('/patient');
 
+  // Logged-in users on auth pages → role home
   if (isAuthRoute && isLoggedIn) {
-    const res = NextResponse.redirect(
-      new URL(ROUTES.DASHBOARD.ROOT, request.url)
-    );
-    res.headers.set('Cache-Control', 'no-store');
-    return res;
+    if (isDoctorLoggedIn) {
+      const res = NextResponse.redirect(
+        new URL(ROUTES.DASHBOARD.ROOT, request.url)
+      );
+      res.headers.set('Cache-Control', 'no-store');
+      return res;
+    }
+    if (isHealthAssistantLoggedIn) {
+      const res = NextResponse.redirect(
+        new URL(ROUTES.HEALTH_ASSISTANT.PATIENT.ROOT, request.url)
+      );
+      res.headers.set('Cache-Control', 'no-store');
+      return res;
+    }
+    if (isPatientLoggedIn) {
+      const res = NextResponse.redirect(
+        new URL(ROUTES.PATIENT.ROOT, request.url)
+      );
+      res.headers.set('Cache-Control', 'no-store');
+      return res;
+    }
   }
 
-  if (isProtectedRoute && !isLoggedIn) {
-    const res = NextResponse.redirect(new URL(ROUTES.AUTH.LOGIN, request.url));
-    res.headers.set('Cache-Control', 'no-store');
-    return res;
+  // Doctor routes
+  if (isDoctorRoute) {
+    if (isPatientLoggedIn || isHealthAssistantLoggedIn) {
+      const home = isPatientLoggedIn
+        ? ROUTES.PATIENT.ROOT
+        : ROUTES.HEALTH_ASSISTANT.PATIENT.ROOT;
+      const res = NextResponse.redirect(new URL(home, request.url));
+      res.headers.set('Cache-Control', 'no-store');
+      return res;
+    }
+    if (!isDoctorLoggedIn) {
+      const res = NextResponse.redirect(
+        new URL(ROUTES.AUTH.LOGIN, request.url)
+      );
+      res.headers.set('Cache-Control', 'no-store');
+      return res;
+    }
+    return NextResponse.next();
+  }
+
+  // Health Assistant routes
+  if (isHealthAssistantRoute) {
+    if (isPatientLoggedIn) {
+      const res = NextResponse.redirect(
+        new URL(ROUTES.PATIENT.ROOT, request.url)
+      );
+      res.headers.set('Cache-Control', 'no-store');
+      return res;
+    }
+    if (isDoctorLoggedIn) {
+      const res = NextResponse.redirect(
+        new URL(ROUTES.DASHBOARD.ROOT, request.url)
+      );
+      res.headers.set('Cache-Control', 'no-store');
+      return res;
+    }
+    if (!isHealthAssistantLoggedIn) {
+      const res = NextResponse.redirect(
+        new URL(ROUTES.AUTH.LOGIN, request.url)
+      );
+      res.headers.set('Cache-Control', 'no-store');
+      return res;
+    }
+    return NextResponse.next();
+  }
+
+  // Patient portal routes
+  if (isPatientRoute) {
+    if (isHealthAssistantLoggedIn) {
+      const res = NextResponse.redirect(
+        new URL(ROUTES.HEALTH_ASSISTANT.PATIENT.ROOT, request.url)
+      );
+      res.headers.set('Cache-Control', 'no-store');
+      return res;
+    }
+    if (isDoctorLoggedIn) {
+      const res = NextResponse.redirect(
+        new URL(ROUTES.DASHBOARD.ROOT, request.url)
+      );
+      res.headers.set('Cache-Control', 'no-store');
+      return res;
+    }
+    if (!isPatientLoggedIn) {
+      const res = NextResponse.redirect(
+        new URL(ROUTES.AUTH.LOGIN, request.url)
+      );
+      res.headers.set('Cache-Control', 'no-store');
+      return res;
+    }
+    return NextResponse.next();
   }
 
   return NextResponse.next();

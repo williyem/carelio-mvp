@@ -1,13 +1,13 @@
 export interface Patient {
   id: string;
-  fullName: string;
+  fullName?: string;
   dateOfBirth: string;
   gender: 'Male' | 'Female' | 'Other';
-  bloodType: string;
+  bloodType?: string;
   email: string;
-  phone: string;
+  phone?: string;
   phoneNumber?: string;
-  address: string;
+  address?: string;
   allergies?: string[];
   chiefComplaint?: string;
   patientId: string;

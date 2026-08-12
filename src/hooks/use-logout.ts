@@ -24,14 +24,14 @@ export function useLogout() {
       localStorage.clear();
 
       // Redirect to login
-      window.location.href = ROUTES.AUTH.ROOT;
+      window.location.href = ROUTES.AUTH.LOGIN;
       toast.success('Successfully logged out');
     } catch (error) {
       console.error('Logout error:', error);
       endCall();
       queryClient.clear();
       localStorage.clear();
-      window.location.href = ROUTES.AUTH.ROOT;
+      window.location.href = ROUTES.AUTH.LOGIN;
       toast.success('Successfully logged out');
     }
   };
