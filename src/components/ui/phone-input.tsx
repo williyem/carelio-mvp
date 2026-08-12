@@ -27,18 +27,60 @@ type PhoneInputProps = Omit<
 > &
   Omit<RPNInput.Props<typeof RPNInput.default>, 'onChange'> & {
     onChange?: (value: RPNInput.Value) => void;
+    inputClassName?: string;
+    countryButtonClassName?: string;
   };
 
 const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
   React.forwardRef<React.ElementRef<typeof RPNInput.default>, PhoneInputProps>(
-    ({ className, onChange, value, ...props }, ref) => {
+    (
+      {
+        className,
+        onChange,
+        value,
+        inputClassName,
+        countryButtonClassName,
+        ...props
+      },
+      ref
+    ) => {
+      const CustomInputComponent = React.useMemo(() => {
+        const Component = React.forwardRef<
+          HTMLInputElement,
+          React.ComponentProps<'input'>
+        >(({ className: inputClass, ...inputProps }, inputRef) => (
+          <Input
+            className={cn(
+              inputClassName,
+              inputClass,
+              'rounded-e-[10px] rounded-s-none'
+            )}
+            {...inputProps}
+            ref={inputRef}
+          />
+        ));
+        Component.displayName = 'CustomInputComponent';
+        return Component;
+      }, [inputClassName]);
+
+      const CustomCountrySelect = React.useMemo(() => {
+        const Component = (countrySelectProps: CountrySelectProps) => (
+          <CountrySelect
+            {...countrySelectProps}
+            buttonClassName={countryButtonClassName}
+          />
+        );
+
+        return Component;
+      }, [countryButtonClassName]);
+
       return (
         <RPNInput.default
           ref={ref}
           className={cn('flex', className)}
           flagComponent={FlagComponent}
-          countrySelectComponent={CountrySelect}
-          inputComponent={InputComponent}
+          countrySelectComponent={CustomCountrySelect}
+          inputComponent={CustomInputComponent}
           smartCaret={false}
           value={value || undefined}
           /**
@@ -63,7 +105,7 @@ const InputComponent = React.forwardRef<
   React.ComponentProps<'input'>
 >(({ className, ...props }, ref) => (
   <Input
-    className={cn('rounded-e-[10px] rounded-s-none', className)}
+    className={cn(className, 'rounded-e-[10px] rounded-s-none')}
     {...props}
     ref={ref}
   />
@@ -77,6 +119,7 @@ type CountrySelectProps = {
   value: RPNInput.Country;
   options: CountryEntry[];
   onChange: (country: RPNInput.Country) => void;
+  buttonClassName?: string;
 };
 
 const CountrySelect = ({
@@ -84,6 +127,7 @@ const CountrySelect = ({
   value: selectedCountry,
   options: countryList,
   onChange,
+  buttonClassName,
 }: CountrySelectProps) => {
   const scrollAreaRef = React.useRef<HTMLDivElement>(null);
   const [searchValue, setSearchValue] = React.useState('');
@@ -104,8 +148,15 @@ const CountrySelect = ({
         <Button
           type="button"
           variant="outline"
-          className="flex gap-1 rounded-e-none rounded-s-[10px] border-r-0 px-3 h-[48px] focus:z-10 bg-(--bg-input) border-(--border-stroke) hover:bg-(--bg-input) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2"
+          className={cn(
+            'flex gap-1 rounded-e-none rounded-s-[8px] border-r-0 px-3 h-[44px] focus:z-10 focus-visible:outline-none disabled:opacity-15 focus-visible:ring-2 focus-visible:ring-carex-blue-600 focus-visible:ring-offset-2',
+            buttonClassName ||
+              'bg-(--bg-input) border-(--border-stroke) hover:bg-(--bg-input)'
+          )}
           disabled={disabled}
+          style={{
+            borderColor: '#d0d5dd',
+          }}
         >
           <FlagComponent
             country={selectedCountry}
