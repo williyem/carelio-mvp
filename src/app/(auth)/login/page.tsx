@@ -1,15 +1,20 @@
 'use client';
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useDoctorLoginForm } from '@/hooks/page-hooks/use-doctor-login';
 import { Spinner } from '@/components/ui/spinner';
 import ErrorMessage from '@/components/ui/error-message';
 
+type LoginRole = 'doctor' | 'user';
+
 export default function LoginPage() {
+  const [loginRole, setLoginRole] = useState<LoginRole>('doctor');
   const {
     register,
     handleSubmit,
@@ -36,8 +41,28 @@ export default function LoginPage() {
               />
             </Link>
           </div>
-          {/* Headers are implicit in the design */}
         </div>
+
+        <Tabs
+          value={loginRole}
+          onValueChange={(value) => setLoginRole(value as LoginRole)}
+          className="w-full gap-0"
+        >
+          <TabsList className="h-auto w-full  border border-gray-200 p-[5px]">
+            <TabsTrigger
+              value="doctor"
+              className="h-auto flex-1 cursor-pointer p-[10px] text-[14px] leading-[1.2] text-[#020f17] data-[state=active]:bg-white data-[state=active]:border-[#ebebeb]"
+            >
+              Doctor
+            </TabsTrigger>
+            <TabsTrigger
+              value="user"
+              className="h-auto flex-1 cursor-pointer p-[10px] text-[14px] leading-[1.2] text-[#020f17] data-[state=active]:bg-white data-[state=active]:border-[#ebebeb]"
+            >
+              User
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
         <form className="grid gap-4" onSubmit={handleSubmit}>
           <div className="grid gap-2">
