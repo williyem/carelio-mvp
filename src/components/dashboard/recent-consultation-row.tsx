@@ -1,50 +1,83 @@
-import UserSvg from '@/assets/icons/user-svg';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import { Patient } from '@/types/patient.types';
+import { UpcomingAppointment } from '@/integration/appointments/types';
+import { formatAppointmentDate, formatAppointmentTimeRange } from '@/lib/easy';
+import ClockSvg from '@/assets/icons/clock-svg';
+import CalendarSvg from '@/assets/icons/calendar-svg';
+import ChevronRightSvg from '@/assets/icons/chevron-right-svg';
+
+interface RecentConsultationRowProps {
+  appointment: UpcomingAppointment;
+  handlePatientSelect: (appointment: UpcomingAppointment) => void;
+}
 
 const RecentConsultationRow = ({
-  patient,
-  selectedPatient,
+  appointment,
   handlePatientSelect,
-}: {
-  patient: Patient;
-  selectedPatient: Patient | null;
-  handlePatientSelect: (patient: Patient) => void;
-}) => {
+}: RecentConsultationRowProps) => {
+  const { patient } = appointment;
+  const fullName =
+    patient.fullName ||
+    `${patient.firstName} ${patient.lastName}` ||
+    patient.email ||
+    patient.phoneNumber;
+
   return (
     <div
-      key={patient.id}
       className={cn(
-        'flex  items-center justify-between w-full p-4 rounded-xl border cursor-pointer transition-all',
-        selectedPatient?.id === patient.id
-          ? 'border-brand-blue bg-blue-50/50'
-          : 'border-gray-200 hover:border-gray-300 bg-white'
+        'flex cursor-pointer items-center justify-between w-full p-4 rounded-xl border transition-all border-gray-200 hover:border-gray-300 bg-white'
       )}
+      onClick={() => handlePatientSelect(appointment)}
     >
-      <div
-        onClick={() => handlePatientSelect(patient)}
-        className={cn('flex items-center w-full gap-4 ')}
-      >
+      <div className={cn('flex items-center w-full gap-4')}>
         <Avatar className="h-10 w-10 bg-gray-100">
           <AvatarFallback className="text-gray-500">
-            <UserSvg />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M12 2C9.2385 2 7 4.2385 7 7C7 9.7615 9.2385 12 12 12C14.7615 12 17 9.7615 17 7C17 4.2385 14.7615 2 12 2ZM8.25 7C8.25 6.00544 8.64509 5.05161 9.34835 4.34835C10.0516 3.64509 11.0054 3.25 12 3.25C12.9946 3.25 13.9484 3.64509 14.6517 4.34835C15.3549 5.05161 15.75 6.00544 15.75 7C15.75 7.99456 15.3549 8.94839 14.6517 9.65165C13.9484 10.3549 12.9946 10.75 12 10.75C11.0054 10.75 10.0516 10.3549 9.34835 9.65165C8.64509 8.94839 8.25 7.99456 8.25 7ZM6.125 14C5.5615 14 5.02108 14.2238 4.62257 14.6222C4.22407 15.0206 4.00013 15.561 4 16.1245V16.5C4 18.3775 4.971 19.7835 6.46 20.69C7.925 21.5815 9.893 22 12 22C14.107 22 16.075 21.5815 17.54 20.69C19.029 19.7835 20 18.3775 20 16.5V16.1245C19.9999 15.561 19.7759 15.0206 19.3774 14.6222C18.9789 14.2238 18.4385 14 17.875 14H6.125ZM5.25 16.1245C5.25013 15.8925 5.34238 15.6701 5.50646 15.5061C5.67054 15.3421 5.89302 15.25 6.125 15.25H17.875C18.3585 15.25 18.75 15.6415 18.75 16.1245V16.5C18.75 17.872 18.07 18.904 16.89 19.6225C15.685 20.356 13.966 20.75 12 20.75C10.034 20.75 8.315 20.356 7.11 19.6225C5.93 18.904 5.25 17.8725 5.25 16.5V16.1245Z"
+                fill="#444545"
+              />
+            </svg>
           </AvatarFallback>
         </Avatar>
-        <div>
-          <h3 className="font-semibold text-gray-900">
-            {patient.fullName || patient.patientId}
+        <div className="flex gap-y-1 flex-col">
+          <h3 className="font-semibold text-gray-900 leading-tight">
+            {fullName || patient.patientId}
           </h3>
-          <p className="text-sm text-gray-500">
+          <div className="flex gap-x-2 items-end text-sm text-gray-500">
+            <div className="flex items-center gap-x-1">
+              <CalendarSvg />
+              <span className="text-sm font-normal text-(--text-secondary)">
+                {formatAppointmentDate(appointment.startTime || '')}
+              </span>
+            </div>
+            <div className="flex items-center gap-x-1">
+              <ClockSvg />
+              <span className="text-sm font-normal text-(--text-secondary)">
+                {formatAppointmentTimeRange(
+                  appointment.startTime || '',
+                  appointment.endTime || ''
+                )}
+              </span>
+            </div>
+          </div>
+          {/* <p className="text-sm text-gray-500">
             {patient.email || patient.phoneNumber}
-          </p>
-          {patient?.isRegistrationComplete ? null : (
-            <p className="text-xs text-red-500">Registration Incomplete</p>
+          </p> */}
+          {!patient.isRegistrationComplete && (
+            <p className="text-xs text-red-500 mt-0.5">
+              Registration Incomplete
+            </p>
           )}
         </div>
       </div>
-
-      {/* <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-0.5 transition-all" /> */}
+      <ChevronRightSvg />
     </div>
   );
 };

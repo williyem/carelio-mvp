@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useSearchPatients } from '@/integration/patient';
 import { Patient as IntegrationPatient } from '@/integration/patient/type';
 import { useDebounce } from '@/hooks/use-debounce';
-import RecentConsultationRow from './recent-consultation-row';
+import RecentConsultationRow from './patients/recent-consultation-row';
 import { Patient } from '@/types/patient.types';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 
