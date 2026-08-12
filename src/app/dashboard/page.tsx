@@ -2,56 +2,46 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { Calendar as CalendarIcon, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AppointmentsScheduler } from '@/components/dashboard/appointments-scheduler';
 import { PatientSearch } from '@/components/dashboard/patient-search';
 import { RecentConsultation } from '@/components/dashboard/recent-consultation';
-import { UpcomingAppointments } from '@/components/dashboard/upcoming-appointments';
 import AddPatientSvg from '@/assets/icons/add-patient-svg';
+import NewAppointmentSvg from '@/assets/icons/new-appointment-svg';
 
 export default function DashboardPage() {
   return (
     <div className="space-y-10">
       {/* Welcome and Search */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+      <div className="space-y-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-2xl font-bold leading-[1.2] tracking-tight text-[#020f17]">
             Welcome back
           </h1>
-          <div className="relative">
-            <button className="h-10 w-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors">
-              <Bell className="h-5 w-5 text-gray-600" />
-            </button>
-            <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-brand-blue text-[10px] font-bold text-white flex items-center justify-center border-2 border-white">
-              5
-            </span>
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+            <Link href="/dashboard/schedule-appointment">
+              <Button
+                variant="outline"
+                className="h-11 w-full sm:w-[211px] rounded-full border-[#1792e6] bg-white px-4 py-2.5 text-base font-normal text-[#1692e5] hover:bg-brand-blue/5 hover:text-[#1692e5]"
+              >
+                <NewAppointmentSvg color="#1692E5" />
+                New Appointment
+              </Button>
+            </Link>
+            <Link href="/dashboard/add-patient">
+              <Button
+                variant="brand"
+                className="h-11 w-full sm:w-[168px] rounded-full border border-[#1792e6] bg-[#1692e5] px-4 py-2.5 text-base font-normal text-white hover:bg-[#1692e5]/90 hover:text-white [&_svg]:size-5"
+              >
+                <AddPatientSvg color="#FFFFFF" />
+                New Patient
+              </Button>
+            </Link>
           </div>
         </div>
 
         <PatientSearch />
-
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Link href="/dashboard/schedule-appointment" className="flex-1">
-            <Button className="w-full h-14 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white font-semibold text-base  ">
-              <CalendarIcon className="mr-2 h-5 w-5 text-white/80" />
-              Schedule Appointment
-            </Button>
-          </Link>
-          <Link href="/dashboard/add-patient" className="flex-1">
-            <Button
-              variant="outline"
-              className="w-full h-14 rounded-full border-blue-200 text-brand-blue hover:bg-blue-50 hover:text-brand-blue/90 font-semibold text-base"
-            >
-              <AddPatientSvg />
-              Add Patient
-            </Button>
-          </Link>
-        </div>
       </div>
-
-      {/* Upcoming Appointments */}
-      {/* <UpcomingAppointments /> */}
 
       <RecentConsultation />
 

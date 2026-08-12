@@ -12,8 +12,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LogOut } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { LogOut, Users } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import HomeSvg from '@/assets/icons/home-svg';
+import { ROUTES } from '@/lib/routes';
+import { cn } from '@/lib/utils';
 
 export default function DashboardLayout({
   children,
@@ -22,6 +25,7 @@ export default function DashboardLayout({
 }) {
   const logout = useLogout();
   const router = useRouter();
+  const pathname = usePathname();
   const { fullName, isLoading, isFetching, email } = useUser();
 
   const handleLogout = () => {
@@ -37,12 +41,21 @@ export default function DashboardLayout({
         .toUpperCase()
     : 'U';
 
+  const isHomeActive = pathname === ROUTES.DASHBOARD.ROOT;
+  const isPatientsActive = pathname?.startsWith(ROUTES.DASHBOARD.PATIENT.ROOT);
+
+  const navItemClass = (isActive: boolean) =>
+    cn(
+      'flex items-center gap-2 px-1 py-0 hover:opacity-70 transition-opacity',
+      isActive ? 'text-brand-blue' : 'text-(--text-primary)'
+    );
+
   return (
     <div className="min-h-screen w-full">
       {/* Header */}
       <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-[#EBEBEB] bg-white px-6">
         <Link
-          href="/dashboard"
+          href={ROUTES.DASHBOARD.ROOT}
           className="flex items-center hover:opacity-90 transition-opacity"
         >
           <Image
@@ -54,9 +67,35 @@ export default function DashboardLayout({
             priority
           />
         </Link>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-5">
+          <div className="hidden md:flex gap-5 items-center">
+            <Link
+              href={ROUTES.DASHBOARD.ROOT}
+              className={navItemClass(isHomeActive)}
+            >
+              <HomeSvg className="w-5 h-5" />
+              <span className="text-[14px] leading-[1.2] font-normal">
+                Home
+              </span>
+            </Link>
+
+            <div className="bg-(--border-stroke) h-[44px] w-px" />
+
+            <Link
+              href={ROUTES.DASHBOARD.PATIENT.ROOT}
+              className={navItemClass(!!isPatientsActive)}
+            >
+              <Users className="w-5 h-5" />
+              <span className="text-[14px] leading-[1.2] font-normal">
+                Patients
+              </span>
+            </Link>
+
+            <div className="bg-(--border-stroke) h-[44px] w-px" />
+          </div>
+
           {isLoading || isFetching ? (
-            <div className="flex items-center gap-3 pr-4 border-r border-gray-100">
+            <div className="flex items-center gap-3">
               <Skeleton className="h-9 w-9 rounded-full" />
               <div className="hidden md:block space-y-2">
                 <Skeleton className="h-4 w-32" />
@@ -67,41 +106,31 @@ export default function DashboardLayout({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-3 pl-1 outline-none hover:opacity-80 transition-opacity cursor-pointer text-left">
-                  {isLoading || isFetching ? (
-                    <div className="flex items-center gap-3">
-                      <Skeleton className="h-9 w-9 rounded-full" />
-                      <div className="hidden md:block space-y-1">
-                        <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-3 w-16" />
-                      </div>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-9 w-9 border border-(--border-stroke)">
+                      <AvatarImage src="" alt={fullName || 'User'} />
+                      <AvatarFallback className="bg-brand-blue/5 text-brand-blue text-xs font-medium">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="hidden md:block">
+                      <p className="text-[14px] font-medium text-(--text-primary) leading-none">
+                        {fullName || 'User'}
+                      </p>
+                      <p className="text-[11px] truncate text-(--text-secondary) mt-1">
+                        {email || 'Clinician'}
+                      </p>
                     </div>
-                  ) : (
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-9 w-9 border border-(--border-stroke)">
-                        <AvatarImage src="" alt={fullName || 'User'} />
-                        <AvatarFallback className="bg-brand-blue/5 text-brand-blue text-xs font-medium">
-                          {initials}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="hidden md:block">
-                        <p className="text-[14px] font-medium text-(--text-primary) leading-none">
-                          {fullName || 'User'}
-                        </p>
-                        <p className="text-[11px] truncate text-(--text-secondary) mt-1">
-                          {email || 'Clinician'}
-                        </p>
-                      </div>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="9"
-                        height="5"
-                        viewBox="0 0 9 5"
-                        fill="none"
-                      >
-                        <path d="M4.5 4.5L0 0H9L4.5 4.5Z" fill="#5C5C5C" />
-                      </svg>
-                    </div>
-                  )}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="9"
+                      height="5"
+                      viewBox="0 0 9 5"
+                      fill="none"
+                    >
+                      <path d="M4.5 4.5L0 0H9L4.5 4.5Z" fill="#5C5C5C" />
+                    </svg>
+                  </div>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-[200px] mt-2">
@@ -109,6 +138,13 @@ export default function DashboardLayout({
                   <p className="text-sm font-semibold">{fullName || 'User'}</p>
                   <p className="text-xs text-gray-500 truncate">{email}</p>
                 </div>
+                <DropdownMenuSeparator className="md:hidden" />
+                <DropdownMenuItem asChild className="md:hidden">
+                  <Link href={ROUTES.DASHBOARD.ROOT}>Home</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="md:hidden">
+                  <Link href={ROUTES.DASHBOARD.PATIENT.ROOT}>Patients</Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator className="md:hidden" />
                 <DropdownMenuItem
                   onClick={handleLogout}
