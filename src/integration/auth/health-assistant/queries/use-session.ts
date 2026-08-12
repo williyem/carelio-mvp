@@ -5,18 +5,15 @@ import { getSession } from '../api-functions';
 import type { GetSessionResponse } from '../types';
 import { extractResponseData } from '@/integration/utils';
 
-/**
- * Query key for health assistant session
- */
 export const HEALTH_ASSISTANT_SESSION_QUERY_KEY = [
   'health-assistant',
   'auth',
   'session',
 ] as const;
 
-/**
- * Hook to get current health assistant session
- */
+// Legacy alias for backward compatibility
+export const DOCTOR_SESSION_QUERY_KEY = HEALTH_ASSISTANT_SESSION_QUERY_KEY;
+
 export const useHealthAssistantSession = (
   options?: Omit<
     UseQueryOptions<GetSessionResponse, Error>,
@@ -34,3 +31,6 @@ export const useHealthAssistantSession = (
     ...options,
   });
 };
+
+// Legacy alias for backward compatibility
+export const useDoctorSession = useHealthAssistantSession;

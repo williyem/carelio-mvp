@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { backendApiClient, API_BASE_URL } from '@/integration/config';
+import { backendApiClient } from '@/integration/config';
 import { cookies } from 'next/headers';
+import {
+  healthAssistantAccessToken,
+  healthAssistantRefreshToken,
+} from '@/lib/constants';
+import { HEALTH_ASSISTANT_ENDPOINTS } from '@/integration/auth/health-assistant/endpoints';
+import { API_BASE_URL } from '@/integration/config';
 
 /**
  * POST /api/auth/health-assistant/logout
@@ -8,12 +14,14 @@ import { cookies } from 'next/headers';
  */
 export async function POST(request: NextRequest) {
   try {
+    // Get access token from cookie
     const cookieStore = await cookies();
-    const accessToken = cookieStore.get('health_assistant_access_token')?.value;
+    const accessToken = cookieStore.get(healthAssistantAccessToken)?.value;
 
     if (accessToken) {
+      // Call backend logout
       await backendApiClient.post(
-        `${API_BASE_URL}/auth/assistant/logout`,
+        `${API_BASE_URL}${HEALTH_ASSISTANT_ENDPOINTS.LOGOUT}`,
         {},
         {
           headers: {
@@ -24,8 +32,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Clear cookies
-    cookieStore.delete('health_assistant_access_token');
-    cookieStore.delete('health_assistant_refresh_token');
+    cookieStore.delete(healthAssistantAccessToken);
+    cookieStore.delete(healthAssistantRefreshToken);
 
     return NextResponse.json({ message: 'Logged out successfully' });
   } catch (error: unknown) {
@@ -33,8 +41,8 @@ export async function POST(request: NextRequest) {
 
     // Clear cookies even if backend call fails
     const cookieStore = await cookies();
-    cookieStore.delete('health_assistant_access_token');
-    cookieStore.delete('health_assistant_refresh_token');
+    cookieStore.delete(healthAssistantAccessToken);
+    cookieStore.delete(healthAssistantRefreshToken);
 
     return NextResponse.json({ message: 'Logged out successfully' });
   }
