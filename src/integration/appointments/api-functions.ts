@@ -16,6 +16,9 @@ import type {
   SubmitSoapNotesRequest,
   RescheduleAppointmentRequest,
   UpdateConsultationNoteRequest,
+  ScheduleAppointmentRequest,
+  ScheduleAppointmentResponse,
+  UpcomingAppointmentsResponse,
 } from './types';
 
 /**
@@ -238,5 +241,28 @@ export const getConsultationNoteByAppointment = async (
     appointmentId
   );
   const response = await apiClient.get<ApiResponse<AppointmentNote>>(endpoint);
+  return extractResponseData(response);
+};
+
+export const scheduleAppointment = async (
+  data: ScheduleAppointmentRequest
+): Promise<ScheduleAppointmentResponse> => {
+  const response = await apiClient.post<
+    ApiResponse<ScheduleAppointmentResponse>
+  >(APPOINTMENT_API_ENDPOINTS.SCHEDULE_APPOINTMENT, data);
+  return extractResponseData(response);
+};
+
+export const getUpcomingAppointments = async (
+  page: number = 1,
+  limit: number = 5
+): Promise<UpcomingAppointmentsResponse> => {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+  });
+  const endpoint = `${APPOINTMENT_API_ENDPOINTS.GET_UPCOMING_APPOINTMENTS}?${params.toString()}`;
+  const response =
+    await apiClient.get<ApiResponse<UpcomingAppointmentsResponse>>(endpoint);
   return extractResponseData(response);
 };

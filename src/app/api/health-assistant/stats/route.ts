@@ -12,19 +12,16 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const response = await backendApiClient.get(
-      `${API_BASE_URL}/health-assistants`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          ...USER_TYPE_HEADER,
-        },
-      }
-    );
+    const response = await backendApiClient.get(`${API_BASE_URL}/stats`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        ...USER_TYPE_HEADER,
+      },
+    });
 
     return NextResponse.json(response.data);
   } catch (error: unknown) {
-    console.error('Get health assistants error:', error);
+    console.error('Get health assistant stats error:', error);
 
     if (error instanceof Error && 'response' in error) {
       const axiosError = error as {
@@ -32,7 +29,7 @@ export async function GET() {
       };
       return NextResponse.json(
         {
-          error: 'Failed to fetch health assistants',
+          error: 'Failed to fetch health assistant stats',
           details: axiosError.response?.data,
         },
         { status: axiosError.response?.status || 500 }

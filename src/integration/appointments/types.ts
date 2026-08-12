@@ -62,7 +62,7 @@ export interface Appointment {
   date?: string;
   startTime?: string;
   endTime?: string;
-  isImmediate: boolean;
+  isImmediate?: boolean;
   status: AppointmentStatus;
   code?: string;
   cancellationReason?: string | null;
@@ -201,10 +201,39 @@ export interface ScheduleAppointmentRequest {
 /** @deprecated Use CreateAppointmentResponse instead */
 export type ScheduleAppointmentResponse = Appointment;
 
+export interface UpcomingAppointment extends Appointment {
+  patient: AppointmentPatient & {
+    firstName?: string;
+    lastName?: string;
+    dob?: string;
+    gender?: string;
+    address?: string;
+    bloodType?: string;
+    phoneVerified?: boolean;
+    emailVerified?: boolean;
+    isActive?: boolean;
+  };
+}
+
+export interface UpcomingAppointmentsResponse {
+  docs: UpcomingAppointment[];
+  totalDocs: number;
+  limit: number;
+  totalPages: number;
+  page: number;
+  pagingCounter: number;
+  hasPrevPage: boolean;
+  hasNextPage: boolean;
+  prevPage: number | null;
+  nextPage: number | null;
+}
+
 export interface AppointmentItemData {
   id: string;
   date: string;
   time: string;
   description: string;
   doctor: AppointmentDoctor;
+  status?: string;
+  timeRemaining?: string;
 }

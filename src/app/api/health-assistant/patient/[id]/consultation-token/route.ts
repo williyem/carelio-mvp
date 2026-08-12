@@ -1,10 +1,22 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { API_BASE_URL, backendApiClient } from '@/integration/config';
 import { cookies } from 'next/headers';
 import { USER_TYPE_HEADER, healthAssistantAccessToken } from '@/lib/constants';
+import { PATIENT_ENDPOINTS } from '@/integration/patient/endpoints';
 
-export async function GET() {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id: patientId } = await params;
   try {
+    if (!patientId) {
+      return NextResponse.json(
+        { error: 'Patient ID is required' },
+        { status: 400 }
+      );
+    }
+
     const cookieStore = await cookies();
     const accessToken = cookieStore.get(healthAssistantAccessToken)?.value;
 
@@ -13,7 +25,7 @@ export async function GET() {
     }
 
     const response = await backendApiClient.get(
-      `${API_BASE_URL}/health-assistants`,
+      `${API_BASE_URL}${PATIENT_ENDPOINTS.GET_PATIENT_CONSULTATION_TOKEN.replace(':id', patientId)}`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -24,7 +36,7 @@ export async function GET() {
 
     return NextResponse.json(response.data);
   } catch (error: unknown) {
-    console.error('Get health assistants error:', error);
+    console.error('Get patient consultation token error:', error);
 
     if (error instanceof Error && 'response' in error) {
       const axiosError = error as {
@@ -32,7 +44,7 @@ export async function GET() {
       };
       return NextResponse.json(
         {
-          error: 'Failed to fetch health assistants',
+          error: 'Failed to fetch patient consultation token',
           details: axiosError.response?.data,
         },
         { status: axiosError.response?.status || 500 }

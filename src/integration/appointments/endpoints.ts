@@ -25,10 +25,11 @@ export const APPOINTMENT_API_ENDPOINTS = {
   GET_APPOINTMENT_NOTE: '/doctor/consultations/:appointmentId/note',
   GET_RECENT_APPOINTMENTS: '/doctor/appointments/recent',
   RESCHEDULE_APPOINTMENT: '/doctor/appointments/reschedule/:id',
-  // Backwards compatibility
+  // Backwards compatibility / HA
   GET_PATIENT_APPOINTMENTS: '/doctor/appointments/:patientId/get',
   SCHEDULE_APPOINTMENT: '/doctor/appointments/schedule',
   SUBMIT_SOAP_NOTES: '/doctor/consultations/:appointmentId/soap',
   COMPLETE_CONSULTATION: '/doctor/consultations/:appointmentId/complete',
   UPDATE_CONSULTATION_NOTE: '/doctor/consultations/notes/:noteId',
+  GET_UPCOMING_APPOINTMENTS: '/health-assistant/appointments/upcoming',
 } as const;

@@ -3,10 +3,9 @@ import { createVital, confirmVitals } from './api-function';
 import { VITALS_QUERY_KEYS } from './query-keys';
 import { ConfirmVitalsRequest } from './type';
 
-const useVitalsMutations = () => {
+export function useCreateVital() {
   const queryClient = useQueryClient();
-
-  const createVitalMutation = useMutation({
+  return useMutation({
     mutationFn: createVital,
     onSuccess: (data) => {
       queryClient.invalidateQueries({
@@ -14,6 +13,12 @@ const useVitalsMutations = () => {
       });
     },
   });
+}
+
+const useVitalsMutations = () => {
+  const queryClient = useQueryClient();
+
+  const createVitalMutation = useCreateVital();
 
   const confirmVitalsMutation = useMutation({
     mutationFn: ({

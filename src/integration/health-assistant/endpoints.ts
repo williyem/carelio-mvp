@@ -8,6 +8,13 @@ export const HEALTH_ASSISTANT_ENDPOINTS = {
 } as const;
 
 export const HEALTH_ASSISTANT_API_ENDPOINTS = {
+  REGISTER_PATIENT: '/health-assistant/patient/register',
   GET_HEALTH_ASSISTANTS: '/health-assistant/get',
   ASSIGN_HEALTH_ASSISTANT: '/health-assistant/assign',
+  VERIFY_PATIENT_PHONE: '/health-assistant/patient/:id/verify/phone',
+  VERIFY_PATIENT_EMAIL: '/health-assistant/patient/:id/verify/email',
+  VERIFY_PATIENT_CODE: '/health-assistant/patient/:id/verify/code',
+  GET_DOCTORS: '/health-assistant/doctors',
+  GET_STATS: '/health-assistant/stats',
+  PROFILE: '/health-assistant/profile',
 } as const;

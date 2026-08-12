@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { backendApiClient } from '@/integration/config';
-import type { AssignHealthAssistantRequest } from '@/integration/health-assistant/types';
+import type {
+  InvitePatientRequest,
+  InvitePatientResponse,
+} from '@/integration/auth/health-assistant/types.ts';
 import { cookies } from 'next/headers';
-import { healthAssistantAccessToken, USER_TYPE_HEADER } from '@/lib/constants';
+import { healthAssistantAccessToken } from '@/lib/constants';
 import { HEALTH_ASSISTANT_ENDPOINTS } from '@/integration/health-assistant/endpoints';
-import { AssignedPatient } from '@/integration/patient/type';
 
+/**
+ * POST /api/auth/health-assistant/invite-patient
+ * Proxy endpoint for inviting a patient
+ */
 export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies();
@@ -14,33 +20,28 @@ export async function POST(request: NextRequest) {
     if (!accessToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    const body: InvitePatientRequest = await request.json();
 
-    const body: AssignHealthAssistantRequest = await request.json();
-
-    const response = await backendApiClient.post<AssignedPatient>(
-      `${HEALTH_ASSISTANT_ENDPOINTS.ASSIGN_HEALTH_ASSISTANT}`,
+    const response = await backendApiClient.post<InvitePatientResponse>(
+      `${HEALTH_ASSISTANT_ENDPOINTS.REGISTER_PATIENT}`,
       body,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          ...USER_TYPE_HEADER,
         },
       }
     );
 
     return NextResponse.json(response.data);
   } catch (error: unknown) {
-    console.error('Assign health assistant error:', error);
+    console.error('Invite patient error:', error);
 
     if (error instanceof Error && 'response' in error) {
       const axiosError = error as {
         response?: { status: number; data: unknown };
       };
       return NextResponse.json(
-        {
-          error: 'Assign health assistant failed',
-          details: axiosError.response?.data,
-        },
+        { error: 'Invite patient failed', details: axiosError.response?.data },
         { status: axiosError.response?.status || 500 }
       );
     }

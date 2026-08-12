@@ -1,9 +1,14 @@
-import { NextResponse } from 'next/server';
-import { API_BASE_URL, backendApiClient } from '@/integration/config';
+import { NextRequest, NextResponse } from 'next/server';
+import { backendApiClient } from '@/integration/config';
 import { cookies } from 'next/headers';
-import { USER_TYPE_HEADER, healthAssistantAccessToken } from '@/lib/constants';
+import { healthAssistantAccessToken, USER_TYPE_HEADER } from '@/lib/constants';
+import type { PatientAppointmentsResponse } from '@/integration/appointments/types';
+import { PATIENT_ENDPOINTS } from '@/integration/patient/endpoints';
 
-export async function GET() {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get(healthAssistantAccessToken)?.value;
@@ -12,8 +17,19 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const response = await backendApiClient.get(
-      `${API_BASE_URL}/health-assistants`,
+    const { id } = await params;
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Patient ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const endpoint = PATIENT_ENDPOINTS.GET_PATIENT_BY_ID.replace(':id', id);
+
+    const response = await backendApiClient.get<PatientAppointmentsResponse>(
+      endpoint,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -24,7 +40,7 @@ export async function GET() {
 
     return NextResponse.json(response.data);
   } catch (error: unknown) {
-    console.error('Get health assistants error:', error);
+    console.error('Get patient  error:', error);
 
     if (error instanceof Error && 'response' in error) {
       const axiosError = error as {
@@ -32,7 +48,7 @@ export async function GET() {
       };
       return NextResponse.json(
         {
-          error: 'Failed to fetch health assistants',
+          error: 'Get patient failed',
           details: axiosError.response?.data,
         },
         { status: axiosError.response?.status || 500 }

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getHealthAssistants } from '../api-functions';
 import { HEALTH_ASSISTANT_QUERY_KEYS } from '../query-keys';
-import { Clinician } from '../types';
+import { Clinician } from '@/types/clinician.types';
 
 const useGetHealthAssistantsQuery = () => {
   const { data, isLoading, error } = useQuery<Clinician[]>({

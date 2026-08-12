@@ -25,6 +25,7 @@ export interface RegisteredPatient {
   bloodType: string;
   invitedByDoctorId: string | null;
   assignedAssistantId: string | null;
+  isRegistrationComplete?: boolean;
 }
 
 export interface HealthAssistantResponse {
@@ -65,8 +66,9 @@ export interface PatientRow {
     phone: string;
     email: string;
   };
-  accountNumber?: string;
-  insId?: string;
+  assignedAssistantId: string | null;
+  assignedAssistantName?: string;
+  isRegistrationComplete?: boolean;
 }
 
 export interface Doctor {
@@ -102,7 +104,7 @@ export interface HealthAssistantStats {
   unassignedPatients: number;
 }
 
-export interface Clinician {
+export interface HealthAssistantProfile {
   id: string;
   email: string;
   firstName: string;
@@ -112,13 +114,4 @@ export interface Clinician {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  // Computed field for backward compatibility
-  name?: string;
-  specialization?: string;
-}
-
-export interface mappedClinician {
-  id: string;
-  name: string;
-  email: string;
 }
