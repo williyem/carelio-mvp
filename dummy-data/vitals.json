@@ -1,0 +1,112 @@
+[
+  {
+    "id": "vit-001",
+    "appointmentId": "apt-001",
+    "patientId": "pat-001",
+    "recordedByAssistantId": "ha-001",
+    "vitalType": "blood-pressure",
+    "reading": { "systolic": 122, "diastolic": 78, "pulse": 74 },
+    "deviceId": "DEV003",
+    "recordedAt": "2026-08-12T09:55:00.000Z",
+    "status": "confirmed",
+    "createdAt": "2026-08-12T09:55:00.000Z",
+    "updatedAt": "2026-08-12T09:56:00.000Z",
+    "recordedBy": {
+      "id": "ha-001",
+      "firstName": "Grace",
+      "lastName": "Addo",
+      "email": "grace.addo@carelio.app"
+    }
+  },
+  {
+    "id": "vit-002",
+    "appointmentId": "apt-001",
+    "patientId": "pat-001",
+    "recordedByAssistantId": "ha-001",
+    "vitalType": "thermometer",
+    "reading": { "temperatureC": 36.8, "temperatureF": 98.2 },
+    "deviceId": "DEV001",
+    "recordedAt": "2026-08-12T09:54:00.000Z",
+    "status": "confirmed",
+    "createdAt": "2026-08-12T09:54:00.000Z",
+    "updatedAt": "2026-08-12T09:55:00.000Z"
+  },
+  {
+    "id": "vit-003",
+    "appointmentId": "apt-001",
+    "patientId": "pat-001",
+    "recordedByAssistantId": "ha-001",
+    "vitalType": "pulse-ox",
+    "reading": { "spo2": 98, "pulse": 74, "pi": 4.2 },
+    "deviceId": "DEV005",
+    "recordedAt": "2026-08-12T09:54:30.000Z",
+    "status": "confirmed",
+    "createdAt": "2026-08-12T09:54:30.000Z",
+    "updatedAt": "2026-08-12T09:55:00.000Z"
+  },
+  {
+    "id": "vit-004",
+    "appointmentId": "apt-002",
+    "patientId": "pat-002",
+    "recordedByAssistantId": "ha-002",
+    "vitalType": "blood-pressure",
+    "reading": { "systolic": 118, "diastolic": 76, "pulse": 68 },
+    "deviceId": "DEV003",
+    "recordedAt": "2026-08-11T13:50:00.000Z",
+    "status": "confirmed",
+    "createdAt": "2026-08-11T13:50:00.000Z",
+    "updatedAt": "2026-08-11T13:51:00.000Z"
+  },
+  {
+    "id": "vit-005",
+    "appointmentId": "apt-002",
+    "patientId": "pat-002",
+    "recordedByAssistantId": "ha-002",
+    "vitalType": "pulse-ox",
+    "reading": { "spo2": 99, "pulse": 68 },
+    "deviceId": "DEV005",
+    "recordedAt": "2026-08-11T13:51:00.000Z",
+    "status": "confirmed",
+    "createdAt": "2026-08-11T13:51:00.000Z",
+    "updatedAt": "2026-08-11T13:52:00.000Z"
+  },
+  {
+    "id": "vit-006",
+    "appointmentId": "apt-004",
+    "patientId": "pat-004",
+    "recordedByAssistantId": "ha-001",
+    "vitalType": "glucose",
+    "reading": { "value": 110, "type": 1 },
+    "deviceId": "DEV006",
+    "recordedAt": "2026-08-05T10:45:00.000Z",
+    "status": "confirmed",
+    "createdAt": "2026-08-05T10:45:00.000Z",
+    "updatedAt": "2026-08-05T10:46:00.000Z"
+  },
+  {
+    "id": "vit-007",
+    "appointmentId": "apt-004",
+    "patientId": "pat-004",
+    "recordedByAssistantId": "ha-001",
+    "vitalType": "weight-scale",
+    "reading": { "weightKg": 68.5, "weightLbs": 151, "bmi": 24.2 },
+    "deviceId": "DEV002",
+    "recordedAt": "2026-08-05T10:44:00.000Z",
+    "status": "confirmed",
+    "createdAt": "2026-08-05T10:44:00.000Z",
+    "updatedAt": "2026-08-05T10:45:00.000Z"
+  },
+  {
+    "id": "vit-008",
+    "appointmentId": "apt-006",
+    "patientId": "pat-001",
+    "recordedByAssistantId": "ha-001",
+    "vitalType": "blood-pressure",
+    "reading": { "systolic": 120, "diastolic": 80, "pulse": 72 },
+    "deviceId": "DEV003",
+    "recordedAt": "2026-08-12T14:20:00.000Z",
+    "status": "pending",
+    "createdAt": "2026-08-12T14:20:00.000Z",
+    "updatedAt": "2026-08-12T14:20:00.000Z"
+  }
+]
