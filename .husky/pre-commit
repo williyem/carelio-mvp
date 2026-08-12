@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Loose rules - only format, don't block on lint errors
+npx lint-staged --quiet
