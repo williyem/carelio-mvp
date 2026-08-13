@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import AudioLevelMeter from '../audio-level-meter';
 import {
   Select,
   SelectContent,
@@ -71,7 +71,7 @@ export default function SpeakerTest({
               {Math.round(outputLevel)}%
             </span>
           </div>
-          <Progress value={outputLevel} className="h-2 " />
+          <AudioLevelMeter level={outputLevel} />
         </div>
       </CardContent>
     </Card>

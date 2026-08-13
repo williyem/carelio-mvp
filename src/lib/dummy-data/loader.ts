@@ -206,6 +206,7 @@ export const getConsultationToken = (appointmentId: string) => {
   return {
     token: apt?.telehealth?.doctorToken ?? 'dummy-consultation-token',
     code: apt?.code ?? 'CRL-000',
+    url: '',
   };
 };
 

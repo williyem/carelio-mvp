@@ -1,183 +1,68 @@
 'use client';
 
 import { useRef, useEffect, memo } from 'react';
-import type { ZoomClientType } from '@/stores/video-call-store';
-import MuteIndicator from './mute-indicator';
+import type { Room } from 'livekit-client';
+import { ParticipantEvent, Track } from 'livekit-client';
+import AudioLevelIndicator from './audio-level-indicator';
+import SpeakingRing from './speaking-ring';
+import { useAudioLevel } from '@/hooks/page-hooks/video-call/useAudioLevel';
+import type { CallParticipant } from '@/hooks/page-hooks/video-call/useZoomParticipants';
 
 interface VideoPlayerProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  participant: any;
-  client: ZoomClientType;
+  participant: CallParticipant;
+  client: Room;
   className?: string;
-  muteIndicatorPosition?: 'top-left' | 'top-right';
+  /** Renders a smaller indicator out of the way of the picture-in-picture controls. */
+  compact?: boolean;
   scale?: number;
 }
 
 const VideoPlayerComponent = ({
   participant,
-  client,
   className,
-  muteIndicatorPosition = 'top-right',
+  compact = false,
   scale = 1.01,
 }: VideoPlayerProps) => {
-  const videoRef = useRef<HTMLDivElement>(null);
-  const isMuted = participant?.muted === true;
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const isMuted = participant.muted === true;
+  const audioLevel = useAudioLevel(participant.participant);
 
   useEffect(() => {
-    if (!client || !participant) return;
+    const videoEl = videoRef.current;
+    const audioEl = audioRef.current;
+    const remote = participant.participant;
 
-    let isMounted = true;
-    const { userId } = participant;
+    const attachMedia = () => {
+      const camera = remote.getTrackPublication(Track.Source.Camera);
+      const microphone = remote.getTrackPublication(Track.Source.Microphone);
 
-    const render = async () => {
-      try {
-        const { VideoQuality } = await import('@zoom/videosdk');
-
-        if (!participant.bVideoOn) return;
-
-        if (!isMounted) return;
-
-        const mediaStream = client.getMediaStream();
-        const videoElement = (await mediaStream.attachVideo(
-          userId,
-          VideoQuality.Video_720P
-        )) as HTMLElement;
-
-        if (isMounted && videoRef.current && videoElement) {
-          const styleStr = `
-              width: 100% !important;
-              height: 100% !important;
-              object-fit: cover !important;
-              position: absolute !important;
-              top: 0 !important;
-              left: 0 !important;
-              inset: 0 !important;
-              display: block !important;
-              border-radius: 30px !important;
-              transform: scale(${scale}) !important;
-           `;
-          videoElement.style.cssText = styleStr;
-
-          const isContainer = videoElement.tagName === 'VIDEO-PLAYER-CONTAINER';
-          let elementToAppend = videoElement;
-
-          if (!isContainer) {
-            const container = document.createElement(
-              'video-player-container'
-            ) as HTMLElement;
-            container.style.cssText = `
-                width: 100% !important;
-                height: 100% !important;
-                position: absolute !important;
-                top: 0 !important;
-                left: 0 !important;
-                display: block !important;
-                overflow: hidden !important;
-                border-radius: 30px !important;
-                transform: scale(${scale}) !important;
-            `;
-            container.appendChild(videoElement);
-            elementToAppend = container;
-          } else {
-            videoElement.style.cssText += `overflow: hidden !important; border-radius: 30px !important; transform: scale(${scale}) !important;`;
-          }
-
-          if (videoRef.current) {
-            videoRef.current.innerHTML = '';
-            videoRef.current.appendChild(elementToAppend);
-          }
-        }
-      } catch (error) {
-        console.error('Failed to render video for user', userId, error);
+      if (videoEl && camera?.track && participant.bVideoOn) {
+        camera.track.attach(videoEl);
+      }
+      if (audioEl && microphone?.track) {
+        microphone.track.attach(audioEl);
+        void audioEl.play().catch(() => {});
       }
     };
 
-    const onVideoStateChange = async (payload: {
-      action: 'Start' | 'Stop';
-      userId: number;
-    }) => {
-      if (payload.userId !== userId) return;
-
-      if (payload.action === 'Start') {
-        await render();
-      } else if (payload.action === 'Stop') {
-        const mediaStream = client.getMediaStream();
-        await mediaStream.detachVideo(userId);
-        if (isMounted && videoRef.current) {
-          while (videoRef.current.firstChild) {
-            videoRef.current.removeChild(videoRef.current.firstChild);
-          }
-        }
-      }
-    };
-
-    client.on('peer-video-state-change', onVideoStateChange);
-
-    // Initial render check
-    if (participant.bVideoOn) {
-      render();
-    }
+    attachMedia();
+    remote.on(ParticipantEvent.TrackSubscribed, attachMedia);
+    remote.on(ParticipantEvent.TrackUnsubscribed, attachMedia);
+    remote.on(ParticipantEvent.TrackMuted, attachMedia);
+    remote.on(ParticipantEvent.TrackUnmuted, attachMedia);
 
     return () => {
-      isMounted = false;
-      client.off('peer-video-state-change', onVideoStateChange);
-
-      const cleanup = async () => {
-        try {
-          const mediaStream = client.getMediaStream();
-          if (participant.bVideoOn) {
-            await mediaStream.detachVideo(userId).catch(() => {});
-          }
-        } catch {
-          // Ignore cleanup errors
-          // console.error('Failed to detach video for user', userId, error);
-        }
-      };
-      cleanup();
+      remote.off(ParticipantEvent.TrackSubscribed, attachMedia);
+      remote.off(ParticipantEvent.TrackUnsubscribed, attachMedia);
+      remote.off(ParticipantEvent.TrackMuted, attachMedia);
+      remote.off(ParticipantEvent.TrackUnmuted, attachMedia);
+      const camera = remote.getTrackPublication(Track.Source.Camera);
+      const microphone = remote.getTrackPublication(Track.Source.Microphone);
+      if (videoEl && camera?.track) camera.track.detach(videoEl);
+      if (audioEl && microphone?.track) microphone.track.detach(audioEl);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [client, participant?.userId, participant?.bVideoOn, scale]);
-
-  // MutationObserver to enforce styles if Zoom SDK changes them
-  useEffect(() => {
-    if (!participant.bVideoOn || !videoRef.current) return;
-
-    const enforceStyle = () => {
-      const els = videoRef.current?.querySelectorAll(
-        'video-player-container, video, canvas'
-      );
-      els?.forEach((el) => {
-        const hEl = el as HTMLElement;
-        hEl.style.setProperty('object-fit', 'cover', 'important');
-        hEl.style.setProperty('width', '100%', 'important');
-        hEl.style.setProperty('height', '100%', 'important');
-        hEl.style.setProperty('position', 'absolute', 'important');
-        hEl.style.setProperty('inset', '0', 'important');
-        hEl.style.setProperty('border-radius', '30px', 'important');
-        hEl.style.setProperty('transform', `scale(${scale})`, 'important');
-      });
-    };
-
-    const observer = new MutationObserver(() => enforceStyle());
-    observer.observe(videoRef.current, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['style'],
-    });
-
-    // also run once
-    enforceStyle();
-
-    return () => observer.disconnect();
-  }, [participant.bVideoOn, scale]);
-
-  // Ensure we clean up if switching modes
-  useEffect(() => {
-    if (!participant.bVideoOn && videoRef.current) {
-      // Force cleanup if we switched to avatar mode but ref still exists (should rely on React conditional rendering but safety check)
-    }
-  }, [participant.bVideoOn]);
+  }, [participant.bVideoOn, participant.participant, participant.userId]);
 
   const getInitials = (name: string) => {
     return (
@@ -225,7 +110,16 @@ const VideoPlayerComponent = ({
       }}
     >
       {participant.bVideoOn ? (
-        <div ref={videoRef} style={{ width: '100%', height: '100%' }} />
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover"
+          style={{
+            borderRadius: 30,
+            transform: `scale(${scale})`,
+          }}
+        />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center">
           <div
@@ -246,15 +140,15 @@ const VideoPlayerComponent = ({
           </div>
         </div>
       )}
-      {isMuted && (
-        <MuteIndicator
-          className={
-            muteIndicatorPosition === 'top-left'
-              ? 'top-2 left-2 right-auto'
-              : undefined
-          }
-        />
-      )}
+      <audio ref={audioRef} autoPlay playsInline />
+      <SpeakingRing level={audioLevel} muted={isMuted} radius={30} />
+      <AudioLevelIndicator
+        level={audioLevel}
+        muted={isMuted}
+        size={compact ? 'sm' : 'md'}
+        label={compact ? undefined : displayName}
+        className={compact ? 'top-3 left-3 bottom-auto' : undefined}
+      />
     </div>
   );
 };
@@ -268,7 +162,7 @@ export const VideoPlayer = memo(
       prevProps.participant?.muted === nextProps.participant?.muted &&
       prevProps.client === nextProps.client &&
       prevProps.className === nextProps.className &&
-      prevProps.muteIndicatorPosition === nextProps.muteIndicatorPosition &&
+      prevProps.compact === nextProps.compact &&
       prevProps.scale === nextProps.scale
     );
   }

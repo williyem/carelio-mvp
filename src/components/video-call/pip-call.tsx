@@ -9,7 +9,7 @@ import { VideoPlayer } from './video-player';
 const PipCall = ({ handleEndCall }: { handleEndCall: () => Promise<void> }) => {
   const { toggleMinimize, client } = useVideoCallStore();
   const participants = useZoomParticipants(client);
-  const currentUserId = client?.getCurrentUserInfo()?.userId;
+  const currentUserId = client?.localParticipant.identity;
   const firstRemoteParticipant = participants.find(
     (p) => p.userId !== currentUserId
   );
@@ -35,8 +35,8 @@ const PipCall = ({ handleEndCall }: { handleEndCall: () => Promise<void> }) => {
         <VideoPlayer
           participant={firstRemoteParticipant}
           client={client}
-          muteIndicatorPosition="top-left"
           className="absolute inset-0 w-full h-full object-cover"
+          compact
           scale={1.2}
         />
       ) : (

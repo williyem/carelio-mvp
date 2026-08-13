@@ -21,26 +21,16 @@ const CallControls = ({
 
   const handleToggleMute = async () => {
     if (!client) return;
-    const mediaStream = client.getMediaStream();
-    if (isMuted) {
-      await mediaStream.unmuteAudio();
-      setIsMuted(false);
-    } else {
-      await mediaStream.muteAudio();
-      setIsMuted(true);
-    }
+    const enabled = isMuted;
+    await client.localParticipant.setMicrophoneEnabled(enabled);
+    setIsMuted(!enabled);
   };
 
   const handleToggleVideo = async () => {
     if (!client) return;
-    const mediaStream = client.getMediaStream();
-    if (isVideoPaused) {
-      await mediaStream.startVideo();
-      setIsVideoPaused(false);
-    } else {
-      await mediaStream.stopVideo();
-      setIsVideoPaused(true);
-    }
+    const enabled = isVideoPaused;
+    await client.localParticipant.setCameraEnabled(enabled);
+    setIsVideoPaused(!enabled);
   };
 
   const containerClass =

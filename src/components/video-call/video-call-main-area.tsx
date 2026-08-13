@@ -17,7 +17,7 @@ const VideoCallMainArea = ({
   const participants = useZoomParticipants(client);
   const remoteContainerRef = useRef<HTMLDivElement>(null);
 
-  const currentUserId = client?.getCurrentUserInfo()?.userId;
+  const currentUserId = client?.localParticipant.identity;
   const firstRemoteParticipant = useMemo(() => {
     if (!currentUserId) return undefined;
 
@@ -30,6 +30,9 @@ const VideoCallMainArea = ({
         <div
           ref={remoteContainerRef}
           className="flex-1 relative bg-(--bg-video-dark) border border-(--border-video) rounded-[30px] flex items-center justify-center overflow-hidden"
+          onClick={() => {
+            void client?.startAudio();
+          }}
         >
           {!firstRemoteParticipant && (
             <div className="space-y-5 text-center">

@@ -1,53 +1,73 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect, useCallback } from 'react';
-import type { ZoomClientType } from '@/stores/video-call-store';
+'use client';
 
+import { useState, useEffect, useCallback } from 'react';
+import type { Room, RemoteParticipant } from 'livekit-client';
+import { RoomEvent, Track } from 'livekit-client';
 import { toast } from 'sonner';
 
-export function useZoomParticipants(client: ZoomClientType | null) {
-  const [participants, setParticipants] = useState<any[]>([]);
+export interface CallParticipant {
+  userId: string;
+  displayName: string;
+  bVideoOn: boolean;
+  muted: boolean;
+  participant: RemoteParticipant;
+}
+
+function toCallParticipant(p: RemoteParticipant): CallParticipant {
+  const camera = p.getTrackPublication(Track.Source.Camera);
+  const mic = p.getTrackPublication(Track.Source.Microphone);
+  return {
+    userId: p.identity,
+    displayName: p.name || p.identity,
+    bVideoOn: Boolean(camera?.isSubscribed && !camera.isMuted && camera.track),
+    muted: !mic || mic.isMuted,
+    participant: p,
+  };
+}
+
+export function useZoomParticipants(client: Room | null) {
+  const [participants, setParticipants] = useState<CallParticipant[]>([]);
 
   const refreshParticipants = useCallback(() => {
     if (!client) return;
-    setParticipants(client.getAllUser().map((user) => ({ ...user })));
+    setParticipants(
+      Array.from(client.remoteParticipants.values()).map(toCallParticipant)
+    );
   }, [client]);
 
   useEffect(() => {
     if (!client) return;
 
-    // Type definition for user payload if available, otherwise any
-    const handleUserAdded = (payload: any[]) => {
+    const handleJoined = (participant: RemoteParticipant) => {
       refreshParticipants();
-      payload.forEach((user) => {
-        toast.success(
-          `${user.displayName || 'A participant'} joined the meeting`
-        );
-      });
+      toast.success(
+        `${participant.name || participant.identity} joined the meeting`
+      );
     };
 
-    const handleUserRemoved = (payload: any[]) => {
+    const handleLeft = (participant: RemoteParticipant) => {
       refreshParticipants();
-      payload.forEach((user) => {
-        toast.info(`${user.displayName || 'A participant'} left the meeting`);
-      });
+      toast.info(
+        `${participant.name || participant.identity} left the meeting`
+      );
     };
 
-    client.on('user-added', handleUserAdded);
-    client.on('user-removed', handleUserRemoved);
-    client.on('user-updated', refreshParticipants);
-    client.on('peer-audio-state-change', refreshParticipants);
-    client.on('peer-video-state-change', refreshParticipants);
-
-    setTimeout(() => {
-      refreshParticipants();
-    }, 0);
+    client.on(RoomEvent.ParticipantConnected, handleJoined);
+    client.on(RoomEvent.ParticipantDisconnected, handleLeft);
+    client.on(RoomEvent.TrackSubscribed, refreshParticipants);
+    client.on(RoomEvent.TrackUnsubscribed, refreshParticipants);
+    client.on(RoomEvent.TrackMuted, refreshParticipants);
+    client.on(RoomEvent.TrackUnmuted, refreshParticipants);
+    const timer = window.setTimeout(refreshParticipants, 0);
 
     return () => {
-      client.off('user-added', handleUserAdded);
-      client.off('user-removed', handleUserRemoved);
-      client.off('user-updated', refreshParticipants);
-      client.off('peer-audio-state-change', refreshParticipants);
-      client.off('peer-video-state-change', refreshParticipants);
+      window.clearTimeout(timer);
+      client.off(RoomEvent.ParticipantConnected, handleJoined);
+      client.off(RoomEvent.ParticipantDisconnected, handleLeft);
+      client.off(RoomEvent.TrackSubscribed, refreshParticipants);
+      client.off(RoomEvent.TrackUnsubscribed, refreshParticipants);
+      client.off(RoomEvent.TrackMuted, refreshParticipants);
+      client.off(RoomEvent.TrackUnmuted, refreshParticipants);
     };
   }, [client, refreshParticipants]);
 

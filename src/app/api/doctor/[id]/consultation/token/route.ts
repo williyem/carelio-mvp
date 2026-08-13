@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { API_BASE_URL, backendApiClient } from '@/integration/config';
 import { cookies } from 'next/headers';
-import { USER_TYPE_HEADER, doctorAccessToken } from '@/lib/constants';
+import {
+  USER_TYPE_HEADER,
+  doctorAccessToken,
+  healthAssistantAccessToken,
+  patientAccessToken,
+} from '@/lib/constants';
 import { DOCTOR_ENDPOINTS } from '@/integration/doctor/endpoint';
 import { isDummyDataEnabled } from '@/lib/dummy-data/config';
 import { getConsultationToken } from '@/lib/dummy-data/loader';
@@ -20,7 +25,10 @@ export async function GET(
     }
 
     const cookieStore = await cookies();
-    const accessToken = cookieStore.get(doctorAccessToken)?.value;
+    const accessToken =
+      cookieStore.get(doctorAccessToken)?.value ||
+      cookieStore.get(healthAssistantAccessToken)?.value ||
+      cookieStore.get(patientAccessToken)?.value;
 
     if (!accessToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

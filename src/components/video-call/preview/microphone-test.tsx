@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import AudioLevelMeter from '../audio-level-meter';
 import {
   Select,
   SelectContent,
@@ -87,13 +87,7 @@ export default function MicrophoneTest({
               {Math.round(inputLevel)}%
             </span>
           </div>
-          <Progress
-            value={inputLevel}
-            className={cn(
-              'h-2 transition-all',
-              isRecording && '[&>div]:bg-destructive'
-            )}
-          />
+          <AudioLevelMeter level={inputLevel} />
         </div>
 
         {isRecording && (

@@ -1,31 +1,84 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import type { ZoomClientType } from '@/stores/video-call-store';
+import { useEffect, useState } from 'react';
+import {
+  createAudioAnalyser,
+  isAudioTrack,
+  ParticipantEvent,
+  Track,
+  type LocalAudioTrack,
+  type Participant,
+  type RemoteAudioTrack,
+} from 'livekit-client';
 
-export function useAudioLevel(client: ZoomClientType | null): number {
+export function useAudioLevel(
+  participant: Participant | null | undefined
+): number {
   const [level, setLevel] = useState(0);
 
-  const onAudioLevelChange = useCallback(({ level }: { level: number }) => {
-    // Level is 0-9. Ignore 1 if it's just background noise.
-    const effectiveLevel = level > 1 ? level : 0;
-    if (effectiveLevel > 0) {
-      console.log('--- Local Audio Level ---', effectiveLevel);
-    }
-    setLevel(effectiveLevel);
-  }, []);
-
   useEffect(() => {
-    if (!client) return;
+    if (!participant) {
+      return undefined;
+    }
 
-    console.log('--- Attaching current-audio-level-change listener ---');
-    client.on('current-audio-level-change', onAudioLevelChange);
+    let intervalId: number | undefined;
+    let cleanupAnalyser: (() => Promise<void>) | undefined;
+
+    const teardown = () => {
+      if (intervalId !== undefined) {
+        window.clearInterval(intervalId);
+        intervalId = undefined;
+      }
+      const cleanup = cleanupAnalyser;
+      cleanupAnalyser = undefined;
+      void cleanup?.();
+    };
+
+    const setup = () => {
+      teardown();
+
+      const publication = participant.getTrackPublication(
+        Track.Source.Microphone
+      );
+      const track = publication?.track;
+      if (!track || !isAudioTrack(track) || publication.isMuted) {
+        return;
+      }
+
+      try {
+        const { calculateVolume, cleanup } = createAudioAnalyser(
+          track as LocalAudioTrack | RemoteAudioTrack,
+          { fftSize: 256, smoothingTimeConstant: 0.5 }
+        );
+        cleanupAnalyser = cleanup;
+        intervalId = window.setInterval(() => {
+          setLevel(Math.min(100, Math.round(calculateVolume() * 400)));
+        }, 50);
+      } catch {
+        intervalId = window.setInterval(() => {
+          setLevel(Math.min(100, Math.round(participant.audioLevel * 100)));
+        }, 50);
+      }
+    };
+
+    setup();
+    participant.on(ParticipantEvent.TrackSubscribed, setup);
+    participant.on(ParticipantEvent.TrackUnsubscribed, setup);
+    participant.on(ParticipantEvent.TrackMuted, setup);
+    participant.on(ParticipantEvent.TrackUnmuted, setup);
+    participant.on(ParticipantEvent.LocalTrackPublished, setup);
+    participant.on(ParticipantEvent.LocalTrackUnpublished, setup);
 
     return () => {
-      console.log('--- Detaching current-audio-level-change listener ---');
-      client.off('current-audio-level-change', onAudioLevelChange);
+      teardown();
+      participant.off(ParticipantEvent.TrackSubscribed, setup);
+      participant.off(ParticipantEvent.TrackUnsubscribed, setup);
+      participant.off(ParticipantEvent.TrackMuted, setup);
+      participant.off(ParticipantEvent.TrackUnmuted, setup);
+      participant.off(ParticipantEvent.LocalTrackPublished, setup);
+      participant.off(ParticipantEvent.LocalTrackUnpublished, setup);
     };
-  }, [client, onAudioLevelChange]);
+  }, [participant]);
 
-  return level;
+  return participant ? level : 0;
 }

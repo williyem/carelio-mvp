@@ -1,7 +1,6 @@
 'use client';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useZoomDevices } from '@/hooks/page-hooks/video-call/useZoomDevices';
-import type { LocalAudioTrack } from '@zoom/videosdk';
 import VideoPreview from './video-preview';
 import ControlBar from './control-bar';
 import SpeakerTest from './speaker-test';
@@ -29,10 +28,6 @@ export default function PreviewPage({
     switchCamera,
     switchMicrophone,
     switchSpeaker,
-    localAudioRef,
-    localVideoRef,
-    speakerTesterRef,
-    microphoneTesterRef,
     isLoading,
   } = useZoomDevices();
 
@@ -41,7 +36,6 @@ export default function PreviewPage({
   const [isStartedAudio, setIsStartedAudio] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [isStartedVideo, setIsStartedVideo] = useState(false);
-  const [isInVBMode, setIsInVBMode] = useState(false);
   const [outputLevel, setOutputLevel] = useState(0);
   const [inputLevel, setInputLevel] = useState(0);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
@@ -50,367 +44,239 @@ export default function PreviewPage({
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const videoStreamRef = useRef<MediaStream | null>(null);
+  const audioStreamRef = useRef<MediaStream | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const speakerOscRef = useRef<OscillatorNode | null>(null);
+  const meterRafRef = useRef<number | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const playbackRef = useRef<HTMLAudioElement | null>(null);
 
-  const audioTrackStartedRef = useRef(false);
-  const videoTrackStartedRef = useRef(false);
-
-  const safeStopAudio = useCallback(async (track: LocalAudioTrack | null) => {
-    if (!track || !audioTrackStartedRef.current) return;
-    try {
-      await track.stop();
-      audioTrackStartedRef.current = false;
-    } catch (error: unknown) {
-      const errorName = error instanceof Error ? error.name : '';
-      if (
-        errorName !== 'AudioNotStartedError' &&
-        errorName !== 'VideoNotStartedError'
-      ) {
-        console.error('Error stopping audio track:', error);
-      }
-      audioTrackStartedRef.current = false;
+  const stopMeter = useCallback(() => {
+    if (meterRafRef.current) {
+      cancelAnimationFrame(meterRafRef.current);
+      meterRafRef.current = null;
     }
   }, []);
 
-  const safeStopVideo = useCallback(
-    async (track: { stop: () => Promise<void | Error> } | null) => {
-      if (!track || !videoTrackStartedRef.current) return;
-      try {
-        await track.stop();
-        videoTrackStartedRef.current = false;
-      } catch (error: unknown) {
-        const errorName = error instanceof Error ? error.name : '';
-        // Ignore expected errors
-        if (errorName !== 'VideoNotStartedError') {
-          console.error('Error stopping video track:', error);
-        }
-        videoTrackStartedRef.current = false;
-      }
+  const startMeter = useCallback(
+    (stream: MediaStream, setter: (n: number) => void) => {
+      stopMeter();
+      const ctx = audioContextRef.current ?? new AudioContext();
+      audioContextRef.current = ctx;
+      void ctx.resume();
+      const source = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 256;
+      source.connect(analyser);
+      analyserRef.current = analyser;
+      const data = new Uint8Array(analyser.frequencyBinCount);
+
+      const tick = () => {
+        analyser.getByteFrequencyData(data);
+        const avg = data.reduce((a, b) => a + b, 0) / data.length;
+        setter(Math.min(100, Math.round((avg / 255) * 100)));
+        meterRafRef.current = requestAnimationFrame(tick);
+      };
+      tick();
     },
-    []
+    [stopMeter]
   );
 
-  const safeMuteAudio = useCallback(
-    async (track: LocalAudioTrack | null, mute: boolean) => {
-      if (!track || !audioTrackStartedRef.current) return false;
-      try {
-        if (mute) {
-          await track.mute();
-        } else {
-          await track.unmute();
-        }
-        return true;
-      } catch (error: unknown) {
-        const errorName = error instanceof Error ? error.name : '';
-        if (
-          errorName !== 'AudioAlreadyMutedError' &&
-          errorName !== 'AudioAlreadyUnmutedError' &&
-          errorName !== 'AudioNotStartedError'
-        ) {
-          console.error(`Error ${mute ? 'muting' : 'unmuting'} audio:`, error);
-        }
-        return true;
-      }
-    },
-    []
-  );
+  const stopVideoPreview = useCallback(() => {
+    videoStreamRef.current?.getTracks().forEach((t) => t.stop());
+    videoStreamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
+  }, []);
+
+  const stopAudioPreview = useCallback(() => {
+    audioStreamRef.current?.getTracks().forEach((t) => t.stop());
+    audioStreamRef.current = null;
+    stopMeter();
+    setInputLevel(0);
+  }, [stopMeter]);
 
   useEffect(() => {
-    const audioTrack = localAudioRef.current;
-    const videoTrack = localVideoRef.current;
-    const speakerTester = speakerTesterRef.current;
-    const micTester = microphoneTesterRef.current;
-
     return () => {
-      if (audioTrack && audioTrackStartedRef.current) {
-        safeStopAudio(audioTrack);
-      }
-      if (videoTrack && videoTrackStartedRef.current) {
-        safeStopVideo(videoTrack);
-      }
-      if (speakerTester) {
-        try {
-          speakerTester.destroy();
-        } catch (error) {
-          console.error('Error destroying speaker tester:', error);
-        }
-      }
-      if (micTester) {
-        try {
-          micTester.stop();
-          micTester.destroy();
-        } catch {
-          // Ignore cleanup errors
-        }
-      }
-      // Reset input level on cleanup
-      setInputLevel(0);
+      stopVideoPreview();
+      stopAudioPreview();
+      speakerOscRef.current?.stop();
+      audioContextRef.current?.close().catch(() => {});
+      playbackRef.current?.pause();
     };
-  }, [
-    localAudioRef,
-    localVideoRef,
-    speakerTesterRef,
-    microphoneTesterRef,
-    safeStopAudio,
-    safeStopVideo,
-  ]);
+  }, [stopAudioPreview, stopVideoPreview]);
 
   const onCameraClick = useCallback(async () => {
-    if (!localVideoRef.current || typeof window === 'undefined') return;
-
     if (isStartedVideo) {
-      if (videoTrackStartedRef.current) {
-        await safeStopVideo(localVideoRef.current);
-      }
+      stopVideoPreview();
       setIsStartedVideo(false);
-      setIsInVBMode(false);
-      videoTrackStartedRef.current = false;
-    } else {
-      try {
-        if (videoRef.current && localVideoRef.current) {
-          await localVideoRef.current.start(videoRef.current);
-          videoTrackStartedRef.current = true;
-          setIsStartedVideo(true);
-        }
-      } catch (error: unknown) {
-        const errorName = error instanceof Error ? error.name : '';
-        console.error('Error starting video:', error);
-        videoTrackStartedRef.current = false;
-        setIsStartedVideo(false);
-        // If it's a permission error, we might want to show a message
-        if (errorName === 'NotAllowedError' || errorName === 'NotFoundError') {
-          console.error('Camera permission denied or not found');
-        }
-      }
+      return;
     }
-  }, [isStartedVideo, localVideoRef, safeStopVideo]);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: activeCamera ? { deviceId: { exact: activeCamera } } : true,
+        audio: false,
+      });
+      videoStreamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play().catch(() => {});
+      }
+      setIsStartedVideo(true);
+    } catch (error) {
+      console.error('Error starting video:', error);
+      setIsStartedVideo(false);
+    }
+  }, [activeCamera, isStartedVideo, stopVideoPreview]);
 
   const onMicrophoneClick = useCallback(async () => {
-    if (!localAudioRef.current || typeof window === 'undefined') return;
-
-    try {
-      if (isStartedAudio && audioTrackStartedRef.current) {
-        if (isMuted) {
-          const success = await safeMuteAudio(localAudioRef.current, false);
-          if (success) {
-            setIsMuted(false);
-          }
-        } else {
-          const success = await safeMuteAudio(localAudioRef.current, true);
-          if (success) {
-            setIsMuted(true);
-          }
+    if (isStartedAudio) {
+      if (isMuted) {
+        audioStreamRef.current
+          ?.getAudioTracks()
+          .forEach((t) => (t.enabled = true));
+        if (audioStreamRef.current) {
+          startMeter(audioStreamRef.current, setInputLevel);
         }
-      } else {
-        await localAudioRef.current.start();
-        audioTrackStartedRef.current = true;
-        setIsStartedAudio(true);
         setIsMuted(false);
+      } else {
+        audioStreamRef.current
+          ?.getAudioTracks()
+          .forEach((t) => (t.enabled = false));
+        stopMeter();
+        setInputLevel(0);
+        setIsMuted(true);
       }
-    } catch (error: unknown) {
-      const errorName = error instanceof Error ? error.name : '';
-      if (errorName !== 'AudioNotStartedError') {
-        console.error('Error toggling microphone:', error);
-      }
-      if (!isStartedAudio) {
-        audioTrackStartedRef.current = false;
-        setIsStartedAudio(false);
-      }
+      return;
     }
-  }, [isStartedAudio, isMuted, localAudioRef, safeMuteAudio]);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: activeMicrophone
+          ? { deviceId: { exact: activeMicrophone } }
+          : true,
+        video: false,
+      });
+      audioStreamRef.current = stream;
+      startMeter(stream, setInputLevel);
+      setIsStartedAudio(true);
+      setIsMuted(false);
+    } catch (error) {
+      console.error('Error toggling microphone:', error);
+    }
+  }, [activeMicrophone, isMuted, isStartedAudio, startMeter, stopMeter]);
 
   const onMicrophoneSelect = useCallback(
     async (deviceId: string) => {
-      if (
-        deviceId !== activeMicrophone &&
-        localAudioRef.current &&
-        typeof window !== 'undefined'
-      ) {
-        await safeStopAudio(localAudioRef.current);
-        setIsMuted(true);
-        setIsStartedAudio(false);
-
-        const ZoomVideo = (await import('@zoom/videosdk')).default;
-        localAudioRef.current = ZoomVideo.createLocalAudioTrack(deviceId);
-        try {
-          await localAudioRef.current.start();
-          audioTrackStartedRef.current = true;
-          setActiveMicrophone(deviceId);
-          setIsStartedAudio(true);
-          setIsMuted(false);
-        } catch (error) {
-          console.error('Error starting new audio track:', error);
-          audioTrackStartedRef.current = false;
-          setIsStartedAudio(false);
-        }
-      }
+      setActiveMicrophone(deviceId);
+      if (!isStartedAudio) return;
+      stopAudioPreview();
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { deviceId: { exact: deviceId } },
+        video: false,
+      });
+      audioStreamRef.current = stream;
+      startMeter(stream, setInputLevel);
+      setIsStartedAudio(true);
+      setIsMuted(false);
     },
-    [activeMicrophone, localAudioRef, setActiveMicrophone, safeStopAudio]
+    [isStartedAudio, setActiveMicrophone, startMeter, stopAudioPreview]
   );
 
-  const onTestSpeakerClick = useCallback(() => {
-    if (!localAudioRef.current || typeof window === 'undefined') return;
-
-    if (microphoneTesterRef.current) {
-      microphoneTesterRef.current.destroy();
-      microphoneTesterRef.current = null;
-      setIsRecordingVoice(false);
-      setIsPlayingRecording(false);
-    }
-
+  const onTestSpeakerClick = useCallback(async () => {
     if (isPlayingAudio) {
-      if (speakerTesterRef.current) {
-        speakerTesterRef.current.stop();
-        speakerTesterRef.current = null;
-      }
+      speakerOscRef.current?.stop();
+      speakerOscRef.current = null;
       setIsPlayingAudio(false);
       setOutputLevel(0);
-    } else {
-      try {
-        const tester = localAudioRef.current.testSpeaker({
-          speakerId: activeSpeaker,
-          onAnalyseFrequency: (value: number) => {
-            setOutputLevel(Math.min(100, value));
-          },
-        });
-        speakerTesterRef.current = tester || null;
-        setIsPlayingAudio(true);
-      } catch (error) {
-        console.error('Error testing speaker:', error);
-      }
+      return;
     }
-  }, [
-    isPlayingAudio,
-    activeSpeaker,
-    localAudioRef,
-    speakerTesterRef,
-    microphoneTesterRef,
-  ]);
-
-  const onTestMicrophoneClick = useCallback(() => {
-    if (!localAudioRef.current || typeof window === 'undefined') return;
-
-    if (speakerTesterRef.current) {
-      speakerTesterRef.current.destroy();
-      speakerTesterRef.current = null;
+    const ctx = audioContextRef.current ?? new AudioContext();
+    audioContextRef.current = ctx;
+    await ctx.resume();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.frequency.value = 440;
+    gain.gain.value = 0.08;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    speakerOscRef.current = osc;
+    setIsPlayingAudio(true);
+    setOutputLevel(40);
+    window.setTimeout(() => {
+      osc.stop();
+      speakerOscRef.current = null;
       setIsPlayingAudio(false);
       setOutputLevel(0);
-    }
+    }, 1500);
+  }, [isPlayingAudio]);
 
-    if (!isPlayingRecording && !isRecordingVoice) {
-      if (microphoneTesterRef.current) {
-        try {
-          microphoneTesterRef.current.stop();
-          microphoneTesterRef.current.destroy();
-        } catch {
-          // Ignore errors during cleanup
-        }
-        microphoneTesterRef.current = null;
-      }
+  const onTestMicrophoneClick = useCallback(async () => {
+    if (isPlayingRecording) {
+      playbackRef.current?.pause();
+      setIsPlayingRecording(false);
       setInputLevel(0);
-
-      try {
-        const tester = localAudioRef.current.testMicrophone({
-          microphoneId: activeMicrophone,
-          speakerId: activeSpeaker,
-          recordAndPlay: true,
-          onAnalyseFrequency: (value: number) => {
-            if (microphoneTesterRef.current) {
-              setInputLevel(Math.min(100, value));
-            }
-          },
-          onStartRecording: () => {
-            setIsRecordingVoice(true);
-          },
-          onStartPlayRecording: () => {
-            setIsRecordingVoice(false);
-            setIsPlayingRecording(true);
-          },
-          onStopPlayRecording: () => {
-            setIsPlayingRecording(false);
-            setInputLevel(0);
-            if (microphoneTesterRef.current) {
-              try {
-                microphoneTesterRef.current.destroy();
-              } catch {}
-              microphoneTesterRef.current = null;
-            }
-          },
-        });
-        microphoneTesterRef.current = tester || null;
-      } catch (error) {
-        console.error('Error testing microphone:', error);
-        setInputLevel(0);
-      }
-    } else if (isRecordingVoice) {
-      if (microphoneTesterRef.current) {
-        try {
-          microphoneTesterRef.current.stopRecording();
-        } catch (error: unknown) {
-          console.error('Error stopping recording:', error);
-        }
-        setIsRecordingVoice(false);
-        setInputLevel(0);
-      }
-    } else if (isPlayingRecording) {
-      if (microphoneTesterRef.current) {
-        try {
-          microphoneTesterRef.current.stop();
-          microphoneTesterRef.current.destroy();
-        } catch (error: unknown) {
-          console.error('Error stopping playback:', error);
-        }
-        microphoneTesterRef.current = null;
+      return;
+    }
+    if (isRecordingVoice) {
+      mediaRecorderRef.current?.stop();
+      return;
+    }
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: activeMicrophone
+        ? { deviceId: { exact: activeMicrophone } }
+        : true,
+      video: false,
+    });
+    audioStreamRef.current = stream;
+    startMeter(stream, setInputLevel);
+    recordedChunksRef.current = [];
+    const recorder = new MediaRecorder(stream);
+    mediaRecorderRef.current = recorder;
+    recorder.ondataavailable = (e) => {
+      if (e.data.size > 0) recordedChunksRef.current.push(e.data);
+    };
+    recorder.onstop = () => {
+      setIsRecordingVoice(false);
+      stopMeter();
+      const blob = new Blob(recordedChunksRef.current, { type: 'audio/webm' });
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      playbackRef.current = audio;
+      setIsPlayingRecording(true);
+      audio.onended = () => {
         setIsPlayingRecording(false);
         setInputLevel(0);
-      }
-    }
+        URL.revokeObjectURL(url);
+      };
+      audio.play().catch(() => setIsPlayingRecording(false));
+    };
+    recorder.start();
+    setIsRecordingVoice(true);
   }, [
+    activeMicrophone,
     isPlayingRecording,
     isRecordingVoice,
-    activeMicrophone,
-    activeSpeaker,
-    localAudioRef,
-    speakerTesterRef,
-    microphoneTesterRef,
+    startMeter,
+    stopMeter,
   ]);
 
   const onSpeakerSelect = useCallback(
     (deviceId: string) => {
       switchSpeaker(deviceId);
       setActiveSpeaker(deviceId);
-      if (isPlayingAudio) {
-        speakerTesterRef.current?.stop();
-        setIsPlayingAudio(false);
-        setOutputLevel(0);
-      }
     },
-    [switchSpeaker, setActiveSpeaker, isPlayingAudio, speakerTesterRef]
+    [switchSpeaker, setActiveSpeaker]
   );
 
   const onMicTestSelect = useCallback(
     (deviceId: string) => {
       switchMicrophone(deviceId);
       setActiveMicrophone(deviceId);
-      if (isRecordingVoice || isPlayingRecording) {
-        if (microphoneTesterRef.current) {
-          try {
-            microphoneTesterRef.current.stop();
-            microphoneTesterRef.current.destroy();
-          } catch {}
-          microphoneTesterRef.current = null;
-        }
-        setIsRecordingVoice(false);
-        setIsPlayingRecording(false);
-        setInputLevel(0);
-      }
     },
-    [
-      switchMicrophone,
-      setActiveMicrophone,
-      isRecordingVoice,
-      isPlayingRecording,
-      microphoneTesterRef,
-    ]
+    [switchMicrophone, setActiveMicrophone]
   );
 
   const handleJoinCall = useCallback(async () => {
@@ -423,14 +289,9 @@ export default function PreviewPage({
     });
 
     const success = await joinSession();
-
     if (success) {
-      if (localAudioRef.current && audioTrackStartedRef.current) {
-        await safeStopAudio(localAudioRef.current);
-      }
-      if (localVideoRef.current && videoTrackStartedRef.current) {
-        await safeStopVideo(localVideoRef.current);
-      }
+      stopVideoPreview();
+      stopAudioPreview();
     }
   }, [
     isMuted,
@@ -440,10 +301,8 @@ export default function PreviewPage({
     activeSpeaker,
     setPreviewSettings,
     joinSession,
-    safeStopAudio,
-    safeStopVideo,
-    localAudioRef,
-    localVideoRef,
+    stopAudioPreview,
+    stopVideoPreview,
   ]);
 
   const handleCancel = useCallback(() => {
@@ -464,7 +323,6 @@ export default function PreviewPage({
   return (
     <div className="min-h-screen flex justify-center items-center py-4 px-4 lg:py-8 relative">
       <div className="w-full lg:w-[1057px] space-y-6 lg:space-y-[50px]">
-        {/* Header */}
         <div className="text-center flex flex-col items-center gap-2">
           <Image
             src="/images/carelio-logo.png"
@@ -482,16 +340,14 @@ export default function PreviewPage({
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 w-full justify-center gap-4">
-          {/* Video Preview */}
           <div className="overflow-hidden relative w-full">
             <VideoPreview
               isStartedVideo={isStartedVideo}
-              isInVBMode={isInVBMode}
+              isInVBMode={false}
               videoRef={videoRef}
               canvasRef={canvasRef}
             />
 
-            {/* Control Bar */}
             <ControlBar
               isStartedAudio={isStartedAudio}
               isMuted={isMuted}
@@ -504,22 +360,25 @@ export default function PreviewPage({
               onMicrophoneSelect={onMicrophoneSelect}
               onCameraClick={onCameraClick}
               onCameraSelect={async (deviceId: string) => {
-                if (
-                  isStartedVideo &&
-                  videoTrackStartedRef.current &&
-                  localVideoRef.current
-                ) {
-                  try {
-                    await switchCamera(deviceId);
-                  } catch (error) {
-                    console.error('Error switching camera:', error);
+                await switchCamera(deviceId);
+                if (isStartedVideo) {
+                  stopVideoPreview();
+                  setIsStartedVideo(false);
+                  const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { deviceId: { exact: deviceId } },
+                    audio: false,
+                  });
+                  videoStreamRef.current = stream;
+                  if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                    await videoRef.current.play().catch(() => {});
                   }
+                  setIsStartedVideo(true);
                 }
               }}
             />
           </div>
 
-          {/* Audio Testing Section */}
           <div className="grid w-full gap-4">
             <SpeakerTest
               speakerList={speakerList}

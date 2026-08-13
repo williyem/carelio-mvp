@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { Patient } from '@/types/patient.types';
 import { Appointment } from '@/types/appointment.types';
-import ZoomVideo from '@zoom/videosdk';
+import type { Room } from 'livekit-client';
+
 export interface PreviewSettings {
   isMuted: boolean;
   activeCamera: string;
@@ -10,16 +11,18 @@ export interface PreviewSettings {
   isVideoOn: boolean;
 }
 
-export type ZoomClientType = ReturnType<typeof ZoomVideo.createClient>;
+export type CallClient = Room;
+/** @deprecated Use CallClient */
+export type ZoomClientType = CallClient;
 
 interface VideoCallState {
-  client: ZoomClientType | null;
-  setClient: (client: ZoomClientType) => void;
+  client: CallClient | null;
+  setClient: (client: CallClient | null) => void;
   isActive: boolean;
   isMinimized: boolean;
   isInPreview: boolean;
   patient: Patient | null;
-  callDuration: number; // in seconds
+  callDuration: number;
   pipPosition: { x: number; y: number };
   previewSettings: PreviewSettings | null;
   startCall: (patient: Patient) => void;
@@ -48,7 +51,7 @@ interface VideoCallState {
 
 export const useVideoCallStore = create<VideoCallState>((set) => ({
   client: null,
-  setClient: (client: ZoomClientType) => set({ client }),
+  setClient: (client) => set({ client }),
   isActive: false,
   isMinimized: false,
   isInPreview: false,
@@ -75,6 +78,7 @@ export const useVideoCallStore = create<VideoCallState>((set) => ({
       callDuration: 0,
       previewSettings: null,
       selectedAppointment: null,
+      client: null,
     }),
   toggleMinimize: () =>
     set((state) => ({
@@ -93,9 +97,9 @@ export const useVideoCallStore = create<VideoCallState>((set) => ({
       previewSettings: settings,
     }),
   startCallFromPreview: () =>
-    set((state) => ({
+    set({
       isInPreview: false,
-    })),
+    }),
   closePreview: () =>
     set({
       isActive: false,
@@ -105,6 +109,7 @@ export const useVideoCallStore = create<VideoCallState>((set) => ({
       callDuration: 0,
       previewSettings: null,
       selectedAppointment: null,
+      client: null,
     }),
   setSelectedAppointment: (
     appointment: Appointment | null,

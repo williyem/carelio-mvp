@@ -109,4 +109,5 @@ export interface UnassignPatientResponse {
 export interface PatientConsultationTokenResponse {
   token: string;
   code: string;
+  url?: string;
 }
