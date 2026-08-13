@@ -9,9 +9,12 @@ import { useVideoCallStore } from '@/stores/video-call-store';
 import { useLiveVitals } from '@/hooks/use-live-vitals';
 import { useDeviceStore } from '@/stores/device-store';
 import { useVitalsSync } from '@/hooks/page-hooks/video-call/useVitalsSync';
-import { useCallVitalsStore } from '@/stores/call-vitals-store';
+import { useCallVitalsStore, type CallVital } from '@/stores/call-vitals-store';
 import useVitalsMutations from '@/integration/vitals/mutations';
 import { toast } from 'sonner';
+
+// Stable identity: a selector returning a fresh [] loops useSyncExternalStore.
+const EMPTY_VITALS: CallVital[] = [];
 
 const MANUAL_TYPES = [
   { value: 'blood-pressure', label: 'Blood pressure' },
@@ -29,9 +32,10 @@ const LiveVitalsCard = () => {
   });
   const liveReadings = useDeviceStore((s) => s.liveReadings);
   const { syncReading } = useVitalsSync();
-  const callVitals = useCallVitalsStore((s) =>
-    appointmentId ? (s.byAppointmentId[appointmentId] ?? []) : []
+  const storedVitals = useCallVitalsStore((s) =>
+    appointmentId ? s.byAppointmentId[appointmentId] : undefined
   );
+  const callVitals = storedVitals ?? EMPTY_VITALS;
   const addVital = useCallVitalsStore((s) => s.addVital);
   const setStatus = useCallVitalsStore((s) => s.setStatus);
   const { confirmVitalsMutation, createVitalMutation } = useVitalsMutations();

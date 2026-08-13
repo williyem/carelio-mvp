@@ -8,7 +8,7 @@ import NextTopLoader from 'nextjs-toploader';
 import { ReactNode, useState, useEffect } from 'react';
 
 const Providers = ({ children }: { children: ReactNode }) => {
-  const queryClient = new QueryClient();
+  const [queryClient] = useState(() => new QueryClient());
   const [position, setPosition] = useState<'top-center' | 'bottom-right'>(
     'bottom-right'
   );

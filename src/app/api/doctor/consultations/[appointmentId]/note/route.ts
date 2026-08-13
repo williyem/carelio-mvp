@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { backendApiClient } from '@/integration/config';
 import { cookies } from 'next/headers';
-import { doctorAccessToken, USER_TYPE_HEADER } from '@/lib/constants';
+import {
+  doctorAccessToken,
+  healthAssistantAccessToken,
+  USER_TYPE,
+} from '@/lib/constants';
 import { APPOINTMENT_ENDPOINTS } from '@/integration/appointments/endpoints';
 import { isDummyDataEnabled } from '@/lib/dummy-data/config';
 import { getConsultationNoteByAppointment } from '@/lib/dummy-data/loader';
@@ -12,11 +16,16 @@ export async function GET(
 ) {
   try {
     const cookieStore = await cookies();
-    const accessToken = cookieStore.get(doctorAccessToken)?.value;
+    const doctorToken = cookieStore.get(doctorAccessToken)?.value;
+    const assistantToken = cookieStore.get(healthAssistantAccessToken)?.value;
+    // Health assistants join consultations too, so they need the note as well.
+    const accessToken = doctorToken || assistantToken;
 
     if (!accessToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const userType = doctorToken ? USER_TYPE.doctor : USER_TYPE.healthAssistant;
 
     const { appointmentId } = await params;
 
@@ -40,7 +49,7 @@ export async function GET(
     const response = await backendApiClient.get(endpoint, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        ...USER_TYPE_HEADER,
+        'x-user-type': userType,
       },
     });
 

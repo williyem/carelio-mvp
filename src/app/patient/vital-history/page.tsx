@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import BackButton from '@/components/dashboard/back-button';
 import { ROUTES } from '@/lib/routes';
@@ -11,8 +12,13 @@ const VitalHistoryPage = () => {
   const router = useRouter();
   const { data: session } = usePatientSession();
   const patientId = session?.user?.id;
-  const entries = usePatientVitalsStore((s) =>
-    patientId ? s.entries.filter((entry) => entry.patientId === patientId) : []
+  const allEntries = usePatientVitalsStore((s) => s.entries);
+  const entries = useMemo(
+    () =>
+      patientId
+        ? allEntries.filter((entry) => entry.patientId === patientId)
+        : [],
+    [allEntries, patientId]
   );
 
   return (
