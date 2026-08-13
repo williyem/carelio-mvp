@@ -24,7 +24,7 @@ const PatientVerificationDialog = ({
       initialStep: 0,
       totalSteps: 3,
       initialData: {
-        method: 'phone',
+        method: 'email',
         contactValue: '',
       },
     });
@@ -32,36 +32,14 @@ const PatientVerificationDialog = ({
   const { selectedPatient: patient } = usePatientVerificationStore();
 
   const {
-    verifyPatientPhoneMutation,
     verifyPatientEmailMutation,
     verifyPatientCodeMutation,
     assignHealthAssistantMutation,
   } = useHealthAssistantMutations();
 
-  const handlePhoneSendCode = async () => {
-    if (!patient) return;
-    if (patient.phoneVerified) {
-      toast.error('Patient already verified');
-      return;
-    }
-    verifyPatientPhoneMutation.mutate(patient.id, {
-      onSuccess: () => {
-        toast.success('Verification code sent successfully');
-        updateStepData({
-          method: 'phone',
-          contactValue: patient?.phoneNumber,
-        });
-        next();
-      },
-      onError: () => {
-        toast.error('Failed to send verification code');
-      },
-    });
-  };
-
   const handleEmailSendCode = async () => {
     if (!patient) return;
-    if (patient.phoneVerified) {
+    if (patient.emailVerified) {
       toast.error('Patient already verified');
       return;
     }
@@ -82,12 +60,12 @@ const PatientVerificationDialog = ({
 
   const handleVerifyCode = async (code: string) => {
     if (!patient) return;
-    if (patient.phoneVerified) {
+    if (patient.emailVerified) {
       toast.error('Patient already verified');
       return;
     }
     verifyPatientCodeMutation.mutate(
-      { patientId: patient.id, code, type: stepData.method },
+      { patientId: patient.id, code, type: 'email' },
       {
         onSuccess: () => {
           toast.success('Verification code verified successfully');
@@ -123,10 +101,10 @@ const PatientVerificationDialog = ({
   };
 
   const isSubmitting =
-    verifyPatientPhoneMutation.isPending ||
     verifyPatientEmailMutation.isPending ||
     verifyPatientCodeMutation.isPending ||
     assignHealthAssistantMutation.isPending;
+
   const handleUseDifferentMethod = () => {
     goToStep(0);
   };
@@ -153,7 +131,6 @@ const PatientVerificationDialog = ({
           <VerificationSteps
             step={currentStep}
             stepData={stepData}
-            onPhoneSendCode={handlePhoneSendCode}
             onEmailSendCode={handleEmailSendCode}
             onVerifyCode={handleVerifyCode}
             onAssignClinician={handleAssignClinician}

@@ -70,7 +70,7 @@ export const verifyPatientEmail = async (
 export const verifyPatientCode = async (
   patientId: string,
   code: string,
-  type: 'phone' | 'email'
+  type: 'email'
 ): Promise<VerifyPatientResponse> => {
   const endpoint = HEALTH_ASSISTANT_API_ENDPOINTS.VERIFY_PATIENT_CODE.replace(
     ':id',

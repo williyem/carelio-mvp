@@ -46,7 +46,7 @@ export interface VerifyPatientRequest {
 
 export interface VerifyPatientCodeRequest {
   code: string;
-  type: 'phone' | 'email';
+  type: 'email';
 }
 
 export interface VerifyPatientResponse {

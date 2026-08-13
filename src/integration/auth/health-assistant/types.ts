@@ -316,6 +316,9 @@ export interface InvitePatientRequest {
  */
 export interface InvitePatientResponse {
   message: string;
+  inviteLink?: string;
+  invitationMethod?: string;
+  patientId?: string;
   invitationToken?: string;
 }
 

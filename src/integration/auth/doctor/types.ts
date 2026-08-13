@@ -297,7 +297,7 @@ export interface GetSessionResponse {
  * Invite Patient Request
  */
 export interface InvitePatientRequest {
-  email?: string;
+  email: string;
   phoneNumber?: string;
 }
 

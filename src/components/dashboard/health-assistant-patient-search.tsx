@@ -85,7 +85,7 @@ const PatientSearch = ({
     setSearchValue(patient.fullName);
     setShowResults(false);
 
-    if (patient.emailVerified === false && patient.phoneVerified === false) {
+    if (patient.emailVerified === false) {
       setSelectedPatient(patient);
       setShowVerificationDialog(true);
     } else {

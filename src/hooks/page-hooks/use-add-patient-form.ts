@@ -18,26 +18,13 @@ const isNotPastDate = (d: Date) => {
 
 const addPatientSchema = z
   .object({
-    email: z
-      .string()
-      .email('Please enter a valid email address')
-      .optional()
-      .or(z.literal('')),
+    email: z.string().email('Please enter a valid email address'),
     phone: z.string().optional(),
     includeAppointment: z.boolean(),
     date: z.date().optional(),
     startTime: z.string().optional(),
     endTime: z.string().optional(),
   })
-  .refine(
-    (data) => {
-      return (
-        (!!data.email && data.email.length > 0) ||
-        (!!data.phone && data.phone.length > 0)
-      );
-    },
-    { message: 'Email or phone number is required', path: ['email'] }
-  )
   .refine(
     (data) => {
       if (!data.includeAppointment) return true;
@@ -99,9 +86,7 @@ export type AddPatientFormData = z.infer<typeof addPatientSchema>;
 export function useAddPatientForm() {
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState('');
-  const [type, setType] = useState<
-    'email' | 'phone' | 'emailPhone' | undefined
-  >(undefined);
+  const [inviteLink, setInviteLink] = useState<string | undefined>();
 
   const { mutate: invitePatient, isPending: isInviting } = useInvitePatient();
   const { mutate: createAppointment, isPending: isCreating } =
@@ -131,23 +116,14 @@ export function useAddPatientForm() {
 
   const onSubmit = (data: AddPatientFormData) => {
     const payload: InvitePatientRequest = {
-      email: data.email || undefined,
+      email: data.email,
       phoneNumber: data.phone || undefined,
     };
     invitePatient(payload, {
       onSuccess: (response) => {
-        setSubmittedEmail(
-          data?.email && data?.phone
-            ? `${data.email} and ${data.phone}`
-            : data.email || data.phone || ''
-        );
-        setType(
-          data?.email && data?.phone
-            ? 'emailPhone'
-            : data?.email
-              ? 'email'
-              : 'phone'
-        );
+        setSubmittedEmail(data.email);
+        setInviteLink(response.inviteLink);
+        toast.success('Invitation email sent');
 
         if (data.includeAppointment && data.date && data.startTime) {
           const parseTime = (timeStr: string) => {
@@ -189,7 +165,7 @@ export function useAddPatientForm() {
                     'Patient invited, but failed to schedule appointment.'
                   )
                 );
-                setIsSuccessOpen(true); // Still show success for invitation
+                setIsSuccessOpen(true);
               },
             }
           );
@@ -216,7 +192,7 @@ export function useAddPatientForm() {
     });
     setIsSuccessOpen(false);
     setSubmittedEmail('');
-    setType(undefined);
+    setInviteLink(undefined);
   };
 
   const handleCloseSuccess = () => {
@@ -234,10 +210,10 @@ export function useAddPatientForm() {
     date,
     isSuccessOpen,
     submittedEmail,
+    inviteLink,
     isPending,
     handleAddAnother,
     handleCloseSuccess,
     startTime,
-    type,
   };
 }

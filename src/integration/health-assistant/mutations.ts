@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   assignHealthAssistant,
   registerPatient,
-  verifyPatientPhone,
   verifyPatientEmail,
   verifyPatientCode,
 } from './api-functions';
@@ -21,10 +20,6 @@ const useHealthAssistantMutations = () => {
     },
   });
 
-  const verifyPatientPhoneMutation = useMutation({
-    mutationFn: verifyPatientPhone,
-  });
-
   const verifyPatientEmailMutation = useMutation({
     mutationFn: verifyPatientEmail,
   });
@@ -37,14 +32,13 @@ const useHealthAssistantMutations = () => {
     }: {
       patientId: string;
       code: string;
-      type: 'phone' | 'email';
+      type: 'email';
     }) => verifyPatientCode(patientId, code, type),
   });
 
   return {
     registerPatientMutation,
     assignHealthAssistantMutation,
-    verifyPatientPhoneMutation,
     verifyPatientEmailMutation,
     verifyPatientCodeMutation,
   };

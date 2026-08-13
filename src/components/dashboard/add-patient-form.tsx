@@ -20,37 +20,35 @@ import { Spinner } from '@/components/ui/spinner';
 import { useAddPatientForm } from '@/hooks/page-hooks/use-add-patient-form';
 import TimePicker from '../ui/time-picker';
 import { useRouter } from 'nextjs-toploader/app';
+import { toast } from 'sonner';
 
 interface SuccessModalProps {
   email: string;
+  inviteLink?: string;
   isOpen: boolean;
   onClose: () => void;
   onAddAnother: () => void;
-  type: 'email' | 'phone' | 'emailPhone' | undefined;
 }
-
-const returnText = (type: 'email' | 'phone' | 'emailPhone' | undefined) => {
-  switch (type) {
-    case 'email':
-      return 'An email';
-    case 'phone':
-      return 'An sms';
-    case 'emailPhone':
-      return 'An email and an sms';
-    default:
-      return 'An email and an sms';
-  }
-};
 
 function SuccessModal({
   email,
+  inviteLink,
   isOpen,
   onClose,
   onAddAnother,
-  type,
 }: SuccessModalProps) {
   const router = useRouter();
   if (!isOpen) return null;
+
+  const handleCopyLink = async () => {
+    if (!inviteLink) return;
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      toast.success('Invite link copied');
+    } catch {
+      toast.error('Could not copy invite link');
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
@@ -64,11 +62,27 @@ function SuccessModal({
               Invitation Sent Successfully
             </h3>
             <p className="mx-auto max-w-xs text-sm text-gray-500">
-              {returnText(type)} has been sent to{' '}
+              An email has been sent to{' '}
               <span className="font-semibold text-gray-900">{email}</span> with
               instructions to complete their profile.
             </p>
           </div>
+          {inviteLink ? (
+            <div className="w-full space-y-2 rounded-lg bg-gray-50 p-3 text-left">
+              <p className="text-xs font-medium text-gray-500">
+                Fallback invite link
+              </p>
+              <p className="break-all text-xs text-gray-700">{inviteLink}</p>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full rounded-full"
+                onClick={handleCopyLink}
+              >
+                Copy invite link
+              </Button>
+            </div>
+          ) : null}
           <div className="flex w-full flex-col gap-3 pt-2 sm:flex-row">
             <Button
               variant="outline"
@@ -105,10 +119,10 @@ export function AddPatientForm() {
     startTime,
     isSuccessOpen,
     submittedEmail,
+    inviteLink,
     isPending,
     handleAddAnother,
     handleCloseSuccess,
-    type,
   } = useAddPatientForm();
 
   return (
@@ -144,7 +158,7 @@ export function AddPatientForm() {
                   htmlFor="phone-number"
                   className="text-sm font-bold text-gray-900"
                 >
-                  Phone Number
+                  Phone Number (optional)
                 </Label>
                 <Controller
                   name="phone"
@@ -163,9 +177,9 @@ export function AddPatientForm() {
               </div>
             </div>
             <p className="text-sm text-gray-500">
-              An invitation link will be sent to the provided contact details
-              (email and/or phone number). The patient will use this link to
-              complete their profile and gain access to the portal.
+              An invitation email with a registration link will be sent to the
+              patient. Phone number is stored on their profile only and is not
+              used for delivery.
             </p>
           </CardContent>
         </Card>
@@ -288,9 +302,9 @@ export function AddPatientForm() {
       <SuccessModal
         isOpen={isSuccessOpen}
         email={submittedEmail}
+        inviteLink={inviteLink}
         onClose={handleCloseSuccess}
         onAddAnother={handleAddAnother}
-        type={type}
       />
     </div>
   );

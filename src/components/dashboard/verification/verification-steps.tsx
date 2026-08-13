@@ -8,7 +8,6 @@ import { VerificationStepData } from '@/types/verification.types';
 interface VerificationStepsProps {
   step: number;
   stepData: VerificationStepData;
-  onPhoneSendCode: (phoneNumber: string) => void | Promise<void>;
   onEmailSendCode: (email: string) => void | Promise<void>;
   onVerifyCode: (code: string) => void | Promise<void>;
   onAssignClinician: (clinicianId: string) => void | Promise<void>;
@@ -19,7 +18,6 @@ interface VerificationStepsProps {
 const VerificationSteps = ({
   step,
   stepData,
-  onPhoneSendCode,
   onEmailSendCode,
   onVerifyCode,
   onAssignClinician,
@@ -29,7 +27,6 @@ const VerificationSteps = ({
   if (step === 0) {
     return (
       <VerificationTabs
-        onPhoneSendCode={onPhoneSendCode}
         onEmailSendCode={onEmailSendCode}
         isSubmitting={isSubmitting}
       />
@@ -48,7 +45,6 @@ const VerificationSteps = ({
     );
   }
 
-  // Step 2: Assign medical assistant
   if (step === 2) {
     return (
       <MedicalAssistantAssignment

@@ -12,7 +12,7 @@ import { Spinner } from '@/components/ui/spinner';
 
 interface VerificationCodeInputProps {
   contactValue: string;
-  method: 'phone' | 'email';
+  method: 'email';
   onVerify: (code: string) => void | Promise<void>;
   onUseDifferentMethod: () => void;
   isSubmitting?: boolean;
@@ -30,7 +30,6 @@ type VerificationCodeFormData = z.infer<typeof verificationCodeSchema>;
 
 const VerificationCodeInput = ({
   contactValue,
-  method,
   onVerify,
   onUseDifferentMethod,
   isSubmitting = false,
@@ -51,18 +50,6 @@ const VerificationCodeInput = ({
     await onVerify(data.code);
   };
 
-  const formatContactValue = (value: string, method: 'phone' | 'email') => {
-    if (method === 'phone') {
-      // Format phone number for display (e.g., +1233540977343 -> 233 5409 77343)
-      const cleaned = value.replace(/\D/g, '');
-      if (cleaned.length > 3) {
-        return cleaned.slice(-10).replace(/(\d{3})(\d{4})(\d{3})/, '$1 $2 $3');
-      }
-      return value;
-    }
-    return value;
-  };
-
   return (
     <div className="flex flex-col gap-[36px] items-start w-full">
       <div className="flex flex-col gap-[20px] items-center w-full">
@@ -72,10 +59,8 @@ const VerificationCodeInput = ({
           </h2>
           <div className="font-normal leading-[1.2] text-(--text-gray) text-[14px] w-[263px]">
             <p className="mb-0">
-              We sent verification code to{' '}
-              <span className="text-(--brand-blue)">
-                {formatContactValue(contactValue, method)}
-              </span>
+              We sent a verification code to{' '}
+              <span className="text-(--brand-blue)">{contactValue}</span>
             </p>
           </div>
         </div>
@@ -132,7 +117,7 @@ const VerificationCodeInput = ({
           onClick={onUseDifferentMethod}
           className="w-full text-center text-(--text-label) text-[14px] font-normal leading-[1.2] underline hover:no-underline transition-all"
         >
-          Use different method
+          Use a different email
         </button>
       </div>
     </div>

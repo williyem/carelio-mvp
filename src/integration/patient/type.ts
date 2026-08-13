@@ -72,8 +72,8 @@ export interface AssignPatientRequest {
 }
 
 export interface InvitePatientRequest {
-  email?: string;
-  phone?: string;
+  email: string;
+  phoneNumber?: string;
 }
 
 // ============================================
@@ -98,6 +98,8 @@ export type PatientSearchResponse = PaginatedResponse<Patient>;
 export interface InvitePatientResponse {
   message: string;
   invitationId?: string;
+  inviteLink?: string;
+  patientId?: string;
 }
 
 export interface UnassignPatientResponse {

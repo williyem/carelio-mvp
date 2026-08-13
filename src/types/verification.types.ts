@@ -1,6 +1,6 @@
 export interface VerificationStepData {
-  method: 'phone' | 'email';
-  contactValue: string; // phone number or email
+  method: 'email';
+  contactValue: string;
   verificationCode?: string;
   clinicianId?: string;
   [key: string]: unknown;
