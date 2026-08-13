@@ -59,9 +59,7 @@ export function useFirstTimeResetPasswordForm() {
       {
         onSuccess: () => {
           toast.success('Password set successfully!');
-          router.push(
-            `${ROUTES.AUTH.PASSWORD_RESET_SUCCESS}?next=${ROUTES.AUTH.SETUP_2FA}`
-          );
+          router.push(ROUTES.AUTH.PASSWORD_RESET_SUCCESS);
         },
         onError: (error) => {
           const errorMessage = getErrorMessage(

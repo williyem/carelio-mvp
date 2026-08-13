@@ -114,4 +114,17 @@ export interface HealthAssistantProfile {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  avatarUrl?: string;
+  title?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  timezone?: string;
+  phone?: string;
+  onboardingCompleted?: boolean;
+  onboardingCompletedAt?: string | null;
+  signedAgreementUrl?: string;
+  signedName?: string;
+  staffCode?: string;
 }

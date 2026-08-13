@@ -50,8 +50,11 @@ export function proxy(request: NextRequest) {
   const isDoctorRoute =
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/doctor') ||
-    pathname.startsWith('/live-consultation');
-  const isHealthAssistantRoute = pathname.startsWith('/health-assistant');
+    pathname.startsWith('/live-consultation') ||
+    pathname.startsWith('/onboarding/doctor');
+  const isHealthAssistantRoute =
+    pathname.startsWith('/health-assistant') ||
+    pathname.startsWith('/onboarding/health-assistant');
   const isPatientRoute = pathname.startsWith('/patient');
 
   // Logged-in users on auth pages → role home

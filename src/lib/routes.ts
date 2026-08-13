@@ -21,12 +21,21 @@ export const ROUTES = {
   // Doctor dashboard routes
   DASHBOARD: {
     ROOT: '/dashboard',
-
-    // Doctor viewing a patient chart (not the patient portal)
+    SETTINGS: {
+      ROOT: '/dashboard/settings',
+      SCHEDULE: '/dashboard/settings/schedule',
+      SECURITY: '/dashboard/settings/security',
+      BILLING: '/dashboard/settings/billing-payout',
+    },
     PATIENT: {
       ROOT: '/dashboard/patient',
       DETAILS: (id: string) => `/dashboard/patient/${id}`,
     },
+  },
+
+  ONBOARDING: {
+    DOCTOR: '/onboarding/doctor',
+    HEALTH_ASSISTANT: '/onboarding/health-assistant',
   },
 
   // Health Assistant routes
@@ -42,6 +51,10 @@ export const ROUTES = {
     ASSIGNMENTS: {
       ROOT: '/health-assistant/assignments',
     },
+    SETTINGS: {
+      ROOT: '/health-assistant/settings',
+      SECURITY: '/health-assistant/settings/security',
+    },
   },
 
   // Patient portal routes
@@ -50,10 +63,14 @@ export const ROUTES = {
     RECORD_VITALS: '/patient/record-vitals',
     VITAL_HISTORY: '/patient/vital-history',
     HEALTH_RECORDS: '/patient/health-records',
-    RECORD_DETAILS: (recordId: string) =>
-      `/patient/health-records/${recordId}`,
+    RECORD_DETAILS: (recordId: string) => `/patient/health-records/${recordId}`,
     REGISTER: '/patient/register',
     INVITE: '/patient-invite',
+    SETTINGS: {
+      ROOT: '/patient/settings',
+      BILLING: '/patient/settings/billing',
+      ACCESS: '/patient/settings/access',
+    },
   },
 } as const;
 

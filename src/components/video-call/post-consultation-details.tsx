@@ -5,6 +5,7 @@ import { AppointmentNote } from '@/integration/appointments/types';
 import HealthRecordRow from './health-record-row';
 import VitalsTab from './vitals-tab';
 import SoapSection from './soap-section';
+import { useSoapDraftStore } from '@/stores/soap-draft-store';
 
 interface PostConsultationDetailsProps {
   note: AppointmentNote;
@@ -15,6 +16,13 @@ const PostConsultationDetails = ({
   note,
   patient,
 }: PostConsultationDetailsProps) => {
+  const draft = useSoapDraftStore((s) =>
+    note.appointmentId ? s.byAppointmentId[note.appointmentId] : undefined
+  );
+
+  const contentFor = (
+    key: 'subjective' | 'objective' | 'assessment' | 'plan'
+  ) => note?.soapNote?.[key] || note[key] || draft?.[key];
   return (
     <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300">
       <div className="flex flex-col gap-6 h-full">
@@ -31,11 +39,7 @@ const PostConsultationDetails = ({
           <div className="space-y-4 pb-4">
             {(['subjective', 'objective', 'assessment', 'plan'] as const).map(
               (key) => (
-                <SoapSection
-                  key={key}
-                  type={key}
-                  content={note?.soapNote?.[key] || note[key]}
-                />
+                <SoapSection key={key} type={key} content={contentFor(key)} />
               )
             )}
           </div>

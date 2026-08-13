@@ -12,11 +12,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LogOut, Users } from 'lucide-react';
+import { LogOut, Settings, Users } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import HomeSvg from '@/assets/icons/home-svg';
 import { ROUTES } from '@/lib/routes';
 import { cn } from '@/lib/utils';
+import StaffOnboardingGate from '@/components/onboarding/staff-onboarding-gate';
 
 export default function DashboardLayout({
   children,
@@ -26,7 +27,7 @@ export default function DashboardLayout({
   const logout = useLogout();
   const router = useRouter();
   const pathname = usePathname();
-  const { fullName, isLoading, isFetching, email } = useUser();
+  const { fullName, isLoading, isFetching, email, userId, user } = useUser();
 
   const handleLogout = () => {
     logout();
@@ -43,6 +44,7 @@ export default function DashboardLayout({
 
   const isHomeActive = pathname === ROUTES.DASHBOARD.ROOT;
   const isPatientsActive = pathname?.startsWith(ROUTES.DASHBOARD.PATIENT.ROOT);
+  const isSettingsActive = pathname?.startsWith(ROUTES.DASHBOARD.SETTINGS.ROOT);
 
   const navItemClass = (isActive: boolean) =>
     cn(
@@ -52,6 +54,12 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen w-full">
+      <StaffOnboardingGate
+        role="doctor"
+        userId={userId}
+        isLoading={isLoading}
+        completed={user?.onboardingCompleted}
+      />
       {/* Header */}
       <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-[#EBEBEB] bg-white px-6">
         <Link
@@ -92,6 +100,18 @@ export default function DashboardLayout({
             </Link>
 
             <div className="bg-(--border-stroke) h-[44px] w-px" />
+
+            <Link
+              href={ROUTES.DASHBOARD.SETTINGS.ROOT}
+              className={navItemClass(!!isSettingsActive)}
+            >
+              <Settings className="w-5 h-5" />
+              <span className="text-[14px] leading-[1.2] font-normal">
+                Settings
+              </span>
+            </Link>
+
+            <div className="bg-(--border-stroke) h-[44px] w-px" />
           </div>
 
           {isLoading || isFetching ? (
@@ -108,7 +128,10 @@ export default function DashboardLayout({
                 <button className="flex items-center gap-3 pl-1 outline-none hover:opacity-80 transition-opacity cursor-pointer text-left">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-9 w-9 border border-(--border-stroke)">
-                      <AvatarImage src="" alt={fullName || 'User'} />
+                      <AvatarImage
+                        src={user?.avatarUrl || ''}
+                        alt={fullName || 'User'}
+                      />
                       <AvatarFallback className="bg-brand-blue/5 text-brand-blue text-xs font-medium">
                         {initials}
                       </AvatarFallback>
@@ -144,6 +167,9 @@ export default function DashboardLayout({
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="md:hidden">
                   <Link href={ROUTES.DASHBOARD.PATIENT.ROOT}>Patients</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="md:hidden">
+                  <Link href={ROUTES.DASHBOARD.SETTINGS.ROOT}>Settings</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="md:hidden" />
                 <DropdownMenuItem

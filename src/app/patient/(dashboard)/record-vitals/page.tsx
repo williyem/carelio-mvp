@@ -20,6 +20,9 @@ import ErrorMessage from '@/components/ui/error-message';
 import BackButton from '@/components/dashboard/back-button';
 import { ROUTES } from '@/lib/routes';
 import { cn } from '@/lib/utils';
+import { usePatientSession } from '@/integration/auth/patient';
+import { usePatientVitalsStore } from '@/stores/patient-vitals-store';
+import { toast } from 'sonner';
 
 const vitalsSchema = z.object({
   date: z.date({
@@ -57,6 +60,8 @@ type VitalsFormData = z.infer<typeof vitalsSchema>;
 
 const RecordVitalsPage = () => {
   const router = useRouter();
+  const { data: session } = usePatientSession();
+  const addEntry = usePatientVitalsStore((s) => s.addEntry);
 
   const {
     control,
@@ -79,8 +84,26 @@ const RecordVitalsPage = () => {
   });
 
   const onSubmit = async (data: VitalsFormData) => {
-    console.log('Vitals data:', data);
-    // TODO: Implement actual API call to save vitals
+    const patientId = session?.user?.id;
+    if (!patientId) {
+      toast.error('Sign in again to record vitals');
+      return;
+    }
+    addEntry({
+      patientId,
+      recordedAt: `${format(data.date, 'yyyy-MM-dd')} ${data.time}`,
+      systolic: data.systolic,
+      diastolic: data.diastolic,
+      heartRate: data.heartRate,
+      temperature: data.temperature,
+      respiratoryRate: data.respiratoryRate,
+      oxygenSaturation: data.oxygenSaturation,
+      notes: data.notes,
+    });
+    toast.success(
+      'Vitals recorded. A doctor will confirm them during the visit.'
+    );
+    router.push(ROUTES.PATIENT.VITAL_HISTORY);
   };
 
   const handleBack = () => {

@@ -97,10 +97,10 @@ function SuccessModal({
 
           <div className="space-y-2">
             <h3 className="text-xl font-bold text-gray-900">
-              Appointment Scheduled
+              Appointment Confirmed
             </h3>
             <p className="text-sm text-gray-500 max-w-xs mx-auto">
-              Appointment scheduled for{' '}
+              Appointment confirmed for{' '}
               <span className="font-semibold text-gray-900">{patientName}</span>
             </p>
           </div>

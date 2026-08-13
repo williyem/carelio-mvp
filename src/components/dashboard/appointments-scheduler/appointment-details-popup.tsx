@@ -122,7 +122,8 @@ export function AppointmentDetailsPopup({
                 Completed
               </span>
             )}
-            {appointment.status === 'CONFIRMED' && (
+            {(appointment.status === 'CONFIRMED' ||
+              appointment.status === 'PENDING_CONFIRMATION') && (
               <span
                 className={cn(
                   'text-[10px] px-2 py-0.5 rounded-full font-bold uppercase',

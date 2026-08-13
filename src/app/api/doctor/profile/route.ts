@@ -49,3 +49,36 @@ export async function GET() {
     );
   }
 }
+
+export async function PATCH(request: Request) {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(doctorAccessToken)?.value;
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const body = await request.json();
+    const response = await axios.patch(
+      `${API_BASE_URL}${DOCTOR_ENDPOINTS.PROFILE}`,
+      body,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return NextResponse.json(response.data);
+  } catch (error: unknown) {
+    const axiosError = error as {
+      response?: { status: number; data: unknown };
+    };
+    return NextResponse.json(
+      {
+        error: 'Failed to update profile',
+        details: axiosError?.response?.data,
+      },
+      { status: axiosError?.response?.status || 500 }
+    );
+  }
+}
