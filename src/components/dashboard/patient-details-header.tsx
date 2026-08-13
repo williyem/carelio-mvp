@@ -13,12 +13,14 @@ interface PatientDetailsHeaderProps {
   patient?: Patient;
   onScheduleAppointment?: () => void;
   className?: string;
+  portal?: 'staff' | 'patient' | 'health-assistant';
 }
 
 const PatientDetailsHeader = ({
   patient,
   onScheduleAppointment,
   className,
+  portal = 'staff',
 }: PatientDetailsHeaderProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -57,6 +59,7 @@ const PatientDetailsHeader = ({
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         patient={patient}
+        portal={portal}
       />
     </>
   );

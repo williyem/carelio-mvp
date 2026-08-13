@@ -2,18 +2,24 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getAppointmentById,
   scheduleAppointment,
+  scheduleHealthAssistantAppointment,
   schedulePatientAppointment,
 } from './api-functions';
 import type { ScheduleAppointmentRequest } from './types';
 
-const useAppointmentMutations = (portal: 'staff' | 'patient' = 'staff') => {
+export type AppointmentPortal = 'staff' | 'patient' | 'health-assistant';
+
+const useAppointmentMutations = (portal: AppointmentPortal = 'staff') => {
   const queryClient = useQueryClient();
 
   const scheduleAppointmentMutation = useMutation({
-    mutationFn: (data: ScheduleAppointmentRequest) =>
-      portal === 'patient'
-        ? schedulePatientAppointment(data)
-        : scheduleAppointment(data),
+    mutationFn: (data: ScheduleAppointmentRequest) => {
+      if (portal === 'patient') return schedulePatientAppointment(data);
+      if (portal === 'health-assistant') {
+        return scheduleHealthAssistantAppointment(data);
+      }
+      return scheduleAppointment(data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['appointments', 'patient'],

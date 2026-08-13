@@ -154,6 +154,28 @@ export const getPatientAppointments = async (
   return extractResponseData(response);
 };
 
+export const getHealthAssistantPatientAppointments = async (
+  patientId: string,
+  status?: 'COMPLETED' | 'CONFIRMED' | 'CANCELLED' | 'MISSED',
+  page: number = 1,
+  limit: number = 10
+): Promise<PatientAppointmentsResponse> => {
+  const endpoint =
+    APPOINTMENT_API_ENDPOINTS.HA_GET_PATIENT_APPOINTMENTS.replace(
+      ':patientId',
+      patientId
+    );
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+  });
+  if (status) params.set('status', status);
+  const response = await apiClient.get<
+    ApiResponse<PatientAppointmentsResponse>
+  >(`${endpoint}?${params.toString()}`);
+  return extractResponseData(response);
+};
+
 /**
  * Get recent appointments for the logged-in doctor
  */
@@ -250,6 +272,15 @@ export const scheduleAppointment = async (
   const response = await apiClient.post<
     ApiResponse<ScheduleAppointmentResponse>
   >(APPOINTMENT_API_ENDPOINTS.SCHEDULE_APPOINTMENT, data);
+  return extractResponseData(response);
+};
+
+export const scheduleHealthAssistantAppointment = async (
+  data: ScheduleAppointmentRequest
+): Promise<ScheduleAppointmentResponse> => {
+  const response = await apiClient.post<
+    ApiResponse<ScheduleAppointmentResponse>
+  >(APPOINTMENT_API_ENDPOINTS.HA_SCHEDULE_APPOINTMENT, data);
   return extractResponseData(response);
 };
 

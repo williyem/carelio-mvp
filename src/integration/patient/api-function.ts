@@ -113,6 +113,15 @@ export const getPatientById = async (id: string): Promise<AssignedPatient> => {
   return extractResponseData(response);
 };
 
+export const getHealthAssistantPatientById = async (
+  id: string
+): Promise<AssignedPatient> => {
+  const response = await apiClient.get<ApiResponse<AssignedPatient>>(
+    PATIENT_API_ENDPOINTS.HA_GET_PATIENT_BY_ID.replace(':id', id)
+  );
+  return extractResponseData(response);
+};
+
 export const assignPatient = async (
   data: AssignPatientRequest
 ): Promise<Patient> => {

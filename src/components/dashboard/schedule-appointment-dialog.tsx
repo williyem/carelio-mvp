@@ -43,8 +43,8 @@ interface ScheduleAppointmentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   patient?: Patient;
-  /** Patient portal uses patient auth cookies / BFFs */
-  portal?: 'staff' | 'patient';
+  /** Which auth/BFF path to use for scheduling */
+  portal?: 'staff' | 'patient' | 'health-assistant';
   onScheduled?: () => void;
 }
 

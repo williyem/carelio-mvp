@@ -34,4 +34,7 @@ export const PATIENT_API_ENDPOINTS = {
     '/health-assistant/patient/assistant/search',
   SEARCH_ALL: '/patients',
   SUBMIT_CONSENT_AGREEMENT: '/patients/consent/agree',
+  HA_GET_PATIENT_BY_ID: '/health-assistant/patient/:id/get',
+  HA_GET_PATIENT_APPOINTMENTS: '/health-assistant/appointments/:patientId',
+  HA_SCHEDULE_APPOINTMENT: '/health-assistant/appointments/schedule',
 } as const;

@@ -23,7 +23,7 @@ const PatientDetailsPage = () => {
   const [activeTab, setActiveTab] = useState<PatientTab>('appointments');
 
   const { patient: fetchedPatient, isLoading: isPatientLoading } =
-    useGetPatientByIdQuery(patientId);
+    useGetPatientByIdQuery(patientId, 'health-assistant');
 
   const handleBack = () => {
     router.push(ROUTES.HEALTH_ASSISTANT.PATIENT.ROOT);
@@ -85,7 +85,11 @@ const PatientDetailsPage = () => {
   return (
     <div className="flex flex-col gap-5 items-start w-[900px] max-w-full mx-auto">
       <BackButton onClick={handleBack} />
-      <PatientDetailsHeader patientId={patient.id} patient={patient} />
+      <PatientDetailsHeader
+        patientId={patient.id}
+        patient={patient}
+        portal="health-assistant"
+      />
       {/* Incomplete Profile Banner */}
       {!isPatientLoading && !patient?.isRegistrationComplete && (
         <div className="bg-[#FDFAE7] w-full my-2 border border-[#FFE0A3] rounded-2xl p-5 flex items-center gap-4 text-gray-900 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -127,7 +131,7 @@ const PatientDetailsPage = () => {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="appointments" className="mt-5 w-full">
-          <AppointmentsList patient={patient} />
+          <AppointmentsList patient={patient} portal="health-assistant" />
         </TabsContent>
         <TabsContent value="hie-records" className="mt-5 w-full">
           <HIERecordsList records={[]} isLoading={false} />

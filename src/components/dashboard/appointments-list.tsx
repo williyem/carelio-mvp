@@ -42,12 +42,14 @@ interface AppointmentsListProps {
   patient?: Patient;
   onStartAppointment?: (appointmentId: string) => void;
   className?: string;
+  portal?: 'doctor' | 'health-assistant';
 }
 
 const AppointmentsList = ({
   patient,
   onStartAppointment,
   className,
+  portal = 'doctor',
 }: AppointmentsListProps) => {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'ALL'>(
@@ -59,7 +61,8 @@ const AppointmentsList = ({
     statusFilter === 'ALL' ? undefined : statusFilter,
     true,
     page,
-    10
+    10,
+    portal
   );
 
   const [selectedAppointment, setSelectedAppointment] =

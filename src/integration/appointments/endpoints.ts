@@ -35,4 +35,6 @@ export const APPOINTMENT_API_ENDPOINTS = {
   PATIENT_GET_APPOINTMENTS: '/patient/appointments',
   PATIENT_SCHEDULE_APPOINTMENT: '/patient/appointments/schedule',
   PATIENT_GET_DOCTORS: '/patient/doctors',
+  HA_GET_PATIENT_APPOINTMENTS: '/health-assistant/appointments/:patientId',
+  HA_SCHEDULE_APPOINTMENT: '/health-assistant/appointments/schedule',
 } as const;
