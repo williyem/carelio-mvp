@@ -22,7 +22,18 @@ export default function DoctorProfileSettingsPage() {
       defaults={{
         firstName: user?.firstName,
         lastName: user?.lastName,
-        phone: user?.phoneNumber,
+        phone: user?.phone || user?.phoneNumber,
+        title: user?.title,
+        specialty: user?.specialty,
+        clinicName: user?.clinicName,
+        address: user?.address,
+        city: user?.city,
+        state: user?.state,
+        zip: user?.zip,
+        timezone: user?.timezone,
+        npi: user?.npi,
+        licenseNumber: user?.licenseNumber,
+        avatarUrl: user?.avatarUrl,
       }}
     />
   );

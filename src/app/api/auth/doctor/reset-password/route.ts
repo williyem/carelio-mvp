@@ -5,7 +5,12 @@ import type {
   ResetPasswordResponse,
 } from '@/integration/auth/doctor/types';
 import { cookies } from 'next/headers';
-import { doctorTempToken } from '@/lib/constants';
+import {
+  doctorTempToken,
+  doctorAccessToken,
+  doctorRefreshToken,
+  doctorCookieObj,
+} from '@/lib/constants';
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,9 +24,50 @@ export async function POST(request: NextRequest) {
     );
 
     const res = NextResponse.json(response.data);
+    const data = response.data as {
+      requiresSetup?: boolean;
+      setupToken?: string;
+      tokenData?: {
+        access?: { token: string };
+        refresh?: { token: string };
+      };
+      user?: {
+        id: string;
+        email: string;
+        firstName: string;
+        lastName: string;
+        phoneNumber: string;
+      };
+    };
 
-    if (response?.data?.requiresSetup) {
-      res.cookies.set(doctorTempToken, response.data.setupToken, {
+    if (data.tokenData?.access?.token) {
+      res.cookies.set(doctorAccessToken, data.tokenData.access.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
+      });
+      if (data.tokenData.refresh?.token) {
+        res.cookies.set(doctorRefreshToken, data.tokenData.refresh.token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          path: '/',
+          maxAge: 60 * 60 * 24 * 30,
+        });
+      }
+      if (data.user) {
+        res.cookies.set(doctorCookieObj, JSON.stringify(data.user), {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/',
+        });
+      }
+      res.cookies.delete(doctorTempToken);
+    } else if (data.requiresSetup && data.setupToken) {
+      res.cookies.set(doctorTempToken, data.setupToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',

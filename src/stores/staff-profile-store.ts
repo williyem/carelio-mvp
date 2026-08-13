@@ -19,6 +19,7 @@ export interface StaffProfile {
   timezone: string;
   npi: string;
   licenseNumber: string;
+  avatarUrl?: string;
 }
 
 export const emptyStaffProfile = (): StaffProfile => ({
@@ -35,6 +36,7 @@ export const emptyStaffProfile = (): StaffProfile => ({
   timezone: 'America/New_York',
   npi: '',
   licenseNumber: '',
+  avatarUrl: '',
 });
 
 function keyFor(role: StaffRole, userId: string) {

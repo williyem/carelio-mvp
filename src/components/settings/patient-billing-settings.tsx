@@ -1,20 +1,40 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import SettingsPageHeader from './settings-page-header';
-import { useBillingStore } from '@/stores/billing-store';
+import { Spinner } from '@/components/ui/spinner';
+import { useBillingStore, type PatientBilling } from '@/stores/billing-store';
+import { getPatientBilling } from '@/integration/settings/api';
 
 export default function PatientBillingSettings({
   patientId,
 }: {
   patientId: string;
 }) {
-  const billing = useBillingStore((s) => s.getPatientBilling(patientId));
+  const fallback = useBillingStore((s) => s.getPatientBilling(patientId));
+  const [billing, setBilling] = useState<PatientBilling>(fallback);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getPatientBilling()
+      .then(setBilling)
+      .catch(() => undefined)
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-16">
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <div>
       <SettingsPageHeader
         title="Billing"
-        description="A summary of consultation charges. This is demo data only."
+        description="A summary of consultation charges."
       />
       <div className="rounded-[20px] border border-(--border-stroke) p-6 mb-4">
         <p className="text-sm text-(--text-secondary)">Current balance</p>

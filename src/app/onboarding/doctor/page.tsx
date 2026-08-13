@@ -24,7 +24,12 @@ export default function DoctorOnboardingPage() {
       defaults={{
         firstName: user?.firstName,
         lastName: user?.lastName,
-        phone: user?.phoneNumber,
+        phone: user?.phone || user?.phoneNumber,
+        title: user?.title,
+        specialty: user?.specialty,
+        clinicName: user?.clinicName,
+        npi: user?.npi,
+        licenseNumber: user?.licenseNumber,
       }}
     />
   );

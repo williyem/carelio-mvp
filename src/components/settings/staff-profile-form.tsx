@@ -2,17 +2,26 @@
 
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import SettingsPageHeader from './settings-page-header';
+import { Spinner } from '@/components/ui/spinner';
 import {
   emptyStaffProfile,
-  useStaffProfileStore,
   type StaffProfile,
   type StaffRole,
 } from '@/stores/staff-profile-store';
+import { useUploadFile } from '@/integration/files/mutations';
+import {
+  patchDoctorProfile,
+  patchHealthAssistantProfile,
+} from '@/integration/settings/api';
+import { getErrorMessage } from '@/integration';
+import { DOCTOR_PROFILE_QUERY_KEY } from '@/integration/doctor/queries/use-doctor-profile';
+import { HEALTH_ASSISTANT_QUERY_KEYS } from '@/integration/health-assistant/query-keys';
 
 const FIELDS: {
   name: keyof StaffProfile;
@@ -36,39 +45,61 @@ const FIELDS: {
 
 export default function StaffProfileForm({
   role,
-  userId,
   defaults,
 }: {
   role: StaffRole;
   userId: string;
   defaults?: Partial<StaffProfile>;
 }) {
-  const getProfile = useStaffProfileStore((s) => s.getProfile);
-  const setProfile = useStaffProfileStore((s) => s.setProfile);
-  const [hydrated, setHydrated] = useState(false);
+  const queryClient = useQueryClient();
+  const upload = useUploadFile();
+  const [saving, setSaving] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(defaults?.avatarUrl || '');
 
   const { register, handleSubmit, reset } = useForm<StaffProfile>({
     defaultValues: { ...emptyStaffProfile(), ...defaults },
   });
 
   useEffect(() => {
-    const stored = getProfile(role, userId);
     reset({
       ...emptyStaffProfile(),
       ...defaults,
-      ...stored,
-      firstName: stored.firstName || defaults?.firstName || '',
-      lastName: stored.lastName || defaults?.lastName || '',
-      phone: stored.phone || defaults?.phone || '',
+      firstName: defaults?.firstName || '',
+      lastName: defaults?.lastName || '',
+      phone: defaults?.phone || '',
+      avatarUrl: defaults?.avatarUrl || '',
     });
-    setHydrated(true);
-    // defaults are primitive snapshots from the session
+    setAvatarUrl(defaults?.avatarUrl || '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getProfile, reset, role, userId]);
+  }, [
+    defaults?.firstName,
+    defaults?.lastName,
+    defaults?.phone,
+    defaults?.avatarUrl,
+    reset,
+  ]);
 
-  const onSubmit = (data: StaffProfile) => {
-    setProfile(role, userId, data);
-    toast.success('Profile saved');
+  const onSubmit = async (data: StaffProfile) => {
+    setSaving(true);
+    try {
+      const payload = { ...data, avatarUrl, phoneNumber: data.phone };
+      if (role === 'doctor') {
+        await patchDoctorProfile(payload);
+        await queryClient.invalidateQueries({
+          queryKey: DOCTOR_PROFILE_QUERY_KEY,
+        });
+      } else {
+        await patchHealthAssistantProfile(payload);
+        await queryClient.invalidateQueries({
+          queryKey: HEALTH_ASSISTANT_QUERY_KEYS.PROFILE,
+        });
+      }
+      toast.success('Profile saved');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Could not save profile'));
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -85,6 +116,38 @@ export default function StaffProfileForm({
         onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 gap-4 sm:grid-cols-2"
       >
+        <div className="sm:col-span-2 flex items-center gap-4">
+          {avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={avatarUrl}
+              alt="Profile"
+              className="size-16 rounded-full object-cover border border-(--border-stroke)"
+            />
+          ) : (
+            <div className="size-16 rounded-full bg-brand-blue/10" />
+          )}
+          <div>
+            <Label htmlFor="avatar">Profile picture</Label>
+            <Input
+              id="avatar"
+              type="file"
+              accept="image/*"
+              className="mt-1"
+              onChange={async (event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                try {
+                  const uploaded = await upload.mutateAsync(file);
+                  setAvatarUrl(uploaded.url);
+                  toast.success('Photo uploaded');
+                } catch (error) {
+                  toast.error(getErrorMessage(error, 'Upload failed'));
+                }
+              }}
+            />
+          </div>
+        </div>
         {FIELDS.filter((field) => role === 'doctor' || !field.doctorOnly).map(
           (field) => (
             <div key={field.name} className="flex flex-col gap-1.5">
@@ -92,15 +155,19 @@ export default function StaffProfileForm({
               <Input
                 id={field.name}
                 {...register(field.name)}
-                disabled={!hydrated}
                 className="h-11"
               />
             </div>
           )
         )}
         <div className="sm:col-span-2 pt-2">
-          <Button type="submit" variant="brand" className="rounded-full px-6">
-            Save changes
+          <Button
+            type="submit"
+            variant="brand"
+            className="rounded-full px-6"
+            disabled={saving || upload.isPending}
+          >
+            {saving ? <Spinner /> : 'Save changes'}
           </Button>
         </div>
       </form>

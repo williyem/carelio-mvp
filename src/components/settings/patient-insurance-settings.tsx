@@ -1,28 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import SettingsPageHeader from './settings-page-header';
+import { Spinner } from '@/components/ui/spinner';
+import type { InsurancePolicy } from '@/stores/patient-insurance-store';
 import {
-  usePatientInsuranceStore,
-  type InsurancePolicy,
-} from '@/stores/patient-insurance-store';
+  addPatientInsurance,
+  getPatientInsurance,
+  removePatientInsurance,
+} from '@/integration/settings/api';
+import { useUploadFile } from '@/integration/files/mutations';
+import { getErrorMessage } from '@/integration';
 
 export default function PatientInsuranceSettings({
-  patientId,
+  patientId: _patientId,
 }: {
   patientId: string;
 }) {
-  const policies = usePatientInsuranceStore((s) => s.getPolicies(patientId));
-  const addPolicy = usePatientInsuranceStore((s) => s.addPolicy);
-  const removePolicy = usePatientInsuranceStore((s) => s.removePolicy);
+  const [policies, setPolicies] = useState<InsurancePolicy[]>([]);
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [cardImageUrl, setCardImageUrl] = useState('');
+  const upload = useUploadFile();
   const { register, handleSubmit, reset } = useForm<
-    Omit<InsurancePolicy, 'id' | 'isDefault'>
+    Omit<InsurancePolicy, 'id' | 'isDefault' | 'cardImageUrl'>
   >({
     defaultValues: {
       provider: '',
@@ -33,6 +39,21 @@ export default function PatientInsuranceSettings({
       expirationDate: '',
     },
   });
+
+  useEffect(() => {
+    getPatientInsurance()
+      .then(setPolicies)
+      .catch(() => undefined)
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-16">
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -54,11 +75,21 @@ export default function PatientInsuranceSettings({
       {open && (
         <form
           className="rounded-[20px] border border-(--border-stroke) p-6 grid gap-3 sm:grid-cols-2 mb-6"
-          onSubmit={handleSubmit((data) => {
-            addPolicy(patientId, { ...data, isDefault: policies.length === 0 });
-            toast.success('Insurance added');
-            reset();
-            setOpen(false);
+          onSubmit={handleSubmit(async (data) => {
+            try {
+              const next = await addPatientInsurance({
+                ...data,
+                isDefault: policies.length === 0,
+                cardImageUrl,
+              });
+              setPolicies(next);
+              toast.success('Insurance added');
+              reset();
+              setCardImageUrl('');
+              setOpen(false);
+            } catch (error) {
+              toast.error(getErrorMessage(error, 'Could not add insurance'));
+            }
           })}
         >
           <div className="space-y-1.5">
@@ -99,6 +130,24 @@ export default function PatientInsuranceSettings({
               {...register('expirationDate')}
             />
           </div>
+          <div className="sm:col-span-2 space-y-1.5">
+            <Label>Insurance card image</Label>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={async (event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                try {
+                  const uploaded = await upload.mutateAsync(file);
+                  setCardImageUrl(uploaded.url);
+                  toast.success('Card image uploaded');
+                } catch (error) {
+                  toast.error(getErrorMessage(error, 'Upload failed'));
+                }
+              }}
+            />
+          </div>
           <div className="sm:col-span-2">
             <Button type="submit" variant="brand" className="rounded-full">
               Save policy
@@ -133,9 +182,14 @@ export default function PatientInsuranceSettings({
             <Button
               variant="outline"
               className="rounded-full"
-              onClick={() => {
-                removePolicy(patientId, policy.id);
-                toast.success('Insurance removed');
+              onClick={async () => {
+                try {
+                  const next = await removePatientInsurance(policy.id);
+                  setPolicies(next);
+                  toast.success('Insurance removed');
+                } catch (error) {
+                  toast.error(getErrorMessage(error, 'Could not remove'));
+                }
               }}
             >
               Remove

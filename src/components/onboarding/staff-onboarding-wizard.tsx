@@ -14,15 +14,23 @@ import { generateSignatureImage } from '@/lib/signatureGenerator';
 import { buildProviderAgreementPdf } from '@/lib/provider-agreement-pdf';
 import {
   emptyStaffProfile,
-  useStaffProfileStore,
   type StaffProfile,
   type StaffRole,
 } from '@/stores/staff-profile-store';
-import { useOnboardingStore } from '@/stores/onboarding-store';
+import {
+  completeStaffOnboarding,
+  patchDoctorProfile,
+  patchHealthAssistantProfile,
+} from '@/integration/settings/api';
+import { useUploadFile } from '@/integration/files/mutations';
+import { getErrorMessage } from '@/integration';
+import { useQueryClient } from '@tanstack/react-query';
+import { DOCTOR_PROFILE_QUERY_KEY } from '@/integration/doctor/queries/use-doctor-profile';
+import { HEALTH_ASSISTANT_QUERY_KEYS } from '@/integration/health-assistant/query-keys';
 
 export default function StaffOnboardingWizard({
   role,
-  userId,
+  userId: _userId,
   defaults,
   homeHref,
 }: {
@@ -32,9 +40,8 @@ export default function StaffOnboardingWizard({
   homeHref: string;
 }) {
   const router = useRouter();
-  const getProfile = useStaffProfileStore((s) => s.getProfile);
-  const setProfile = useStaffProfileStore((s) => s.setProfile);
-  const complete = useOnboardingStore((s) => s.complete);
+  const queryClient = useQueryClient();
+  const upload = useUploadFile();
   const [step, setStep] = useState<1 | 2>(1);
   const [agreed, setAgreed] = useState(false);
   const [signedName, setSignedName] = useState('');
@@ -46,10 +53,9 @@ export default function StaffOnboardingWizard({
   });
 
   useEffect(() => {
-    const stored = getProfile(role, userId);
-    reset({ ...emptyStaffProfile(), ...defaults, ...stored });
+    reset({ ...emptyStaffProfile(), ...defaults });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getProfile, reset, role, userId]);
+  }, [defaults?.firstName, defaults?.lastName, defaults?.phone, reset]);
 
   useEffect(() => {
     if (signedName.trim() && agreed) {
@@ -59,10 +65,18 @@ export default function StaffOnboardingWizard({
     }
   }, [agreed, signedName]);
 
-  const onProfile = (data: StaffProfile) => {
-    setProfile(role, userId, data);
-    setSignedName(`${data.firstName} ${data.lastName}`.trim() || signedName);
-    setStep(2);
+  const onProfile = async (data: StaffProfile) => {
+    try {
+      if (role === 'doctor') {
+        await patchDoctorProfile({ ...data, phoneNumber: data.phone });
+      } else {
+        await patchHealthAssistantProfile({ ...data, phoneNumber: data.phone });
+      }
+      setSignedName(`${data.firstName} ${data.lastName}`.trim() || signedName);
+      setStep(2);
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Could not save profile'));
+    }
   };
 
   const onSign = async () => {
@@ -73,14 +87,28 @@ export default function StaffOnboardingWizard({
     setIsSubmitting(true);
     try {
       const profile = getValues();
-      await buildProviderAgreementPdf({
+      const blobUrl = await buildProviderAgreementPdf({
         name: signedName,
         role,
         clinicName: profile.clinicName,
         signatureDataUrl: signature,
       });
-      setProfile(role, userId, profile);
-      complete(role, userId, signedName);
+      const blob = await fetch(blobUrl).then((res) => res.blob());
+      const file = new File([blob], 'provider-agreement.pdf', {
+        type: 'application/pdf',
+      });
+      const uploaded = await upload.mutateAsync(file);
+      await completeStaffOnboarding(role, {
+        ...profile,
+        signedName,
+        signedAgreementUrl: uploaded.url,
+      });
+      await queryClient.invalidateQueries({
+        queryKey:
+          role === 'doctor'
+            ? DOCTOR_PROFILE_QUERY_KEY
+            : HEALTH_ASSISTANT_QUERY_KEYS.PROFILE,
+      });
       toast.success('Onboarding complete');
       router.replace(homeHref);
     } catch (error) {
@@ -222,7 +250,7 @@ export default function StaffOnboardingWizard({
               </Button>
             </div>
             <p className="text-xs text-center text-(--text-secondary)">
-              After this you may still be asked to set up 2FA.
+              A signed copy of the agreement is stored with your account.
             </p>
           </div>
         )}

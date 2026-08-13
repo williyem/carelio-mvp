@@ -1,31 +1,53 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import SettingsPageHeader from './settings-page-header';
+import { Spinner } from '@/components/ui/spinner';
 import {
   defaultDoctorBilling,
-  useBillingStore,
   type DoctorBilling,
 } from '@/stores/billing-store';
-import { useState } from 'react';
+import {
+  getDoctorBilling,
+  saveDoctorBilling,
+} from '@/integration/settings/api';
+import { getErrorMessage } from '@/integration';
 
 export default function DoctorBillingSettings({
-  doctorId,
+  doctorId: _doctorId,
 }: {
   doctorId: string;
 }) {
-  const stored = useBillingStore((s) => s.byDoctorId[doctorId]);
-  const setDoctorBilling = useBillingStore((s) => s.setDoctorBilling);
-  const billing = stored ?? defaultDoctorBilling();
+  const [billing, setBilling] = useState<DoctorBilling>(defaultDoctorBilling());
   const [tab, setTab] = useState<'billing' | 'payouts'>('billing');
+  const [loading, setLoading] = useState(true);
 
-  const { register, handleSubmit } = useForm<DoctorBilling>({
+  const { register, handleSubmit, reset } = useForm<DoctorBilling>({
     values: billing,
   });
+
+  useEffect(() => {
+    getDoctorBilling()
+      .then((data) => {
+        setBilling(data);
+        reset(data);
+      })
+      .catch(() => undefined)
+      .finally(() => setLoading(false));
+  }, [reset]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-16">
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -51,13 +73,18 @@ export default function DoctorBillingSettings({
       {tab === 'billing' ? (
         <form
           className="space-y-6 max-w-xl"
-          onSubmit={handleSubmit((data) => {
-            setDoctorBilling(doctorId, {
-              ...billing,
-              ...data,
-              payouts: billing.payouts,
-            });
-            toast.success('Billing details saved');
+          onSubmit={handleSubmit(async (data) => {
+            try {
+              const saved = await saveDoctorBilling({
+                ...billing,
+                ...data,
+                payouts: billing.payouts,
+              });
+              setBilling(saved);
+              toast.success('Billing details saved');
+            } catch (error) {
+              toast.error(getErrorMessage(error, 'Could not save billing'));
+            }
           })}
         >
           <div className="rounded-[20px] border border-(--border-stroke) p-6 space-y-4">

@@ -284,6 +284,22 @@ export interface DoctorUser {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  avatarUrl?: string;
+  title?: string;
+  specialty?: string;
+  clinicName?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  timezone?: string;
+  npi?: string;
+  licenseNumber?: string;
+  phone?: string;
+  onboardingCompleted?: boolean;
+  onboardingCompletedAt?: string | null;
+  signedAgreementUrl?: string;
+  signedName?: string;
 }
 
 /**

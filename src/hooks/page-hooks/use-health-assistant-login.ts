@@ -65,41 +65,42 @@ export function useHealthAssistantLoginForm() {
           return;
         }
 
-        if ('requires2FA' in response && response.requires2FA) {
-          const token = response.token;
-          try {
-            await axios.post(
-              API_ENDPOINTS.healthAssistantLogin,
-              { accessToken: token },
-              {
-                headers: { 'Content-Type': 'application/json' },
-              }
-            );
-            router.push(ROUTES.AUTH.VERIFY_2FA);
-          } catch (error) {
-            toast.error('Failed to set session. Please try again.');
-            console.error('Login error:', error);
-          }
-          return;
-        }
+        // 2FA is temporarily disabled. Keep the handlers below for later.
+        // if ('requires2FA' in response && response.requires2FA) {
+        //   const token = response.token;
+        //   try {
+        //     await axios.post(
+        //       API_ENDPOINTS.healthAssistantLogin,
+        //       { accessToken: token },
+        //       {
+        //         headers: { 'Content-Type': 'application/json' },
+        //       }
+        //     );
+        //     router.push(ROUTES.AUTH.VERIFY_2FA);
+        //   } catch (error) {
+        //     toast.error('Failed to set session. Please try again.');
+        //     console.error('Login error:', error);
+        //   }
+        //   return;
+        // }
 
-        if ('requiresSetup' in response && response.requiresSetup) {
-          const token = response.setupToken;
-          try {
-            await axios.post(
-              API_ENDPOINTS.healthAssistantLogin,
-              { accessToken: token },
-              {
-                headers: { 'Content-Type': 'application/json' },
-              }
-            );
-            router.push(ROUTES.AUTH.SETUP_2FA);
-          } catch (error) {
-            toast.error('Failed to set session. Please try again.');
-            console.error('Login error:', error);
-          }
-          return;
-        }
+        // if ('requiresSetup' in response && response.requiresSetup) {
+        //   const token = response.setupToken;
+        //   try {
+        //     await axios.post(
+        //       API_ENDPOINTS.healthAssistantLogin,
+        //       { accessToken: token },
+        //       {
+        //         headers: { 'Content-Type': 'application/json' },
+        //       }
+        //     );
+        //     router.push(ROUTES.AUTH.SETUP_2FA);
+        //   } catch (error) {
+        //     toast.error('Failed to set session. Please try again.');
+        //     console.error('Login error:', error);
+        //   }
+        //   return;
+        // }
 
         if (
           ('authenticated' in response && response.authenticated) ||

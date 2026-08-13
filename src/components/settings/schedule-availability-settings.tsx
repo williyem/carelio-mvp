@@ -6,20 +6,26 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import SettingsPageHeader from './settings-page-header';
+import { Spinner } from '@/components/ui/spinner';
 import {
   DAYS_OF_WEEK,
   defaultAvailability,
-  useAvailabilityStore,
   type DayName,
   type DoctorAvailability,
   type TimeRange,
 } from '@/stores/availability-store';
+import {
+  getMyAvailability,
+  saveMyAvailability,
+} from '@/integration/settings/api';
+import { getErrorMessage } from '@/integration';
 
 const DAY_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 function cloneAvailability(value: DoctorAvailability): DoctorAvailability {
   return {
     enabled: value.enabled,
+    timezone: value.timezone,
     days: Object.fromEntries(
       Object.entries(value.days).map(([day, ranges]) => [
         day,
@@ -30,18 +36,31 @@ function cloneAvailability(value: DoctorAvailability): DoctorAvailability {
 }
 
 export default function ScheduleAvailabilitySettings({
-  doctorId,
+  doctorId: _doctorId,
 }: {
   doctorId: string;
 }) {
-  const getAvailability = useAvailabilityStore((s) => s.getAvailability);
-  const setAvailability = useAvailabilityStore((s) => s.setAvailability);
   const [draft, setDraft] = useState<DoctorAvailability>(defaultAvailability);
   const [editing, setEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    setDraft(cloneAvailability(getAvailability(doctorId)));
-  }, [doctorId, getAvailability]);
+    let cancelled = false;
+    getMyAvailability()
+      .then((data) => {
+        if (!cancelled) setDraft(cloneAvailability(data));
+      })
+      .catch(() => {
+        if (!cancelled) setDraft(defaultAvailability());
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const selectedDays = useMemo(
     () =>
@@ -97,11 +116,32 @@ export default function ScheduleAvailabilitySettings({
     });
   };
 
-  const handleSave = () => {
-    setAvailability(doctorId, draft);
-    setEditing(false);
-    toast.success('Availability saved');
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const saved = await saveMyAvailability({
+        enabled: draft.enabled,
+        days: draft.days,
+        timezone:
+          draft.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+      });
+      setDraft(cloneAvailability(saved));
+      setEditing(false);
+      toast.success('Availability saved');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Could not save availability'));
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-16">
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -123,10 +163,7 @@ export default function ScheduleAvailabilitySettings({
               <Button
                 variant="outline"
                 className="rounded-full"
-                onClick={() => {
-                  setDraft(cloneAvailability(getAvailability(doctorId)));
-                  setEditing(false);
-                }}
+                onClick={() => setEditing(false)}
               >
                 Cancel
               </Button>
@@ -134,8 +171,9 @@ export default function ScheduleAvailabilitySettings({
                 variant="brand"
                 className="rounded-full"
                 onClick={handleSave}
+                disabled={saving}
               >
-                Save
+                {saving ? <Spinner /> : 'Save'}
               </Button>
             </div>
           ) : (

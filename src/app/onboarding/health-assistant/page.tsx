@@ -24,7 +24,8 @@ export default function HaOnboardingPage() {
       defaults={{
         firstName: user?.firstName,
         lastName: user?.lastName,
-        phone: user?.phoneNumber,
+        phone: user?.phone || user?.phoneNumber,
+        title: user?.title,
       }}
     />
   );

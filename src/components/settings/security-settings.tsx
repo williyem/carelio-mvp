@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Link from 'next/link';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +11,6 @@ import { Label } from '@/components/ui/label';
 import ErrorMessage from '@/components/ui/error-message';
 import { Spinner } from '@/components/ui/spinner';
 import SettingsPageHeader from './settings-page-header';
-import { ROUTES } from '@/lib/routes';
 import { getErrorMessage } from '@/integration';
 import { useChangePassword as useDoctorChangePassword } from '@/integration/auth/doctor';
 import { useChangePassword as useHaChangePassword } from '@/integration/auth/health-assistant';
@@ -33,7 +31,7 @@ type FormData = z.infer<typeof schema>;
 
 export default function SecuritySettings({
   role,
-  twoFactorEnabled,
+  twoFactorEnabled: _twoFactorEnabled,
 }: {
   role: StaffRole;
   twoFactorEnabled?: boolean;
@@ -72,7 +70,7 @@ export default function SecuritySettings({
     <div className="space-y-8">
       <SettingsPageHeader
         title="Security"
-        description="Change your password and manage two-factor authentication."
+        description="Change your password."
       />
 
       <section className="rounded-[20px] border border-(--border-stroke) p-6 space-y-4">
@@ -128,6 +126,7 @@ export default function SecuritySettings({
         </form>
       </section>
 
+      {/* 2FA is temporarily disabled.
       <section className="rounded-[20px] border border-(--border-stroke) p-6 space-y-3">
         <h2 className="text-base font-semibold">Two-factor authentication</h2>
         <p className="text-sm text-(--text-secondary)">
@@ -141,6 +140,7 @@ export default function SecuritySettings({
           </Button>
         )}
       </section>
+      */}
     </div>
   );
 }

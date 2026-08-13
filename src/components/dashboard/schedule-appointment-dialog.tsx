@@ -5,17 +5,17 @@ import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Check } from 'lucide-react';
-import TimePicker from '@/components/ui/time-picker';
+import { Check } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Calendar } from '@/components/ui/calendar';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import AvailabilitySlotPicker from '@/components/dashboard/availability-slot-picker';
 import {
   Command,
   CommandEmpty,
@@ -43,6 +43,10 @@ import {
   useAvailabilityStore,
 } from '@/stores/availability-store';
 import { useAccessGrantStore } from '@/stores/access-grant-store';
+import {
+  getDoctorAvailability,
+  getAccessGrants,
+} from '@/integration/settings/api';
 
 interface ScheduleAppointmentDialogProps {
   open: boolean;
@@ -131,7 +135,7 @@ const ScheduleAppointmentDialog = ({
   onScheduled,
 }: ScheduleAppointmentDialogProps) => {
   const { clinicians, cliniciansWithSearch, isLoading } = useDoctors();
-  const grantedIds = useAccessGrantStore((s) => s.grantedIds);
+  const localGrantedIds = useAccessGrantStore((s) => s.grantedIds);
   const getAvailability = useAvailabilityStore((s) => s.getAvailability);
   const { startCall, setSelectedAppointment } = useVideoCallStore();
 
@@ -157,6 +161,7 @@ const ScheduleAppointmentDialog = ({
   const selectedDoctorId = useWatch({ control, name: 'doctorId' });
   const selectedDate = useWatch({ control, name: 'date' });
   const startTime = useWatch({ control, name: 'startTime' });
+  const endTime = useWatch({ control, name: 'endTime' });
   const [doctorOpen, setDoctorOpen] = useState(false);
   const [dateOpen, setDateOpen] = useState(false);
 
@@ -168,6 +173,23 @@ const ScheduleAppointmentDialog = ({
 
   const { scheduleAppointmentMutation, getAppointmentByIdMutation } =
     useAppointmentMutations(portal);
+
+  const dateStr = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : undefined;
+  const { data: remoteAvailability } = useQuery({
+    queryKey: ['doctor-availability', selectedDoctorId, dateStr],
+    queryFn: () => getDoctorAvailability(selectedDoctorId, dateStr),
+    enabled: Boolean(selectedDoctorId),
+    retry: 0,
+  });
+
+  const { data: accessGrants } = useQuery({
+    queryKey: ['patient-access-grants'],
+    queryFn: getAccessGrants,
+    enabled: portal === 'patient',
+    retry: 0,
+  });
+
+  const grantedIds = accessGrants?.grantedIds ?? localGrantedIds;
 
   const isSubmitting =
     scheduleAppointmentMutation.isPending ||
@@ -250,8 +272,11 @@ const ScheduleAppointmentDialog = ({
 
   const allowedRanges = useMemo(() => {
     if (!selectedDoctorId || !selectedDate) return null;
+    if (remoteAvailability) {
+      return getRangesForDate(remoteAvailability, selectedDate);
+    }
     return getRangesForDate(getAvailability(selectedDoctorId), selectedDate);
-  }, [getAvailability, selectedDate, selectedDoctorId]);
+  }, [getAvailability, remoteAvailability, selectedDate, selectedDoctorId]);
 
   const today = useMemo(() => {
     const date = new Date();
@@ -272,7 +297,10 @@ const ScheduleAppointmentDialog = ({
     >
       <DialogContent
         showCloseButton={false}
-        className="bg-white rounded-[30px] p-6 max-w-[443px] w-full"
+        className={cn(
+          'bg-white rounded-[30px] p-6 w-full',
+          mode === 'later' ? 'max-w-[640px]' : 'max-w-[443px]'
+        )}
         onPointerDownOutside={(event) => {
           const target = event.target as HTMLElement | null;
           if (
@@ -430,11 +458,17 @@ const ScheduleAppointmentDialog = ({
                                       value={clinician.searchValue}
                                       onSelect={() => {
                                         field.onChange(clinician.id);
+                                        setValue('date', undefined);
+                                        setValue('startTime', undefined);
+                                        setValue('endTime', undefined);
                                         setDoctorOpen(false);
                                       }}
                                       onPointerDown={(event) => {
                                         event.preventDefault();
                                         field.onChange(clinician.id);
+                                        setValue('date', undefined);
+                                        setValue('startTime', undefined);
+                                        setValue('endTime', undefined);
                                         setDoctorOpen(false);
                                       }}
                                       className="flex items-center gap-2"
@@ -472,94 +506,33 @@ const ScheduleAppointmentDialog = ({
                 <ErrorMessage message={errors.doctorId?.message} />
               </div>
 
-              {/* Date and Time - Only show when mode is 'later' */}
               {mode === 'later' && (
-                <>
-                  <div className="flex flex-col gap-2 items-start w-full">
-                    <Label className="font-medium leading-[20px] text-(--text-label) text-[14px]">
-                      Date
-                    </Label>
-                    <Controller
-                      name="date"
-                      control={control}
-                      render={({ field }) => (
-                        <Popover
-                          modal
-                          open={dateOpen}
-                          onOpenChange={setDateOpen}
-                        >
-                          <PopoverTrigger asChild>
-                            <button
-                              type="button"
-                              className={cn(
-                                'bg-(--bg-white) border border-(--border-light) flex gap-2 items-center justify-between px-[14px] py-[10px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] w-full h-[44px] text-left hover:bg-gray-50 transition-colors',
-
-                                !field.value && 'text-(--text-placeholder)'
-                              )}
-                            >
-                              <span className="flex-1 font-normal leading-[24px] text-[14px] text-left">
-                                {field.value
-                                  ? format(field.value, 'dd/MM/yyyy')
-                                  : 'dd/mm/yyyy'}
-                              </span>
-                              <CalendarIcon className="w-4 h-4 text-(--text-secondary) shrink-0" />
-                            </button>
-                          </PopoverTrigger>
-                          <PopoverContent
-                            className="w-auto p-0"
-                            align="start"
-                            onOpenAutoFocus={(event) => event.preventDefault()}
-                          >
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={(date) => {
-                                field.onChange(date);
-                                if (date) setDateOpen(false);
-                              }}
-                              disabled={(date: Date) => date < today}
-                              captionLayout="dropdown"
-                              initialFocus={false}
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      )}
-                    />
-                    <ErrorMessage message={errors.date?.message} />
-                  </div>
-
-                  <div className="flex flex-col gap-2 items-start w-full">
-                    <Label className="font-medium leading-[20px] text-(--text-label) text-[14px]">
-                      Start Time
-                    </Label>
-                    <TimePicker
-                      control={control}
-                      name="startTime"
-                      placeholder="--:--"
-                      selectedDate={selectedDate}
-                      ignorePastTimes={true}
-                      disabled={isSubmitting}
-                      allowedRanges={allowedRanges}
-                    />
-                    <ErrorMessage message={errors.startTime?.message} />
-                  </div>
-
-                  <div className="flex flex-col gap-2 items-start w-full">
-                    <Label className="font-medium leading-[20px] text-(--text-label) text-[14px]">
-                      End Time
-                    </Label>
-                    <TimePicker
-                      control={control}
-                      name="endTime"
-                      placeholder="--:--"
-                      selectedDate={selectedDate}
-                      ignorePastTimes={false}
-                      disabled={isSubmitting || !startTime}
-                      allowedRanges={allowedRanges}
-                    />
-                    <ErrorMessage message={errors.endTime?.message} />
-                  </div>
-                </>
+                <AvailabilitySlotPicker
+                  date={selectedDate}
+                  onDateChange={(next) => {
+                    setValue('date', next, { shouldValidate: true });
+                    setValue('startTime', undefined);
+                    setValue('endTime', undefined);
+                  }}
+                  dateOpen={dateOpen}
+                  onDateOpenChange={setDateOpen}
+                  selectedStart={startTime}
+                  selectedEnd={endTime}
+                  onSelectSlot={(slot) => {
+                    setValue('startTime', slot.start, { shouldValidate: true });
+                    setValue('endTime', slot.end, { shouldValidate: true });
+                  }}
+                  ranges={allowedRanges}
+                  slots={remoteAvailability?.slots}
+                  timezone={remoteAvailability?.timezone}
+                  doctorSelected={Boolean(selectedDoctorId)}
+                  disabled={isSubmitting}
+                  dateError={errors.date?.message}
+                  slotError={
+                    errors.startTime?.message || errors.endTime?.message
+                  }
+                  minDate={today}
+                />
               )}
 
               <Button

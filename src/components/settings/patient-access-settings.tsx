@@ -1,31 +1,48 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import SettingsPageHeader from './settings-page-header';
-import { useAccessGrantStore } from '@/stores/access-grant-store';
+import { Spinner } from '@/components/ui/spinner';
 import { useDoctors } from '@/hooks/page-hooks/useDoctors';
+import {
+  getAccessGrants,
+  grantAccess,
+  revokeAccess,
+} from '@/integration/settings/api';
+import { getErrorMessage } from '@/integration';
 
 export default function PatientAccessSettings() {
   const { clinicians } = useDoctors();
-  const people = useAccessGrantStore((s) => s.people);
-  const grantedIds = useAccessGrantStore((s) => s.grantedIds);
-  const seedPeople = useAccessGrantStore((s) => s.seedPeople);
-  const grant = useAccessGrantStore((s) => s.grant);
-  const revoke = useAccessGrantStore((s) => s.revoke);
+  const [grantedIds, setGrantedIds] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (clinicians.length === 0) return;
-    seedPeople(
+    getAccessGrants()
+      .then((data) => setGrantedIds(data.grantedIds))
+      .catch(() => undefined)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const people = useMemo(
+    () =>
       clinicians.map((c) => ({
         id: c.id,
         name: c.name || `${c.firstName} ${c.lastName}`.trim(),
         email: c.email,
         role: 'doctor' as const,
-      }))
+      })),
+    [clinicians]
+  );
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-16">
+        <Spinner />
+      </div>
     );
-  }, [clinicians, seedPeople]);
+  }
 
   return (
     <div>
@@ -56,13 +73,26 @@ export default function PatientAccessSettings() {
               <Button
                 variant={granted ? 'outline' : 'brand'}
                 className="rounded-full"
-                onClick={() => {
-                  if (granted) {
-                    revoke(person.id);
-                    toast.success(`Revoked access for ${person.name}`);
-                  } else {
-                    grant(person.id);
-                    toast.success(`Granted access to ${person.name}`);
+                onClick={async () => {
+                  try {
+                    if (granted) {
+                      await revokeAccess(person.id);
+                      setGrantedIds((ids) =>
+                        ids.filter((id) => id !== person.id)
+                      );
+                      toast.success(`Revoked access for ${person.name}`);
+                    } else {
+                      await grantAccess({
+                        granteeId: person.id,
+                        granteeRole: person.role,
+                      });
+                      setGrantedIds((ids) => [...ids, person.id]);
+                      toast.success(`Granted access to ${person.name}`);
+                    }
+                  } catch (error) {
+                    toast.error(
+                      getErrorMessage(error, 'Could not update access')
+                    );
                   }
                 }}
               >

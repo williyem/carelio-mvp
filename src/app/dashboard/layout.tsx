@@ -27,7 +27,7 @@ export default function DashboardLayout({
   const logout = useLogout();
   const router = useRouter();
   const pathname = usePathname();
-  const { fullName, isLoading, isFetching, email, userId } = useUser();
+  const { fullName, isLoading, isFetching, email, userId, user } = useUser();
 
   const handleLogout = () => {
     logout();
@@ -58,6 +58,7 @@ export default function DashboardLayout({
         role="doctor"
         userId={userId}
         isLoading={isLoading}
+        completed={user?.onboardingCompleted}
       />
       {/* Header */}
       <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-[#EBEBEB] bg-white px-6">
@@ -127,7 +128,10 @@ export default function DashboardLayout({
                 <button className="flex items-center gap-3 pl-1 outline-none hover:opacity-80 transition-opacity cursor-pointer text-left">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-9 w-9 border border-(--border-stroke)">
-                      <AvatarImage src="" alt={fullName || 'User'} />
+                      <AvatarImage
+                        src={user?.avatarUrl || ''}
+                        alt={fullName || 'User'}
+                      />
                       <AvatarFallback className="bg-brand-blue/5 text-brand-blue text-xs font-medium">
                         {initials}
                       </AvatarFallback>

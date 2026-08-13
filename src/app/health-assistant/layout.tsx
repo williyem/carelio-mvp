@@ -8,7 +8,7 @@ export default function HealthAssistantRootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { userId, isLoading } = useUser();
+  const { userId, isLoading, user } = useUser();
 
   return (
     <>
@@ -16,6 +16,7 @@ export default function HealthAssistantRootLayout({
         role="health-assistant"
         userId={userId}
         isLoading={isLoading}
+        completed={user?.onboardingCompleted}
       />
       {children}
     </>

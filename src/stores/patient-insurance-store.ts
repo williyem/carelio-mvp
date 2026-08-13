@@ -12,6 +12,7 @@ export interface InsurancePolicy {
   effectiveDate: string;
   expirationDate: string;
   isDefault: boolean;
+  cardImageUrl?: string;
 }
 
 interface InsuranceState {
