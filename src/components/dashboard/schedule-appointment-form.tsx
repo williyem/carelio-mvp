@@ -37,6 +37,43 @@ import { PatientSelection } from './patient-selection';
 import ErrorMessage from '@/components/ui/error-message';
 import { useGetPatientById } from '@/integration/patient';
 
+const TIME_SLOTS = [
+  '08:00 AM',
+  '08:30 AM',
+  '09:00 AM',
+  '09:30 AM',
+  '10:00 AM',
+  '10:30 AM',
+  '11:00 AM',
+  '11:30 AM',
+  '12:00 PM',
+  '12:30 PM',
+  '01:00 PM',
+  '01:30 PM',
+  '02:00 PM',
+  '02:30 PM',
+  '03:00 PM',
+  '03:30 PM',
+  '04:00 PM',
+  '04:30 PM',
+  '05:00 PM',
+  '05:30 PM',
+  '06:00 PM',
+  '06:30 PM',
+  '07:00 PM',
+  '07:30 PM',
+  '08:00 PM',
+];
+
+const getTimeValue = (timeStr: string) => {
+  const [timePart, period] = timeStr.split(' ');
+  const [hours, minutes] = timePart.split(':').map(Number);
+  let h24 = hours;
+  if (period === 'PM' && h24 !== 12) h24 += 12;
+  if (period === 'AM' && h24 === 12) h24 = 0;
+  return h24 * 60 + minutes;
+};
+
 function SuccessModal({
   isOpen,
   onClose,
@@ -118,6 +155,12 @@ export function ScheduleAppointmentForm() {
   const [endTimeError, setEndTimeError] = React.useState('');
 
   const { startCall, setSelectedAppointment } = useVideoCallStore();
+
+  const minDate = React.useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  }, []);
 
   const [createdAppointmentId, setCreatedAppointmentId] = React.useState<
     string | null
@@ -254,44 +297,6 @@ export function ScheduleAppointmentForm() {
     }
   };
 
-  // Time slots
-  const timeSlots = [
-    '08:00 AM',
-    '08:30 AM',
-    '09:00 AM',
-    '09:30 AM',
-    '10:00 AM',
-    '10:30 AM',
-    '11:00 AM',
-    '11:30 AM',
-    '12:00 PM',
-    '12:30 PM',
-    '01:00 PM',
-    '01:30 PM',
-    '02:00 PM',
-    '02:30 PM',
-    '03:00 PM',
-    '03:30 PM',
-    '04:00 PM',
-    '04:30 PM',
-    '05:00 PM',
-    '05:30 PM',
-    '06:00 PM',
-    '06:30 PM',
-    '07:00 PM',
-    '07:30 PM',
-    '08:00 PM',
-  ];
-
-  const getTimeValue = (timeStr: string) => {
-    const [timePart, period] = timeStr.split(' ');
-    const [hours, minutes] = timePart.split(':').map(Number);
-    let h24 = hours;
-    if (period === 'PM' && h24 !== 12) h24 += 12;
-    if (period === 'AM' && h24 === 12) h24 = 0;
-    return h24 * 60 + minutes;
-  };
-
   const handleStartTimeChange = (newStartTime: string) => {
     setStartTime(newStartTime);
     setStartTimeError(''); // Clear error on change
@@ -307,7 +312,7 @@ export function ScheduleAppointmentForm() {
     }
 
     const defaultEndValue = startValue + 60;
-    const defaultEndTime = timeSlots.find(
+    const defaultEndTime = TIME_SLOTS.find(
       (slot) => getTimeValue(slot) === defaultEndValue
     );
     if (defaultEndTime) {
@@ -328,10 +333,18 @@ export function ScheduleAppointmentForm() {
     }
   };
 
-  const filteredEndTimeSlots = timeSlots.filter((slot) => {
-    if (!startTime) return true;
-    return getTimeValue(slot) > getTimeValue(startTime);
-  });
+  const filteredStartTimeSlots = React.useMemo(() => {
+    if (!date || !isToday(date)) return TIME_SLOTS;
+    const now = new Date();
+    const currentTimeValue = now.getHours() * 60 + now.getMinutes();
+    return TIME_SLOTS.filter((slot) => getTimeValue(slot) > currentTimeValue);
+  }, [date]);
+
+  const filteredEndTimeSlots = React.useMemo(() => {
+    if (!startTime) return TIME_SLOTS;
+    const startValue = getTimeValue(startTime);
+    return TIME_SLOTS.filter((slot) => getTimeValue(slot) > startValue);
+  }, [startTime]);
 
   return (
     <div className="space-y-8">
@@ -389,15 +402,12 @@ export function ScheduleAppointmentForm() {
                   {date ? format(date, 'PPP') : <span>dd/mm/yyyy</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className="w-auto p-0 duration-0" align="start">
                 <Calendar
                   mode="single"
                   selected={date}
                   onSelect={setDate}
-                  initialFocus
-                  disabled={(date) =>
-                    date < new Date(new Date().setHours(0, 0, 0, 0))
-                  }
+                  disabled={{ before: minDate }}
                 />
               </PopoverContent>
             </Popover>
@@ -418,8 +428,8 @@ export function ScheduleAppointmentForm() {
                   <SelectValue placeholder="Start Time" />
                 </div>
               </SelectTrigger>
-              <SelectContent>
-                {timeSlots.map((slot) => (
+              <SelectContent position="popper">
+                {filteredStartTimeSlots.map((slot) => (
                   <SelectItem key={slot} value={slot}>
                     {slot}
                   </SelectItem>
@@ -443,7 +453,7 @@ export function ScheduleAppointmentForm() {
                   <SelectValue placeholder="End Time" />
                 </div>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper">
                 {filteredEndTimeSlots.map((slot) => (
                   <SelectItem key={slot} value={slot}>
                     {slot}

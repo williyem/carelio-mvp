@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useWatch } from 'react-hook-form';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import {
   Dialog,
@@ -45,7 +45,6 @@ export function RescheduleAppointmentDialog({
   const {
     control,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<RescheduleFormValues>({
     defaultValues: {
@@ -62,8 +61,13 @@ export function RescheduleAppointmentDialog({
     },
   });
 
-  const dateValue = watch('date');
-  const startTimeValue = watch('startTime');
+  const dateValue = useWatch({ control, name: 'date' });
+  const startTimeValue = useWatch({ control, name: 'startTime' });
+  const minDate = React.useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  }, []);
 
   const onRescheduleSubmit = async (data: RescheduleFormValues) => {
     try {
@@ -140,15 +144,15 @@ export function RescheduleAppointmentDialog({
                         <CalendarIcon className="mr-2 h-4 w-4" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent
+                      className="w-auto p-0 duration-0"
+                      align="start"
+                    >
                       <Calendar
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
-                        disabled={(date) =>
-                          date < new Date(new Date().setHours(0, 0, 0, 0))
-                        }
-                        initialFocus
+                        disabled={{ before: minDate }}
                       />
                     </PopoverContent>
                   </Popover>

@@ -132,7 +132,7 @@ export function AddPatientForm() {
         <Card className="overflow-hidden  card">
           <CardContent className="space-y-6 p-6">
             <div className="space-y-3 flex items-start justify-between gap-4">
-              <div className="flex flex-col basis-1/2 gap-2">
+              <div className="flex flex-col basis-full gap-2">
                 <Label
                   htmlFor="email"
                   className="text-sm font-bold text-gray-900"
@@ -151,29 +151,6 @@ export function AddPatientForm() {
                   />
                 </div>
                 <ErrorMessage message={errors.email?.message} />
-              </div>
-
-              <div className="flex w-full flex-col basis-1/2 gap-2 items-start">
-                <Label
-                  htmlFor="phone-number"
-                  className="text-sm font-bold text-gray-900"
-                >
-                  Phone Number (optional)
-                </Label>
-                <Controller
-                  name="phone"
-                  control={control}
-                  render={({ field }) => (
-                    <PhoneInput
-                      defaultCountry="US"
-                      value={field.value || ''}
-                      onChange={field.onChange}
-                      placeholder="+1 (555) 000-0000"
-                      className="w-full"
-                    />
-                  )}
-                />
-                <ErrorMessage message={errors.phone?.message} />
               </div>
             </div>
             <p className="text-sm text-gray-500">

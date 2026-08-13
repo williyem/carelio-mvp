@@ -15,6 +15,8 @@ import {
 import { cn } from '@/lib/utils';
 import { Button, buttonVariants } from '@/components/ui/button';
 
+const defaultClassNames = getDefaultClassNames();
+
 function Calendar({
   className,
   classNames,
@@ -27,8 +29,6 @@ function Calendar({
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>['variant'];
 }) {
-  const defaultClassNames = getDefaultClassNames();
-
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
@@ -179,25 +179,22 @@ function Calendar({
   );
 }
 
-function CalendarDayButton({
+const CalendarDayButton = React.memo(function CalendarDayButton({
   className,
   day,
   modifiers,
   ...props
 }: React.ComponentProps<typeof DayButton>) {
-  const defaultClassNames = getDefaultClassNames();
-
   const ref = React.useRef<HTMLButtonElement>(null);
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     if (modifiers.focused) ref.current?.focus();
   }, [modifiers.focused]);
 
   return (
-    <Button
+    <button
       ref={ref}
-      variant="ghost"
-      size="icon"
-      data-day={day.date.toLocaleDateString()}
+      type="button"
+      data-day={day.date.toISOString().slice(0, 10)}
       data-selected-single={
         modifiers.selected &&
         !modifiers.range_start &&
@@ -208,13 +205,15 @@ function CalendarDayButton({
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
       className={cn(
-        'data-[selected-single=true]:bg-brand-blue data-[selected-single=true]:text-white data-[range-middle=true]:bg-accent data-[range-middle=true]:text-accent-foreground data-[range-start=true]:bg-brand-blue data-[range-start=true]:text-white data-[range-end=true]:bg-brand-blue data-[range-end=true]:text-white group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-ring/50 dark:hover:text-accent-foreground flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md [&>span]:text-xs [&>span]:opacity-70',
+        'flex aspect-square size-auto w-full min-w-(--cell-size) items-center justify-center rounded-md text-sm font-normal leading-none hover:bg-accent',
+        'data-[selected-single=true]:bg-brand-blue data-[selected-single=true]:text-white data-[selected-single=true]:hover:bg-brand-blue',
+        'data-[range-middle=true]:bg-accent data-[range-start=true]:bg-brand-blue data-[range-start=true]:text-white data-[range-end=true]:bg-brand-blue data-[range-end=true]:text-white',
         defaultClassNames.day,
         className
       )}
       {...props}
     />
   );
-}
+});
 
 export { Calendar, CalendarDayButton };

@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import {
   FieldValues,
   useController,
@@ -24,26 +25,19 @@ interface TimePickerProps<
   disabled?: boolean;
 }
 
-const generateTimeSlots = () => {
-  const times: string[] = [];
+const TIME_SLOTS = (() => {
+  const times: { value: string; label: string }[] = [];
   const start = new Date();
   start.setHours(0, 0, 0, 0);
 
   for (let i = 0; i < 96; i++) {
     const slot = new Date(start.getTime() + i * 15 * 60 * 1000);
-    times.push(format(slot, 'HH:mm'));
+    const value = format(slot, 'HH:mm');
+    times.push({ value, label: format(slot, 'h:mm a') });
   }
 
   return times;
-};
-
-const TIME_SLOTS = generateTimeSlots();
-
-const formatTimeDisplay = (time: string | undefined) => {
-  if (!time) return '';
-  const parsed = parse(time, 'HH:mm', new Date());
-  return format(parsed, 'h:mm a');
-};
+})();
 
 const TimePicker = <TFieldValues extends FieldValues = FieldValues>({
   placeholder = 'Select time',
@@ -56,32 +50,32 @@ const TimePicker = <TFieldValues extends FieldValues = FieldValues>({
     field: { value, onChange },
   } = useController(props);
 
-  const now = new Date();
-
   const parsedSelectedDate = selectedDate
     ? typeof selectedDate === 'string'
       ? parseISO(selectedDate)
       : selectedDate
     : null;
 
-  const isSlotDisabled = (slotTime: string) => {
-    if (!ignorePastTimes || !parsedSelectedDate) return false;
-
-    const slot = parse(slotTime, 'HH:mm', new Date());
-
-    if (isToday(parsedSelectedDate)) {
-      const nowHour = now.getHours();
-      const nowMinutes = now.getMinutes();
-      const currentTime = nowHour * 60 + nowMinutes;
-      const slotMinutes = slot.getHours() * 60 + slot.getMinutes();
-
-      if (slotMinutes <= currentTime) {
-        return true;
-      }
+  const slots = useMemo(() => {
+    if (
+      !ignorePastTimes ||
+      !parsedSelectedDate ||
+      !isToday(parsedSelectedDate)
+    ) {
+      return TIME_SLOTS;
     }
 
-    return false;
-  };
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    return TIME_SLOTS.filter((slot) => {
+      const parsed = parse(slot.value, 'HH:mm', now);
+      return parsed.getHours() * 60 + parsed.getMinutes() > currentMinutes;
+    });
+  }, [ignorePastTimes, parsedSelectedDate]);
+
+  const selectedLabel =
+    TIME_SLOTS.find((slot) => slot.value === value)?.label ?? value;
 
   return (
     <Select value={value} onValueChange={onChange} disabled={disabled}>
@@ -92,19 +86,21 @@ const TimePicker = <TFieldValues extends FieldValues = FieldValues>({
         )}
       >
         <SelectValue placeholder={placeholder}>
-          {value ? formatTimeDisplay(value) : placeholder}
+          {value ? selectedLabel : placeholder}
         </SelectValue>
       </TimeSelectTrigger>
 
-      <SelectContent className="max-h-[250px] overflow-y-auto">
-        {TIME_SLOTS.map((time) => (
+      <SelectContent
+        position="popper"
+        className="max-h-[250px] overflow-y-auto"
+      >
+        {slots.map((slot) => (
           <SelectItem
-            key={time}
-            value={time}
-            disabled={disabled || isSlotDisabled(time)}
+            key={slot.value}
+            value={slot.value}
             className="max-md:text-sm"
           >
-            {formatTimeDisplay(time)}
+            {slot.label}
           </SelectItem>
         ))}
       </SelectContent>
