@@ -45,6 +45,20 @@
   --radius-4xl: calc(var(--radius) + 16px);
   --color-brand-blue: var(--brand-blue);
   --color-brand-blue-foreground: var(--brand-blue-foreground);
+  --color-bg-white-0: var(--bg-white);
+  --color-bg-weak-50: var(--bg-primary);
+  --color-text-strong-950: var(--text-primary);
+  --color-text-sub-600: var(--text-secondary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-soft-400: var(--text-gray-placeholder);
+  --color-state-error-lighter: #fef2f2;
+  --color-state-error-base: #ef4444;
+  --radius-8: 8px;
+  --radius-10: 10px;
+  --radius-16: 16px;
+  --radius-20: 20px;
+  --shadow-custom-medium: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-custom-large: 0 10px 15px -3px rgb(0 0 0 / 0.1);
 }
 
 :root {
@@ -201,5 +215,26 @@
   }
   .card {
     @apply border border-(--border-stroke) rounded-[10px] shadow-none!;
+  }
+  .x-small-shadow {
+    @apply shadow-[0px_1px_2px_0px_rgba(10,13,20,0.03)]!;
+  }
+  .typography-h4 {
+    @apply text-[24px] font-medium leading-tight;
+  }
+  .typography-h5 {
+    @apply text-[20px] font-semibold leading-tight;
+  }
+  .typography-paragraph-medium {
+    @apply text-[16px] leading-[24px];
+  }
+  .typography-paragraph-small {
+    @apply text-[14px] leading-[20px];
+  }
+  .typography-label-small {
+    @apply text-[12px] font-medium leading-[16px];
+  }
+  .typography-label-medium {
+    @apply text-[14px] font-medium leading-[20px];
   }
 }

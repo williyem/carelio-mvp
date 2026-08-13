@@ -11,8 +11,9 @@ export default function PatientBillingSettings({
 }: {
   patientId: string;
 }) {
-  const fallback = useBillingStore((s) => s.getPatientBilling(patientId));
-  const [billing, setBilling] = useState<PatientBilling>(fallback);
+  const [billing, setBilling] = useState<PatientBilling>(() =>
+    useBillingStore.getState().getPatientBilling(patientId)
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

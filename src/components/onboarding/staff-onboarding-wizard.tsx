@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Spinner } from '@/components/ui/spinner';
+import OnboardingTopbar from '@/components/onboarding/onboarding-topbar';
+import { OnboardingStepCard } from '@/components/onboarding/onboarding-step-card';
 import { generateSignatureImage } from '@/lib/signatureGenerator';
 import { buildProviderAgreementPdf } from '@/lib/provider-agreement-pdf';
 import {
@@ -27,6 +28,11 @@ import { getErrorMessage } from '@/integration';
 import { useQueryClient } from '@tanstack/react-query';
 import { DOCTOR_PROFILE_QUERY_KEY } from '@/integration/doctor/queries/use-doctor-profile';
 import { HEALTH_ASSISTANT_QUERY_KEYS } from '@/integration/health-assistant/query-keys';
+
+const LABEL_CLASS =
+  'text-[12px] leading-[16px] font-medium text-sm flex items-center gap-2';
+const FIELD_CLASS =
+  'bg-transparent border-(--border-light) h-[44px] rounded-[8px] shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]';
 
 export default function StaffOnboardingWizard({
   role,
@@ -120,84 +126,129 @@ export default function StaffOnboardingWizard({
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-xl space-y-6">
-        <div className="flex justify-center">
-          <Image
-            src="/images/carelio-logo.png"
-            alt="Carelio"
-            width={160}
-            height={49}
-            className="object-contain"
-          />
-        </div>
-        <div>
-          <p className="text-sm text-brand-blue font-medium">
-            Step {step} of 2
-          </p>
-          <h1 className="text-2xl font-bold mt-1">
-            {step === 1 ? 'Set up your profile' : 'Review and sign'}
-          </h1>
-          <p className="text-sm text-(--text-secondary) mt-1">
-            {step === 1
-              ? 'Tell us about your practice before you start seeing patients.'
-              : 'Sign the Business Associate Agreement and telehealth provider terms.'}
-          </p>
-        </div>
+    <div className="min-h-screen mx-auto bg-bg-white-0 max-w-7xl p-4 md:pt-8 pt-0 space-y-8">
+      <OnboardingTopbar onBack={step === 2 ? () => setStep(1) : undefined} />
 
-        {step === 1 ? (
-          <form onSubmit={handleSubmit(onProfile)} className="grid gap-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>First name</Label>
-                <Input className="h-11" {...register('firstName')} />
+      {step === 1 ? (
+        <div className="w-[900px] mx-auto mt-8 max-w-[90%] rounded-[16px] x-small-shadow border border-(--border-stroke) p-5">
+          <div className="space-y-3 mb-6">
+            <h2 className="text-[24px] font-bold">1. Set up your profile</h2>
+            <p className="font-normal text-text-secondary">
+              Tell us about your practice before you start seeing patients.
+            </p>
+          </div>
+          <form
+            onSubmit={handleSubmit(onProfile)}
+            className="flex flex-col gap-6 items-start w-full"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+              <div className="flex flex-col gap-2 items-start w-full">
+                <Label htmlFor="firstName" className={LABEL_CLASS}>
+                  First name
+                </Label>
+                <Input
+                  id="firstName"
+                  className={FIELD_CLASS}
+                  {...register('firstName')}
+                />
               </div>
-              <div className="space-y-1.5">
-                <Label>Last name</Label>
-                <Input className="h-11" {...register('lastName')} />
+              <div className="flex flex-col gap-2 items-start w-full">
+                <Label htmlFor="lastName" className={LABEL_CLASS}>
+                  Last name
+                </Label>
+                <Input
+                  id="lastName"
+                  className={FIELD_CLASS}
+                  {...register('lastName')}
+                />
               </div>
             </div>
-            <div className="space-y-1.5">
-              <Label>Title</Label>
-              <Input className="h-11" {...register('title')} />
+            <div className="flex flex-col gap-2 items-start w-full">
+              <Label htmlFor="title" className={LABEL_CLASS}>
+                Title
+              </Label>
+              <Input
+                id="title"
+                className={FIELD_CLASS}
+                {...register('title')}
+              />
             </div>
             {role === 'doctor' && (
               <>
-                <div className="space-y-1.5">
-                  <Label>Specialty</Label>
-                  <Input className="h-11" {...register('specialty')} />
+                <div className="flex flex-col gap-2 items-start w-full">
+                  <Label htmlFor="specialty" className={LABEL_CLASS}>
+                    Specialty
+                  </Label>
+                  <Input
+                    id="specialty"
+                    className={FIELD_CLASS}
+                    {...register('specialty')}
+                  />
                 </div>
-                <div className="space-y-1.5">
-                  <Label>Clinic name</Label>
-                  <Input className="h-11" {...register('clinicName')} />
+                <div className="flex flex-col gap-2 items-start w-full">
+                  <Label htmlFor="clinicName" className={LABEL_CLASS}>
+                    Clinic name
+                  </Label>
+                  <Input
+                    id="clinicName"
+                    className={FIELD_CLASS}
+                    {...register('clinicName')}
+                  />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label>NPI</Label>
-                    <Input className="h-11" {...register('npi')} />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                  <div className="flex flex-col gap-2 items-start w-full">
+                    <Label htmlFor="npi" className={LABEL_CLASS}>
+                      NPI
+                    </Label>
+                    <Input
+                      id="npi"
+                      className={FIELD_CLASS}
+                      {...register('npi')}
+                    />
                   </div>
-                  <div className="space-y-1.5">
-                    <Label>License number</Label>
-                    <Input className="h-11" {...register('licenseNumber')} />
+                  <div className="flex flex-col gap-2 items-start w-full">
+                    <Label htmlFor="licenseNumber" className={LABEL_CLASS}>
+                      License number
+                    </Label>
+                    <Input
+                      id="licenseNumber"
+                      className={FIELD_CLASS}
+                      {...register('licenseNumber')}
+                    />
                   </div>
                 </div>
               </>
             )}
-            <div className="space-y-1.5">
-              <Label>Phone</Label>
-              <Input className="h-11" {...register('phone')} />
+            <div className="flex flex-col gap-2 items-start w-full">
+              <Label htmlFor="phone" className={LABEL_CLASS}>
+                Phone
+              </Label>
+              <Input
+                id="phone"
+                className={FIELD_CLASS}
+                {...register('phone')}
+              />
             </div>
             <Button
               type="submit"
               variant="brand"
-              className="rounded-full h-11 mt-2"
+              className="w-full h-[50px] rounded-[8px] font-bold mt-2"
             >
               Continue
             </Button>
           </form>
-        ) : (
-          <div className="space-y-4">
-            <div className="rounded-[20px] border border-(--border-stroke) p-5 text-sm space-y-3 max-h-64 overflow-y-auto">
+        </div>
+      ) : (
+        <OnboardingStepCard
+          title="2. Review and sign"
+          description="Sign the Business Associate Agreement and telehealth provider terms."
+          onNext={onSign}
+          isSubmitting={isSubmitting}
+          nextDisabled={!agreed || !signedName.trim()}
+          secondaryAction={{ label: 'Back', onClick: () => setStep(1) }}
+        >
+          <div className="space-y-6 text-left">
+            <div className="space-y-4 text-[14px] leading-relaxed text-text-strong-950">
               <p className="font-semibold">Provider agreement</p>
               <p>
                 I agree to Carelio&apos;s Business Associate Agreement,
@@ -209,52 +260,65 @@ export default function StaffOnboardingWizard({
                 telehealth and will keep clinical documentation in the chart.
               </p>
             </div>
-            <label className="flex items-start gap-3 text-sm">
-              <Checkbox
-                checked={agreed}
-                onCheckedChange={(checked) => setAgreed(Boolean(checked))}
-              />
-              <span>I have read and agree to these documents.</span>
-            </label>
-            <div className="space-y-1.5">
-              <Label>Type your full name to sign</Label>
-              <Input
-                className="h-11"
-                value={signedName}
-                onChange={(e) => setSignedName(e.target.value)}
-              />
-            </div>
-            {signature && (
-              <div className="border border-dashed border-(--border-stroke) rounded-lg p-3 bg-white">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={signature} alt="Signature preview" className="h-16" />
+
+            <div className="pt-4 space-y-4 border-t border-gray-100">
+              <div className="space-y-2">
+                <Label htmlFor="signedName" className="block">
+                  Printed Name:
+                </Label>
+                <input
+                  id="signedName"
+                  value={signedName}
+                  onChange={(e) => setSignedName(e.target.value)}
+                  placeholder="Enter your full name"
+                  className="border-0 border-b-2 border-dotted border-gray-400 w-full max-w-[300px] outline-none bg-transparent text-base mb-2"
+                />
               </div>
-            )}
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-full flex-1"
-                onClick={() => setStep(1)}
-              >
-                Back
-              </Button>
-              <Button
-                type="button"
-                variant="brand"
-                className="rounded-full flex-1"
-                onClick={() => void onSign()}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? <Spinner /> : 'Sign and continue'}
-              </Button>
+
+              <div className="flex items-start space-x-2">
+                <Checkbox
+                  id="provider-agreement"
+                  checked={agreed}
+                  onCheckedChange={(checked) => setAgreed(Boolean(checked))}
+                  className="size-4 mt-0.5"
+                />
+                <label
+                  htmlFor="provider-agreement"
+                  className="typography-paragraph-small text-text-strong-950 leading-normal cursor-pointer"
+                >
+                  I agree to electronically sign this document using my printed
+                  name above
+                </label>
+              </div>
+
+              <div>
+                <div className="typography-paragraph-medium font-normal mb-1">
+                  Provider Signature:
+                </div>
+                <div className="border-b-2 border-dotted border-gray-400 w-full max-w-[300px] h-[60px] relative mb-2 min-w-[200px] flex items-center">
+                  {signature ? (
+                    <Image
+                      src={signature}
+                      alt="Generated signature"
+                      width={300}
+                      height={80}
+                      className="w-full h-[60px] object-contain rounded-[4px]"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-start text-gray-400 text-sm italic">
+                      Signature will appear here
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
+
             <p className="text-xs text-center text-(--text-secondary)">
               A signed copy of the agreement is stored with your account.
             </p>
           </div>
-        )}
-      </div>
+        </OnboardingStepCard>
+      )}
     </div>
   );
 }

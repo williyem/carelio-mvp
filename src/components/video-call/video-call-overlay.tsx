@@ -7,7 +7,6 @@ import VideoCallPreview from './preview/video-call-preview';
 import dynamic from 'next/dynamic';
 import { toast } from 'sonner';
 import useGetDoctorConsultationToken from '@/integration/doctor/mutations';
-import PostConsultationSummary from './post-consulation-summary';
 import { useCompleteConsultation } from '@/integration/appointments/mutations';
 import { Room, RoomEvent } from 'livekit-client';
 
@@ -166,11 +165,7 @@ export default function VideoCallOverlayComponent() {
     <FullscreenCall leaveSession={leaveSession} />
   );
 
-  return createPortal(
-    <>
-      {content}
-      <PostConsultationSummary />
-    </>,
-    document.body
-  );
+  // PostConsultationSummary is mounted in providers.tsx; it must outlive this
+  // overlay, which unmounts as soon as endCall() clears isActive.
+  return createPortal(content, document.body);
 }
