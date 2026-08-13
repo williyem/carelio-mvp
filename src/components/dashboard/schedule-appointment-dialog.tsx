@@ -1,17 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useCallback } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useEffect, useMemo, useCallback, useState } from 'react';
+import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Check } from 'lucide-react';
 import TimePicker from '@/components/ui/time-picker';
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
@@ -47,6 +43,9 @@ interface ScheduleAppointmentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   patient?: Patient;
+  /** Patient portal uses patient auth cookies / BFFs */
+  portal?: 'staff' | 'patient';
+  onScheduled?: () => void;
 }
 
 const scheduleSchema = z
@@ -123,6 +122,8 @@ const ScheduleAppointmentDialog = ({
   open,
   onOpenChange,
   patient,
+  portal = 'staff',
+  onScheduled,
 }: ScheduleAppointmentDialogProps) => {
   const { clinicians, cliniciansWithSearch, isLoading } = useDoctors();
   const { startCall, setSelectedAppointment } = useVideoCallStore();
@@ -130,7 +131,6 @@ const ScheduleAppointmentDialog = ({
   const {
     control,
     handleSubmit,
-    watch,
     setValue,
     formState: { errors },
     reset,
@@ -146,10 +146,12 @@ const ScheduleAppointmentDialog = ({
     },
   });
 
-  const mode = watch('mode');
-  const selectedDoctorId = watch('doctorId');
-  const selectedDate = watch('date');
-  const startTime = watch('startTime');
+  const mode = useWatch({ control, name: 'mode' });
+  const selectedDoctorId = useWatch({ control, name: 'doctorId' });
+  const selectedDate = useWatch({ control, name: 'date' });
+  const startTime = useWatch({ control, name: 'startTime' });
+  const [doctorOpen, setDoctorOpen] = useState(false);
+  const [dateOpen, setDateOpen] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -158,7 +160,7 @@ const ScheduleAppointmentDialog = ({
   }, [open, reset]);
 
   const { scheduleAppointmentMutation, getAppointmentByIdMutation } =
-    useAppointmentMutations();
+    useAppointmentMutations(portal);
 
   const isSubmitting =
     scheduleAppointmentMutation.isPending ||
@@ -192,20 +194,18 @@ const ScheduleAppointmentDialog = ({
         },
         {
           onSuccess: (res) => {
-            if (data.mode === 'now' && patient) {
+            if (data.mode === 'now' && patient && portal === 'staff') {
               getAppointmentByIdMutation.mutate(res.id, {
                 onSuccess: (response) => {
                   if (patient?.isRegistrationComplete) {
                     startCall(patient);
-                    setSelectedAppointment(
-                      response as any,
-                      patient
-                    );
+                    setSelectedAppointment(response as Appointment, patient);
                   }
                 },
               });
             }
             toast.success('Appointment scheduled successfully');
+            onScheduled?.();
             onOpenChange(false);
             reset();
           },
@@ -219,8 +219,10 @@ const ScheduleAppointmentDialog = ({
     },
     [
       patient,
+      portal,
       scheduleAppointmentMutation,
       onOpenChange,
+      onScheduled,
       reset,
       startCall,
       getAppointmentByIdMutation,
@@ -239,12 +241,43 @@ const ScheduleAppointmentDialog = ({
   }, []);
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="bg-white rounded-[30px] p-6 max-w-[443px] w-full">
-        <AlertDialogTitle className="sr-only">
-          Schedule Appointment
-        </AlertDialogTitle>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
+          setDoctorOpen(false);
+          setDateOpen(false);
+        }
+        onOpenChange(nextOpen);
+      }}
+    >
+      <DialogContent
+        showCloseButton={false}
+        className="bg-white rounded-[30px] p-6 max-w-[443px] w-full"
+        onPointerDownOutside={(event) => {
+          const target = event.target as HTMLElement | null;
+          if (
+            target?.closest('[data-slot="popover-content"]') ||
+            target?.closest('[data-slot="select-content"]') ||
+            target?.closest('[data-radix-popper-content-wrapper]')
+          ) {
+            event.preventDefault();
+          }
+        }}
+        onInteractOutside={(event) => {
+          const target = event.target as HTMLElement | null;
+          if (
+            target?.closest('[data-slot="popover-content"]') ||
+            target?.closest('[data-slot="select-content"]') ||
+            target?.closest('[data-radix-popper-content-wrapper]')
+          ) {
+            event.preventDefault();
+          }
+        }}
+      >
+        <DialogTitle className="sr-only">Schedule Appointment</DialogTitle>
         <button
+          type="button"
           onClick={() => onOpenChange(false)}
           className="absolute right-5 top-5 w-6 h-6 flex items-center justify-center"
         >
@@ -326,7 +359,11 @@ const ScheduleAppointmentDialog = ({
                   name="doctorId"
                   control={control}
                   render={({ field }) => (
-                    <Popover>
+                    <Popover
+                      modal
+                      open={doctorOpen}
+                      onOpenChange={setDoctorOpen}
+                    >
                       <PopoverTrigger asChild>
                         <button
                           type="button"
@@ -352,6 +389,7 @@ const ScheduleAppointmentDialog = ({
                       <PopoverContent
                         className="w-(--radix-popover-trigger-width) p-0"
                         align="start"
+                        onOpenAutoFocus={(event) => event.preventDefault()}
                       >
                         <Command shouldFilter={true}>
                           <CommandInput placeholder="Search doctor..." />
@@ -371,9 +409,15 @@ const ScheduleAppointmentDialog = ({
                                     <CommandItem
                                       key={clinician.id}
                                       value={clinician.searchValue}
-                                      onSelect={() =>
-                                        field.onChange(clinician.id)
-                                      }
+                                      onSelect={() => {
+                                        field.onChange(clinician.id);
+                                        setDoctorOpen(false);
+                                      }}
+                                      onPointerDown={(event) => {
+                                        event.preventDefault();
+                                        field.onChange(clinician.id);
+                                        setDoctorOpen(false);
+                                      }}
                                       className="flex items-center gap-2"
                                     >
                                       <Check
@@ -420,7 +464,11 @@ const ScheduleAppointmentDialog = ({
                       name="date"
                       control={control}
                       render={({ field }) => (
-                        <Popover>
+                        <Popover
+                          modal
+                          open={dateOpen}
+                          onOpenChange={setDateOpen}
+                        >
                           <PopoverTrigger asChild>
                             <button
                               type="button"
@@ -438,11 +486,18 @@ const ScheduleAppointmentDialog = ({
                               <CalendarIcon className="w-4 h-4 text-(--text-secondary) shrink-0" />
                             </button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
+                          <PopoverContent
+                            className="w-auto p-0"
+                            align="start"
+                            onOpenAutoFocus={(event) => event.preventDefault()}
+                          >
                             <Calendar
                               mode="single"
                               selected={field.value}
-                              onSelect={field.onChange}
+                              onSelect={(date) => {
+                                field.onChange(date);
+                                if (date) setDateOpen(false);
+                              }}
                               disabled={(date: Date) => date < today}
                               captionLayout="dropdown"
                               initialFocus={false}
@@ -497,8 +552,8 @@ const ScheduleAppointmentDialog = ({
             </form>
           </div>
         </div>
-      </AlertDialogContent>
-    </AlertDialog>
+      </DialogContent>
+    </Dialog>
   );
 };
 

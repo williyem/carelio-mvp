@@ -15,9 +15,9 @@ const nextConfig: NextConfig = {
     ],
   },
   env: {
-    // API_BASE_URL: 'https://api.carelio.app',
-    // API_BASE_URL: 'https://steely-noncorruptive-terisa.ngrok-free.dev',
-    API_BASE_URL: process.env.BASE_URL,
+    // Exposed to the client so auth can reach the backend / honor dummy mode
+    API_BASE_URL: process.env.API_BASE_URL || process.env.BASE_URL,
+    USE_DUMMY_DATA: process.env.USE_DUMMY_DATA ?? 'true',
   },
   async headers() {
     return [

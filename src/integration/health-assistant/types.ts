@@ -61,7 +61,7 @@ export interface PatientRow {
   id: string;
   patientName: string;
   identityNumber: string;
-  age: number;
+  age: number | null;
   contact: {
     phone: string;
     email: string;

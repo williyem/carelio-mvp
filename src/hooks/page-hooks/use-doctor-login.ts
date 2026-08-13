@@ -45,11 +45,6 @@ export function useDoctorLoginForm() {
 
     loginDoctor(data, {
       onSuccess: async (response) => {
-        if (response.authenticated) {
-          router.push(ROUTES.DASHBOARD.ROOT);
-          return;
-        }
-
         if (response.requiresPasswordReset) {
           const token = response.resetToken;
           try {
@@ -65,12 +60,11 @@ export function useDoctorLoginForm() {
             toast.error('Failed to set session. Please try again.');
             console.error('Login error:', error);
           }
+          return;
         }
-        if (
-          ('requires2FA' in response && response.requires2FA) ||
-          response?.user?.twoFactorEnabled === true
-        ) {
-          const token = response.token || response?.tokenData?.access?.token;
+
+        if ('requires2FA' in response && response.requires2FA) {
+          const token = response.token;
           try {
             await axios.post(
               API_ENDPOINTS.doctorLogin,
@@ -87,12 +81,8 @@ export function useDoctorLoginForm() {
           return;
         }
 
-        if (
-          ('requiresSetup' in response && response.requiresSetup) ||
-          response?.user?.twoFactorEnabled === false
-        ) {
-          const token =
-            response.setupToken || response?.tokenData?.access?.token;
+        if ('requiresSetup' in response && response.requiresSetup) {
+          const token = response.setupToken;
           try {
             await axios.post(
               API_ENDPOINTS.doctorLogin,
@@ -101,11 +91,31 @@ export function useDoctorLoginForm() {
                 headers: { 'Content-Type': 'application/json' },
               }
             );
-            router.push(ROUTES.AUTH.FIRST_TIME_RESET_PASSWORD);
+            router.push(ROUTES.AUTH.SETUP_2FA);
           } catch (error) {
             toast.error('Failed to set session. Please try again.');
             console.error('Login error:', error);
           }
+          return;
+        }
+
+        // Successful login — ensure BFF cookies are set, then go to dashboard
+        if (response.tokenData?.access?.token) {
+          try {
+            await axios.post(
+              API_ENDPOINTS.doctorLogin,
+              {
+                accessToken: response.tokenData.access.token,
+                refreshToken: response.tokenData.refresh?.token,
+                user: response.user,
+              },
+              { headers: { 'Content-Type': 'application/json' } }
+            );
+          } catch (error) {
+            // Cookies may already be set by the BFF login proxy
+            console.error('Cookie sync warning:', error);
+          }
+          router.push(ROUTES.DASHBOARD.ROOT);
         }
       },
       onError: (error) => {

@@ -43,7 +43,14 @@ const useAppointmentsCols = ({
       header: ({ column }) => (
         <SortableColumnHeader column={column} label="Age" />
       ),
-      cell: (info) => <span className="font-normal">{info.getValue()}</span>,
+      cell: (info) => {
+        const age = info.getValue();
+        return (
+          <span className="font-normal">
+            {age === null || Number.isNaN(age) ? '—' : age}
+          </span>
+        );
+      },
     }),
     columnHelper.accessor('isRegistrationComplete', {
       header: ({ column }) => (

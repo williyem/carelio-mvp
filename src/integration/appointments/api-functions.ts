@@ -253,6 +253,36 @@ export const scheduleAppointment = async (
   return extractResponseData(response);
 };
 
+export const schedulePatientAppointment = async (
+  data: ScheduleAppointmentRequest
+): Promise<ScheduleAppointmentResponse> => {
+  const response = await apiClient.post<
+    ApiResponse<ScheduleAppointmentResponse>
+  >(APPOINTMENT_API_ENDPOINTS.PATIENT_SCHEDULE_APPOINTMENT, data);
+  return extractResponseData(response);
+};
+
+export const getMyPatientAppointments = async (
+  patientId: string,
+  status?: 'COMPLETED' | 'CONFIRMED' | 'CANCELLED' | 'MISSED',
+  page: number = 1,
+  limit: number = 20
+): Promise<PatientAppointmentsResponse> => {
+  const params = new URLSearchParams({
+    patientId,
+    page: page.toString(),
+    limit: limit.toString(),
+  });
+  if (status) params.set('status', status);
+
+  const response = await apiClient.get<
+    ApiResponse<PatientAppointmentsResponse>
+  >(
+    `${APPOINTMENT_API_ENDPOINTS.PATIENT_GET_APPOINTMENTS}?${params.toString()}`
+  );
+  return extractResponseData(response);
+};
+
 export const getUpcomingAppointments = async (
   page: number = 1,
   limit: number = 5

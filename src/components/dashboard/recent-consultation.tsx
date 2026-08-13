@@ -21,6 +21,7 @@ const formatDuration = (
   if (!startTime || !endTime) return '30 mins';
   try {
     const mins = differenceInMinutes(parseISO(endTime), parseISO(startTime));
+    if (!Number.isFinite(mins) || mins < 0) return '30 mins';
     return `${mins} mins`;
   } catch {
     return '30 mins';

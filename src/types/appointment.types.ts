@@ -2,7 +2,7 @@ export interface AppointmentRow {
   id: string;
   patientName: string;
   identityNumber: string;
-  age: number;
+  age: number | null;
   contact: {
     phone: string;
     email: string;
@@ -30,8 +30,19 @@ export interface Appointment {
   createdAt?: string;
   updatedAt?: string;
   doctor: Doctor;
-  patient?: any;
+  patient?: AppointmentPatient;
   telehealth?: Telehealth;
+}
+
+export interface AppointmentPatient {
+  id: string;
+  patientId: string;
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  dob?: string;
+  gender?: 'male' | 'female' | 'other' | string;
+  isRegistrationComplete?: boolean;
 }
 
 export interface Doctor {

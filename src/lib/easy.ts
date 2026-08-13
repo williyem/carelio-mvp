@@ -4,9 +4,7 @@ import type { AppointmentRow } from '@/types/appointment.types';
 import type { AssignedPatient } from '@/integration/patient/type';
 import { toast } from 'sonner';
 import { Appointment } from '@/integration/appointments';
-import {
-  HealthAssistantResponse,
-} from '@/integration/health-assistant/types';
+import { HealthAssistantResponse } from '@/integration/health-assistant/types';
 
 type Clinician = {
   id: string;
@@ -215,6 +213,7 @@ export function getDynamicWorkingHours(appointments: Appointment[]) {
   appointments.forEach((apt) => {
     if (apt.startTime) {
       const start = parseISO(apt.startTime);
+      if (Number.isNaN(start.getTime())) return;
       const startHour = start.getHours();
       minHour = Math.min(minHour, startHour);
       // Ensure we show at least the hour the appointment starts in
@@ -222,6 +221,7 @@ export function getDynamicWorkingHours(appointments: Appointment[]) {
 
       if (apt.endTime) {
         const end = parseISO(apt.endTime);
+        if (Number.isNaN(end.getTime())) return;
         let endHour = end.getHours();
 
         // Handle midnight/next day
@@ -398,14 +398,20 @@ export const getFirstName = (user: { firstName: string } | null): string => {
   return user.firstName || '';
 };
 
-
-export const calculateAge = (dob: string): number => {
+export const calculateAge = (dob?: string | null): number | null => {
+  if (!dob || !String(dob).trim()) return null;
   const birthDate = new Date(dob);
+  if (Number.isNaN(birthDate.getTime())) return null;
   const today = new Date();
   let age = today.getFullYear() - birthDate.getFullYear();
   const monthDiff = today.getMonth() - birthDate.getMonth();
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
-  return age;
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
+  return age >= 0 ? age : null;
 };
 
 export const extractSearchParams = (searchParams: ReadonlyURLSearchParams) => ({
@@ -429,11 +435,13 @@ export const createSearchParams = (
   return params;
 };
 
-export const mapAssignedPatientToAppointmentRow = (patient: AssignedPatient): AppointmentRow => ({
+export const mapAssignedPatientToAppointmentRow = (
+  patient: AssignedPatient
+): AppointmentRow => ({
   id: patient.id,
   patientName: patient.fullName,
   identityNumber: patient.patientId,
-  age: calculateAge(patient.dob),
+  age: calculateAge(patient.dob || patient.dateOfBirth),
   contact: { phone: patient.phoneNumber || '', email: patient.email },
   assignedAssistantId: patient.assignedAssistantId,
   assignedAssistantName: patient.assignedAssistant
@@ -442,21 +450,33 @@ export const mapAssignedPatientToAppointmentRow = (patient: AssignedPatient): Ap
   isRegistrationComplete: patient.isRegistrationComplete,
 });
 
-export const mapAssignedPatientsToAppointmentRows = (patients: AssignedPatient[]): AppointmentRow[] =>
-  patients?.map(mapAssignedPatientToAppointmentRow);
+export const mapAssignedPatientsToAppointmentRows = (
+  patients: AssignedPatient[]
+): AppointmentRow[] => patients?.map(mapAssignedPatientToAppointmentRow);
 
 export const mapDoctorToClinician = (doctor: {
-  id: string; firstName: string; lastName: string; email: string; phoneNumber: string;
-  twoFactorEnabled: boolean; isActive: boolean; createdAt: string; updatedAt: string;
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  twoFactorEnabled: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }) => ({
   ...doctor,
   name: `${doctor.firstName} ${doctor.lastName}`.trim(),
 });
 
-export const mapDoctorsToClinicians = (doctors: Parameters<typeof mapDoctorToClinician>[0][]) =>
-  doctors.map(mapDoctorToClinician);
+export const mapDoctorsToClinicians = (
+  doctors: Parameters<typeof mapDoctorToClinician>[0][]
+) => doctors.map(mapDoctorToClinician);
 
-export async function searchPatients(query: string, assignedPatients: AssignedPatient[]): Promise<AssignedPatient[]> {
+export async function searchPatients(
+  query: string,
+  assignedPatients: AssignedPatient[]
+): Promise<AssignedPatient[]> {
   if (!query || query.trim().length === 0) return [];
   const searchTerm = query.toLowerCase().trim();
   return assignedPatients?.filter(
@@ -481,7 +501,14 @@ export const formatDateOfBirth = (dob: string): string => {
     const date = parseISO(dob);
     if (!isValid(date)) return dob;
     const day = date.getDate();
-    const suffix = day % 10 === 1 && day !== 11 ? 'st' : day % 10 === 2 && day !== 12 ? 'nd' : day % 10 === 3 && day !== 13 ? 'rd' : 'th';
+    const suffix =
+      day % 10 === 1 && day !== 11
+        ? 'st'
+        : day % 10 === 2 && day !== 12
+          ? 'nd'
+          : day % 10 === 3 && day !== 13
+            ? 'rd'
+            : 'th';
     return `${day}${suffix} ${format(date, 'MMMM, yyyy')}`;
   } catch {
     return dob;
@@ -489,7 +516,12 @@ export const formatDateOfBirth = (dob: string): string => {
 };
 
 export const genderMap: Record<string, 'Male' | 'Female' | 'Other'> = {
-  male: 'Male', female: 'Female', other: 'Other', MALE: 'Male', FEMALE: 'Female', OTHER: 'Other',
+  male: 'Male',
+  female: 'Female',
+  other: 'Other',
+  MALE: 'Male',
+  FEMALE: 'Female',
+  OTHER: 'Other',
 };
 
 export function generateBlobUrls(
@@ -499,22 +531,35 @@ export function generateBlobUrls(
   for (const [section, { pdf, original }] of Object.entries(blobs)) {
     urls[section] = {};
     if (pdf instanceof Blob) urls[section].pdfUrl = URL.createObjectURL(pdf);
-    if (original instanceof Blob) urls[section].originalUrl = URL.createObjectURL(original);
+    if (original instanceof Blob)
+      urls[section].originalUrl = URL.createObjectURL(original);
   }
   return urls;
 }
 
-export const handleApiError = (error: any) => {
+export const handleApiError = (error: unknown) => {
+  const err = error as {
+    response?: {
+      data?: {
+        details?: { message?: string };
+        error?: string;
+        message?: string;
+      };
+    };
+    message?: string;
+  };
   const errorMessage =
-    error?.response?.data?.details?.message ||
-    error?.response?.data?.error ||
-    error?.response?.data?.message ||
-    error?.message ||
+    err?.response?.data?.details?.message ||
+    err?.response?.data?.error ||
+    err?.response?.data?.message ||
+    err?.message ||
     'An unexpected error occurred';
   toast.error(errorMessage);
 };
 
-export const formatPdfDate = (dateValue: any): string => {
+export const formatPdfDate = (
+  dateValue: Date | string | null | undefined
+): string => {
   if (!dateValue) return '';
   let dateToFormat: Date;
   if (dateValue instanceof Date) dateToFormat = dateValue;

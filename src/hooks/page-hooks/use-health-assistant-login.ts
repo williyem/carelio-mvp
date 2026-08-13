@@ -47,14 +47,6 @@ export function useHealthAssistantLoginForm() {
 
     loginHealthAssistant(data, {
       onSuccess: async (response) => {
-        if (
-          'authenticated' in response &&
-          response.authenticated
-        ) {
-          router.push(ROUTES.HEALTH_ASSISTANT.PATIENT.ROOT);
-          return;
-        }
-
         if (response.requiresPasswordReset) {
           const token = response.resetToken;
           try {
@@ -106,6 +98,29 @@ export function useHealthAssistantLoginForm() {
             toast.error('Failed to set session. Please try again.');
             console.error('Login error:', error);
           }
+          return;
+        }
+
+        if (
+          ('authenticated' in response && response.authenticated) ||
+          response.tokenData?.access?.token
+        ) {
+          try {
+            if (response.tokenData?.access?.token) {
+              await axios.post(
+                API_ENDPOINTS.healthAssistantLogin,
+                {
+                  accessToken: response.tokenData.access.token,
+                  refreshToken: response.tokenData.refresh?.token,
+                  user: response.user,
+                },
+                { headers: { 'Content-Type': 'application/json' } }
+              );
+            }
+          } catch (error) {
+            console.error('Cookie sync warning:', error);
+          }
+          router.push(ROUTES.HEALTH_ASSISTANT.PATIENT.ROOT);
         }
       },
       onError: (error) => {

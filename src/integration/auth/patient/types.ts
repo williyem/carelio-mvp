@@ -140,6 +140,7 @@ export interface CompleteRegistrationResponse {
  */
 export interface PatientUser {
   id: PatientId;
+  patientId?: string;
   email: string;
   fullName: string;
   dob: string;

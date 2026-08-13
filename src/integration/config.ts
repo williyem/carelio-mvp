@@ -1,8 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
 import { isDummyDataEnabled } from '@/lib/dummy-data/config';
 
-export const API_BASE_URL =
-  process.env.API_BASE_URL || 'https://api.carelio.app';
+export const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:4000';
 
 export const API_ROUTE_BASE = '/api';
 

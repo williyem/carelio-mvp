@@ -32,4 +32,7 @@ export const APPOINTMENT_API_ENDPOINTS = {
   COMPLETE_CONSULTATION: '/doctor/consultations/:appointmentId/complete',
   UPDATE_CONSULTATION_NOTE: '/doctor/consultations/notes/:noteId',
   GET_UPCOMING_APPOINTMENTS: '/health-assistant/appointments/upcoming',
+  PATIENT_GET_APPOINTMENTS: '/patient/appointments',
+  PATIENT_SCHEDULE_APPOINTMENT: '/patient/appointments/schedule',
+  PATIENT_GET_DOCTORS: '/patient/doctors',
 } as const;

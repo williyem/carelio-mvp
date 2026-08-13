@@ -23,3 +23,4 @@ export { useGetPatientNotes } from './queries/useGetPatientNotes';
 export { useGetNoteById } from './queries/useGetNoteById';
 export { useGetRecentAppointments } from './queries/useGetRecentAppointments';
 export { default as useGetPatientAppointments } from './queries/useGetPatientAppointments';
+export { default as useGetMyPatientAppointments } from './queries/useGetMyPatientAppointments';
