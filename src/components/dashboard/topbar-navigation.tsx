@@ -1,6 +1,6 @@
 'use client';
 
-import { Users, Settings, LogOut, Menu } from 'lucide-react';
+import { Users, Settings, LogOut, Menu, UserCog } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import HomeSvg from '@/assets/icons/home-svg';
@@ -32,6 +32,9 @@ const TopbarNavigation = ({
   const isHomeActive = pathname === ROUTES.HEALTH_ASSISTANT.PATIENT.ROOT;
   const isAssignmentsActive = pathname?.startsWith(
     ROUTES.HEALTH_ASSISTANT.ASSIGNMENTS.ROOT
+  );
+  const isSettingsActive = pathname?.startsWith(
+    ROUTES.HEALTH_ASSISTANT.SETTINGS.ROOT
   );
 
   const logout = useLogout();
@@ -100,6 +103,18 @@ const TopbarNavigation = ({
             Devices
           </span>
         </button>
+
+        <div className="bg-(--border-stroke) h-[44px] w-px" />
+
+        <Link
+          href={ROUTES.HEALTH_ASSISTANT.SETTINGS.ROOT}
+          className={navItemClass(!!isSettingsActive)}
+        >
+          <UserCog className="w-5 h-5" />
+          <span className="text-[14px] leading-[1.2] font-normal">
+            Settings
+          </span>
+        </Link>
 
         {/* Divider */}
         <div className="bg-(--border-stroke) h-[44px] w-px" />
@@ -234,6 +249,30 @@ const TopbarNavigation = ({
               <span className="text-[14px] leading-[1.2] font-normal">
                 Devices
               </span>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem asChild>
+              <Link
+                href={ROUTES.HEALTH_ASSISTANT.SETTINGS.ROOT}
+                className={cn(
+                  'flex items-center gap-2 px-3 py-2 cursor-pointer rounded-[6px]',
+                  isSettingsActive
+                    ? 'bg-brand-blue/5 text-brand-blue'
+                    : 'text-(--text-primary) hover:bg-(--bg-primary)'
+                )}
+              >
+                <UserCog
+                  className={cn(
+                    'w-5 h-5',
+                    isSettingsActive
+                      ? 'text-brand-blue'
+                      : 'text-(--text-primary)'
+                  )}
+                />
+                <span className="text-[14px] leading-[1.2] font-normal">
+                  Settings
+                </span>
+              </Link>
             </DropdownMenuItem>
 
             <DropdownMenuSeparator className="bg-(--border-stroke) my-1" />

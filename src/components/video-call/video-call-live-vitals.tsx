@@ -1,19 +1,18 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Plus, ArrowLeft } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useVideoCallStore } from '@/stores/video-call-store';
 import {
-  updateConsultationNote,
   useGetConsultationNoteByAppointmentMutation,
   useSubmitSoapNotes,
   useUpdateConsultationNote,
 } from '@/integration/appointments';
 import { toast } from 'sonner';
+import { useSoapDraftStore } from '@/stores/soap-draft-store';
 
 // Modular components
 import PatientInfoCard from './patient-info-card';
@@ -40,49 +39,99 @@ const VideoCallLiveVitals = () => {
   const getConsultationNoteByAppointmentMutation =
     useGetConsultationNoteByAppointmentMutation();
   const updateConsultationNoteMutation = useUpdateConsultationNote();
+  const getDraft = useSoapDraftStore((s) => s.getDraft);
+  const saveDraft = useSoapDraftStore((s) => s.saveDraft);
+
+  const persistLocal = (status: 'DRAFT' | 'FINAL') => {
+    if (!selectedAppointment?.id) return;
+    saveDraft(selectedAppointment.id, { ...soapNotes, status });
+  };
+
+  useEffect(() => {
+    const appointmentId = selectedAppointment?.id;
+    if (!appointmentId) return;
+
+    const local = getDraft(appointmentId);
+    if (local) {
+      setSoapNotes({
+        subjective: local.subjective,
+        objective: local.objective,
+        assessment: local.assessment,
+        plan: local.plan,
+      });
+    }
+
+    getConsultationNoteByAppointmentMutation.mutate(appointmentId, {
+      onSuccess: (data) => {
+        const soap = data?.soapNote || data;
+        if (!soap) return;
+        setSoapNotes({
+          subjective: soap.subjective || local?.subjective || '',
+          objective: soap.objective || local?.objective || '',
+          assessment: soap.assessment || local?.assessment || '',
+          plan: soap.plan || local?.plan || '',
+        });
+      },
+    });
+    // Load once per appointment
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedAppointment?.id]);
 
   const isLoading =
     submitSoapMutation.isPending ||
     updateConsultationNoteMutation.isPending ||
     getConsultationNoteByAppointmentMutation.isPending;
-  const handleSaveNotes = async () => {
+
+  const persistNotes = async (action: 'save' | 'approve') => {
     if (!selectedAppointment?.id) {
       toast.error('No active appointment found');
       return;
     }
 
-    getConsultationNoteByAppointmentMutation.mutate(selectedAppointment.id, {
-      onSuccess: async (data) => {
-        if (data?.id) {
-          await updateConsultationNoteMutation.mutateAsync({
-            noteId: data?.id,
-            data: { ...soapNotes },
-          });
-        } else {
-          await submitSoapMutation.mutateAsync({
-            appointmentId: selectedAppointment.id,
-            data: { ...soapNotes, action: 'save' },
-          });
-        }
+    persistLocal(action === 'approve' ? 'FINAL' : 'DRAFT');
 
-        toast.success('SOAP notes saved successfully');
-        setShowNotes(false);
-      },
-      onError: async (error) => {
+    const payload = { ...soapNotes, action };
+
+    try {
+      const existing = await new Promise<{ id?: string } | undefined>(
+        (resolve) => {
+          getConsultationNoteByAppointmentMutation.mutate(
+            selectedAppointment.id,
+            {
+              onSuccess: (data) => resolve(data),
+              onError: () => resolve(undefined),
+            }
+          );
+        }
+      );
+
+      if (existing?.id) {
+        await updateConsultationNoteMutation.mutateAsync({
+          noteId: existing.id,
+          data: payload,
+        });
+      } else {
         await submitSoapMutation.mutateAsync({
           appointmentId: selectedAppointment.id,
-          data: { ...soapNotes, action: 'save' },
+          data: payload,
         });
-        toast.success('SOAP notes saved successfully');
-        setShowNotes(false);
-      },
-    });
-    try {
-    } catch (error) {
-      console.error('Error saving notes:', error);
-      toast.error('Failed to save SOAP notes');
+      }
+      toast.success(
+        action === 'approve' ? 'SOAP notes finalized' : 'SOAP notes saved'
+      );
+      setShowNotes(false);
+    } catch {
+      toast.success(
+        action === 'approve'
+          ? 'SOAP notes finalized locally'
+          : 'SOAP notes saved locally'
+      );
+      setShowNotes(false);
     }
   };
+
+  const handleSaveNotes = () => persistNotes('save');
+  const handleFinalizeNotes = () => persistNotes('approve');
 
   const handleNoteChange = (key: keyof typeof soapNotes, value: string) => {
     setSoapNotes((prev) => ({
@@ -198,6 +247,13 @@ const VideoCallLiveVitals = () => {
                   disabled={isLoading}
                 >
                   {isLoading ? <Spinner /> : 'Save Note'}
+                </Button>
+                <Button
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full h-14 font-bold text-base cursor-pointer"
+                  onClick={handleFinalizeNotes}
+                  disabled={isLoading}
+                >
+                  Finalize
                 </Button>
                 <Button
                   variant="outline"

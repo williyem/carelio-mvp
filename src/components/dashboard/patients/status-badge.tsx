@@ -29,6 +29,7 @@ const StatusBadge = ({
       break;
 
     case 'CONFIRMED':
+    case 'PENDING_CONFIRMATION':
       if (startObj && isBefore(now, startObj)) {
         label = 'Upcoming';
         className =
@@ -38,12 +39,6 @@ const StatusBadge = ({
         className =
           'bg-blue-50 text-brand-blue border-blue-100/50 px-2.5 py-[5px] rounded-full text-[12px] font-normal border  ';
       }
-      break;
-
-    case 'PENDING_CONFIRMATION':
-      label = 'Pending';
-      className =
-        'bg-amber-50 text-amber-600 border-amber-100/50 px-2.5 py-[5px] rounded-full text-[12px] font-normal border ';
       break;
 
     case 'COMPLETED':

@@ -38,6 +38,11 @@ import { combineDateAndTime } from '@/lib/datetime';
 import { getErrorMessage } from '@/integration';
 import { useDoctors } from '@/hooks/page-hooks/useDoctors';
 import { Appointment } from '@/types/appointment.types';
+import {
+  getRangesForDate,
+  useAvailabilityStore,
+} from '@/stores/availability-store';
+import { useAccessGrantStore } from '@/stores/access-grant-store';
 
 interface ScheduleAppointmentDialogProps {
   open: boolean;
@@ -126,6 +131,8 @@ const ScheduleAppointmentDialog = ({
   onScheduled,
 }: ScheduleAppointmentDialogProps) => {
   const { clinicians, cliniciansWithSearch, isLoading } = useDoctors();
+  const grantedIds = useAccessGrantStore((s) => s.grantedIds);
+  const getAvailability = useAvailabilityStore((s) => s.getAvailability);
   const { startCall, setSelectedAppointment } = useVideoCallStore();
 
   const {
@@ -204,7 +211,7 @@ const ScheduleAppointmentDialog = ({
                 },
               });
             }
-            toast.success('Appointment scheduled successfully');
+            toast.success('Appointment confirmed');
             onScheduled?.();
             onOpenChange(false);
             reset();
@@ -233,6 +240,18 @@ const ScheduleAppointmentDialog = ({
   const selectedDoctor = useMemo(() => {
     return clinicians.find((c) => c.id === selectedDoctorId);
   }, [clinicians, selectedDoctorId]);
+
+  const visibleClinicians = useMemo(() => {
+    if (portal !== 'patient' || grantedIds.length === 0) {
+      return cliniciansWithSearch;
+    }
+    return cliniciansWithSearch.filter((c) => grantedIds.includes(c.id));
+  }, [cliniciansWithSearch, grantedIds, portal]);
+
+  const allowedRanges = useMemo(() => {
+    if (!selectedDoctorId || !selectedDate) return null;
+    return getRangesForDate(getAvailability(selectedDoctorId), selectedDate);
+  }, [getAvailability, selectedDate, selectedDoctorId]);
 
   const today = useMemo(() => {
     const date = new Date();
@@ -401,11 +420,11 @@ const ScheduleAppointmentDialog = ({
                             >
                               {isLoading ? (
                                 <CommandEmpty>Loading...</CommandEmpty>
-                              ) : cliniciansWithSearch.length === 0 ? (
+                              ) : visibleClinicians.length === 0 ? (
                                 <CommandEmpty>No doctors found.</CommandEmpty>
                               ) : (
                                 <CommandGroup>
-                                  {cliniciansWithSearch.map((clinician) => (
+                                  {visibleClinicians.map((clinician) => (
                                     <CommandItem
                                       key={clinician.id}
                                       value={clinician.searchValue}
@@ -520,6 +539,7 @@ const ScheduleAppointmentDialog = ({
                       selectedDate={selectedDate}
                       ignorePastTimes={true}
                       disabled={isSubmitting}
+                      allowedRanges={allowedRanges}
                     />
                     <ErrorMessage message={errors.startTime?.message} />
                   </div>
@@ -535,6 +555,7 @@ const ScheduleAppointmentDialog = ({
                       selectedDate={selectedDate}
                       ignorePastTimes={false}
                       disabled={isSubmitting || !startTime}
+                      allowedRanges={allowedRanges}
                     />
                     <ErrorMessage message={errors.endTime?.message} />
                   </div>

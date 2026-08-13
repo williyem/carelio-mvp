@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { LogOut } from 'lucide-react';
+import { LogOut, Settings } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import HomeSvg from '@/assets/icons/home-svg';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,7 @@ interface SimpleTopbarProps {
 const SimpleTopbar = ({ className, onLogoutClick }: SimpleTopbarProps) => {
   const pathname = usePathname();
   const isHomeActive = pathname === ROUTES.PATIENT.ROOT;
+  const isSettingsActive = pathname?.startsWith(ROUTES.PATIENT.SETTINGS.ROOT);
 
   if (pathname === '/patient/register') {
     return null;
@@ -52,6 +53,21 @@ const SimpleTopbar = ({ className, onLogoutClick }: SimpleTopbarProps) => {
         >
           <HomeSvg className="w-5 h-5" />
           <span className="text-[14px] leading-[1.2] font-normal">Home</span>
+        </Link>
+
+        <div className="bg-(--border-stroke) h-[44px] w-px" />
+
+        <Link
+          href={ROUTES.PATIENT.SETTINGS.ROOT}
+          className={cn(
+            'flex items-center gap-2 px-1 py-0 hover:opacity-70 transition-opacity',
+            isSettingsActive ? 'text-(--brand-blue)' : 'text-(--text-primary)'
+          )}
+        >
+          <Settings className="w-5 h-5" />
+          <span className="text-[14px] leading-[1.2] font-normal">
+            Settings
+          </span>
         </Link>
 
         <div className="bg-(--border-stroke) h-[44px] w-px" />

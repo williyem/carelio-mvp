@@ -1,127 +1,93 @@
 'use client';
 
 import { useRouter } from 'nextjs-toploader/app';
-import { format } from 'date-fns';
 import BackButton from '@/components/dashboard/back-button';
 import { ROUTES } from '@/lib/routes';
 import CalendarSvg from '@/assets/icons/calendar-svg';
-
-interface VitalRecord {
-  id: string;
-  date: Date;
-  heartRate: string;
-  bloodPressure: string; // Format: "120/80"
-  temperature: string;
-  oxygenSaturation: string;
-}
+import { usePatientSession } from '@/integration/auth/patient';
+import { usePatientVitalsStore } from '@/stores/patient-vitals-store';
 
 const VitalHistoryPage = () => {
   const router = useRouter();
-
-  // TODO: Fetch vital records from API
-  // For now, using mock data
-  const vitalRecords: VitalRecord[] = [
-    {
-      id: '1',
-      date: new Date('2025-12-04'),
-      heartRate: '72 bpm',
-      bloodPressure: '120/80',
-      temperature: '98.6°F',
-      oxygenSaturation: '98%',
-    },
-    {
-      id: '2',
-      date: new Date('2025-12-03'),
-      heartRate: '72 bpm',
-      bloodPressure: '120/80',
-      temperature: '98.6°F',
-      oxygenSaturation: '98%',
-    },
-    {
-      id: '3',
-      date: new Date('2025-12-02'),
-      heartRate: '72 bpm',
-      bloodPressure: '120/80',
-      temperature: '98.6°F',
-      oxygenSaturation: '98%',
-    },
-    {
-      id: '4',
-      date: new Date('2025-12-01'),
-      heartRate: '72 bpm',
-      bloodPressure: '120/80',
-      temperature: '98.6°F',
-      oxygenSaturation: '98%',
-    },
-  ];
-
-  const handleBack = () => {
-    router.push(ROUTES.PATIENT.RECORD_VITALS);
-  };
+  const { data: session } = usePatientSession();
+  const patientId = session?.user?.id;
+  const entries = usePatientVitalsStore((s) =>
+    patientId ? s.entries.filter((entry) => entry.patientId === patientId) : []
+  );
 
   return (
     <div className="flex flex-col gap-[15px] items-start pt-4 sm:pt-10 px-4 sm:px-0 w-full max-w-[900px] mx-auto">
-      <BackButton onClick={handleBack} />
+      <BackButton onClick={() => router.push(ROUTES.PATIENT.RECORD_VITALS)} />
 
       <div className="flex flex-col gap-[20px] items-start w-full">
         <h1 className="font-bold leading-[1.2] text-(--text-primary) text-[20px] sm:text-[24px]">
           Vital History
         </h1>
 
+        {entries.length === 0 && (
+          <p className="text-sm text-(--text-secondary)">
+            No vitals recorded yet. Readings you submit stay pending until a
+            doctor confirms them in the visit.
+          </p>
+        )}
+
         <div className="flex flex-col gap-[16px] items-start w-full">
-          {vitalRecords.map((record) => (
+          {entries.map((record) => (
             <div
               key={record.id}
               className="border border-(--border-stroke) flex flex-col gap-[16px] items-start px-5 py-[15px] rounded-[10px] w-full"
             >
-              <p className="font-bold leading-[1.2] text-(--text-primary) text-[16px] w-full">
-                Vitals Summary
-              </p>
+              <div className="flex items-center justify-between w-full">
+                <p className="font-bold leading-[1.2] text-(--text-primary) text-[16px]">
+                  Vitals Summary
+                </p>
+                <span className="text-xs capitalize text-brand-blue">
+                  {record.status}
+                </span>
+              </div>
 
-              {/* Date */}
               <div className="flex items-start">
                 <div className="flex gap-[5px] items-center">
                   <div className="size-[18px]">
                     <CalendarSvg color="#1485d0" />
                   </div>
                   <p className="font-normal leading-[1.2] text-(--brand-blue-text) text-[14px]">
-                    {format(record.date, 'MMM d, yyyy')}
+                    {record.recordedAt}
                   </p>
                 </div>
               </div>
 
-              {/* Vitals List */}
               <div className="flex flex-col gap-[14px] items-start w-full">
                 <div className="flex gap-1 items-center w-full">
-                  <p className="flex-1 font-normal leading-[1.2] text-(--text-secondary) text-[14px]">
+                  <p className="flex-1 font-normal text-(--text-secondary) text-[14px]">
                     Heart Rate
                   </p>
-                  <p className="flex-1 font-bold leading-[1.2] text-(--text-primary) text-[14px]">
-                    {record.heartRate}
+                  <p className="flex-1 font-bold text-(--text-primary) text-[14px]">
+                    {record.heartRate} bpm
                   </p>
                 </div>
                 <div className="flex gap-1 items-center w-full">
-                  <p className="flex-1 font-normal leading-[1.2] text-(--text-secondary) text-[14px]">
+                  <p className="flex-1 font-normal text-(--text-secondary) text-[14px]">
                     Blood Pressure
                   </p>
-                  <p className="flex-1 font-bold leading-[1.2] text-(--text-primary) text-[14px]">
-                    {record.bloodPressure}
+                  <p className="flex-1 font-bold text-(--text-primary) text-[14px]">
+                    {record.systolic}/{record.diastolic}
                   </p>
                 </div>
                 <div className="flex gap-1 items-center w-full">
-                  <p className="flex-1 font-normal leading-[1.2] text-(--text-secondary) text-[14px]">
+                  <p className="flex-1 font-normal text-(--text-secondary) text-[14px]">
                     Temperature
                   </p>
-                  <p className="flex-1 font-bold leading-[1.2] text-(--text-primary) text-[14px]">
-                    {record.temperature}
+                  <p className="flex-1 font-bold text-(--text-primary) text-[14px]">
+                    {record.temperature}°F
                   </p>
                 </div>
                 <div className="flex gap-1 items-center w-full">
-                  <p className="flex-1 font-normal leading-[1.2] text-(--text-secondary) text-[14px]">
+                  <p className="flex-1 font-normal text-(--text-secondary) text-[14px]">
                     Oxygen (O₂)
                   </p>
-                  <p className="flex-1 font-bold leading-[1.2] text-(--text-primary) text-[14px]">
-                    {record.oxygenSaturation}
+                  <p className="flex-1 font-bold text-(--text-primary) text-[14px]">
+                    {record.oxygenSaturation}%
                   </p>
                 </div>
               </div>

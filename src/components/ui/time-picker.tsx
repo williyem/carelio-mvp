@@ -23,6 +23,7 @@ interface TimePickerProps<
   selectedDate?: Date | string;
   ignorePastTimes?: boolean;
   disabled?: boolean;
+  allowedRanges?: { start: string; end: string }[] | null;
 }
 
 const TIME_SLOTS = (() => {
@@ -44,6 +45,7 @@ const TimePicker = <TFieldValues extends FieldValues = FieldValues>({
   selectedDate,
   disabled,
   ignorePastTimes = false,
+  allowedRanges = null,
   ...props
 }: TimePickerProps<TFieldValues>) => {
   const {
@@ -57,22 +59,36 @@ const TimePicker = <TFieldValues extends FieldValues = FieldValues>({
     : null;
 
   const slots = useMemo(() => {
+    let next = TIME_SLOTS;
+
+    if (allowedRanges) {
+      next = next.filter((slot) => {
+        const [hours, minutes] = slot.value.split(':').map(Number);
+        const value = hours * 60 + minutes;
+        return allowedRanges.some((range) => {
+          const [startH, startM] = range.start.split(':').map(Number);
+          const [endH, endM] = range.end.split(':').map(Number);
+          return value >= startH * 60 + startM && value < endH * 60 + endM;
+        });
+      });
+    }
+
     if (
       !ignorePastTimes ||
       !parsedSelectedDate ||
       !isToday(parsedSelectedDate)
     ) {
-      return TIME_SLOTS;
+      return next;
     }
 
     const now = new Date();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-    return TIME_SLOTS.filter((slot) => {
+    return next.filter((slot) => {
       const parsed = parse(slot.value, 'HH:mm', now);
       return parsed.getHours() * 60 + parsed.getMinutes() > currentMinutes;
     });
-  }, [ignorePastTimes, parsedSelectedDate]);
+  }, [allowedRanges, ignorePastTimes, parsedSelectedDate]);
 
   const selectedLabel =
     TIME_SLOTS.find((slot) => slot.value === value)?.label ?? value;
