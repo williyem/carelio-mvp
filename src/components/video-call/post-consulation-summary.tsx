@@ -25,6 +25,7 @@ import { isClinicianCallRole } from '@/lib/call-join';
 import { useSoapDraftStore } from '@/stores/soap-draft-store';
 import { cn } from '@/lib/utils';
 import type { SoapNote } from '@/integration/appointments/types';
+import useUser from '@/hooks/useUser';
 
 type TabType = 'SOAP notes' | 'Vitals';
 
@@ -37,6 +38,7 @@ const PostConsultationSummary = () => {
     endCall,
   } = useVideoCallStore();
   const { role } = useCallParticipantRole();
+  const { userId } = useUser();
   const isDoctor = isClinicianCallRole(role);
   const [activeTab, setActiveTab] = React.useState<TabType>('SOAP notes');
 
@@ -86,8 +88,14 @@ const PostConsultationSummary = () => {
     return null;
   }
 
-  const isDraft = currentNote?.status !== 'FINAL';
   const appointment = fetchedAppointment || selectedAppointment;
+  const appointmentDoctorId =
+    appointment?.doctorId || appointment?.doctor?.id || '';
+  const canManageNote = Boolean(
+    userId && appointmentDoctorId && userId === appointmentDoctorId
+  );
+  const isDraft = currentNote?.status !== 'FINAL';
+  const canEdit = canManageNote && isDraft;
 
   return (
     <Dialog
@@ -148,19 +156,19 @@ const PostConsultationSummary = () => {
                     note={currentNote ?? null}
                     appointmentId={postConsultationAppointmentId || undefined}
                     hideVitals
-                    editable={isDraft}
+                    editable={canEdit}
                     soapFields={soapFields}
                     onSoapChange={(key, value) =>
                       setSoapFields((prev) => ({ ...prev, [key]: value }))
                     }
                   />
-                  {postConsultationAppointmentId && (
+                  {canManageNote && postConsultationAppointmentId ? (
                     <ConsultationNoteActions
                       appointmentId={postConsultationAppointmentId}
                       note={currentNote ?? null}
                       soapFields={soapFields}
                     />
-                  )}
+                  ) : null}
                 </div>
               )}
 

@@ -338,7 +338,6 @@ export interface InvitedPatient {
   gender: string | null; // or specific type if needed
   address: string | null;
   bloodType: string | null;
-  assignedAssistantId: string | null;
 }
 
 /**

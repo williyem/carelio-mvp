@@ -90,11 +90,11 @@ const ApproveDoctorContent = () => {
           <div className="flex flex-col items-center text-center space-y-5">
             <div className="space-y-2">
               <h1 className="text-xl font-bold text-gray-900">
-                Approve doctor access
+                Approve covering doctor
               </h1>
               <p className="text-sm text-gray-600">
-                {data.doctorName} is requesting ongoing access to{' '}
-                {data.patientName}’s records. Declining does not cancel an
+                {data.doctorName} is requesting covering-doctor access to{' '}
+                {data.patientName}’s chart. Declining does not cancel an
                 appointment if one was booked.
               </p>
             </div>

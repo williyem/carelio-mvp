@@ -1,23 +1,13 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import {
-  assignHealthAssistant,
   registerPatient,
   verifyPatientEmail,
   verifyPatientCode,
 } from './api-functions';
 
 const useHealthAssistantMutations = () => {
-  const queryClient = useQueryClient();
-
   const registerPatientMutation = useMutation({
     mutationFn: registerPatient,
-  });
-
-  const assignHealthAssistantMutation = useMutation({
-    mutationFn: assignHealthAssistant,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['patient'] });
-    },
   });
 
   const verifyPatientEmailMutation = useMutation({
@@ -38,7 +28,6 @@ const useHealthAssistantMutations = () => {
 
   return {
     registerPatientMutation,
-    assignHealthAssistantMutation,
     verifyPatientEmailMutation,
     verifyPatientCodeMutation,
   };

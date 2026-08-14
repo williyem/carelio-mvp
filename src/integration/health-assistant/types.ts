@@ -24,7 +24,6 @@ export interface RegisteredPatient {
   address: string;
   bloodType: string;
   invitedByDoctorId: string | null;
-  assignedAssistantId: string | null;
   isRegistrationComplete?: boolean;
 }
 
@@ -33,11 +32,6 @@ export interface HealthAssistantResponse {
   firstName: string;
   lastName: string;
   email: string;
-}
-
-export interface AssignHealthAssistantRequest {
-  patientId: string;
-  assistantId: string;
 }
 
 export interface VerifyPatientRequest {
@@ -66,8 +60,6 @@ export interface PatientRow {
     phone: string;
     email: string;
   };
-  assignedAssistantId: string | null;
-  assignedAssistantName?: string;
   isRegistrationComplete?: boolean;
   linked?: boolean;
   emailVerified?: boolean;
@@ -104,7 +96,6 @@ export interface DoctorsResponse {
 export interface HealthAssistantStats {
   totalMedicalAssistants: number;
   totalPatients: number;
-  unassignedPatients: number;
 }
 
 export interface HealthAssistantProfile {

@@ -106,14 +106,6 @@ const useDoctorPatientsCols = ({
           }),
         ]
       : []),
-    columnHelper.accessor('assignedAssistantName', {
-      header: ({ column }) => (
-        <SortableColumnHeader column={column} label="Health Assistant" />
-      ),
-      cell: (info) => (
-        <span className="font-normal">{info.getValue() || 'Unassigned'}</span>
-      ),
-    }),
     columnHelper.display({
       id: 'actions',
       header: () => <span>Actions</span>,
@@ -144,7 +136,7 @@ const useDoctorPatientsCols = ({
                     isLinked ? 'text-brand-blue focus:text-brand-blue' : ''
                   )}
                 >
-                  {isLinked ? 'View chart' : 'Verify access'}
+                  {isLinked ? 'View Details' : 'Verify access'}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -179,7 +171,7 @@ const useDoctorPatientsCols = ({
                 : 'border-[#D4D5D6] bg-[#F6F6F6] text-(--text-primary)'
             )}
           >
-            {isLinked ? 'View chart' : 'Verify access'}
+            {isLinked ? 'View Details' : 'Verify access'}
           </Button>
         );
       },

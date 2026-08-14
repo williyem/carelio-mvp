@@ -52,7 +52,6 @@ const AppointmentsPageContent = () => {
         <AppointmentsStats
           medicalAssistants={stats?.totalMedicalAssistants || 0}
           totalPatients={stats?.totalPatients || 0}
-          unassignedPatients={stats?.unassignedPatients || 0}
         />
       )}
       <div className=" w-full  rounded-[16px] space-y-4.5 border border-(--border-stroke) p-5 ">

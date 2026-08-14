@@ -43,18 +43,13 @@ const ConsultationNoteActions = ({
     hasSoapContent(soapFields[key])
   );
   const sentToPatient = Boolean(note?.planSharedWithPatientAt);
-  const sentToAssistant = Boolean(note?.planSharedWithHealthAssistantAt);
-  const sentToEveryone = sentToPatient && sentToAssistant;
   const isBusy =
     updateNoteMutation.isPending ||
     submitSoapMutation.isPending ||
     sharePlanMutation.isPending;
 
-  const persist = async (
-    action: 'save' | 'approve',
-    options?: { silent?: boolean }
-  ) => {
-    const payload = { ...soapFields, action };
+  const persistDraft = async (options?: { silent?: boolean }) => {
+    const payload = { ...soapFields, action: 'save' as const };
     if (note?.id) {
       await updateNoteMutation.mutateAsync({
         noteId: note.id,
@@ -67,21 +62,15 @@ const ConsultationNoteActions = ({
       });
     }
     if (!options?.silent) {
-      toast.success(
-        action === 'approve' ? 'Note saved to file' : 'Draft saved'
-      );
+      toast.success('Draft saved');
     }
   };
 
-  const handlePersist = async (action: 'save' | 'approve') => {
+  const handleSave = async () => {
     try {
-      await persist(action);
+      await persistDraft();
     } catch {
-      toast.error(
-        action === 'approve'
-          ? 'Could not save this note to file'
-          : 'Could not save draft'
-      );
+      toast.error('Could not save draft');
     }
   };
 
@@ -91,7 +80,7 @@ const ConsultationNoteActions = ({
   ) => {
     try {
       if (!isLocked) {
-        await persist('save', { silent: true });
+        await persistDraft({ silent: true });
       }
       await sharePlanMutation.mutateAsync({
         appointmentId,
@@ -100,7 +89,11 @@ const ConsultationNoteActions = ({
       const labels = recipients.map((recipient) =>
         recipient === 'patient' ? 'patient' : 'health assistant'
       );
-      toast.success(`Notes sent to the ${labels.join(' and ')}`);
+      toast.success(
+        recipients.includes('patient')
+          ? `Notes sent to the ${labels.join(' and ')}. The note is now locked.`
+          : `Notes sent to the ${labels.join(' and ')}`
+      );
       setIsShareOpen(false);
     } catch {
       toast.error('Could not send the SOAP notes');
@@ -111,7 +104,7 @@ const ConsultationNoteActions = ({
     <>
       <div className="flex flex-col sm:flex-row gap-3 w-full">
         <Button
-          onClick={() => handlePersist('save')}
+          onClick={handleSave}
           disabled={isBusy || isLocked}
           variant="outline"
           className="flex-1 text-brand-blue hover:text-brand-blue rounded-full hover:bg-brand-blue/10 border-brand-blue font-bold h-12"
@@ -119,24 +112,11 @@ const ConsultationNoteActions = ({
           {isBusy && !sharePlanMutation.isPending ? <Spinner /> : 'Save'}
         </Button>
         <Button
-          onClick={() => handlePersist('approve')}
-          disabled={isBusy || isLocked}
-          className="flex-1 bg-brand-blue rounded-full hover:bg-brand-blue/90 text-white font-bold h-12"
-        >
-          {isBusy && !sharePlanMutation.isPending ? (
-            <Spinner />
-          ) : isLocked ? (
-            'Saved to file'
-          ) : (
-            'Save to file'
-          )}
-        </Button>
-        <Button
           onClick={() => setIsShareOpen(true)}
           disabled={isBusy || !canSendPlan}
           className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full font-bold h-12"
         >
-          {sentToEveryone ? 'Plan sent' : 'Send plan'}
+          {sentToPatient ? 'Shared' : 'Share'}
         </Button>
         {showClose && onClose && (
           <Button

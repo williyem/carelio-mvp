@@ -16,6 +16,7 @@ import { soapFieldsFromNote } from '@/components/video-call/post-consultation-de
 import { useGetConsultationNoteByAppointment } from '@/integration/appointments/queries/useGetConsultationNoteByAppointment';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useSoapDraftStore } from '@/stores/soap-draft-store';
+import useUser from '@/hooks/useUser';
 
 type TabType = 'SOAP notes' | 'Vitals';
 
@@ -27,6 +28,7 @@ export default function AppointmentSummaryPage({
   const resolvedParams = use(params);
   const { id, appointmentId } = resolvedParams;
   const [activeTab, setActiveTab] = useState<TabType>('SOAP notes');
+  const { userId } = useUser();
 
   const { data: patient, isLoading: isLoadingPatient } = useGetPatientById(id);
   const { data: appointment } = useGetAppointmentById(appointmentId);
@@ -46,7 +48,13 @@ export default function AppointmentSummaryPage({
     return <AppointmentSummarySkeleton />;
   }
 
+  const appointmentDoctorId =
+    appointment?.doctorId || appointment?.doctor?.id || '';
+  const canManageNote = Boolean(
+    userId && appointmentDoctorId && userId === appointmentDoctorId
+  );
   const isDraft = currentNote?.status !== 'FINAL';
+  const canEdit = canManageNote && isDraft;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -89,22 +97,24 @@ export default function AppointmentSummaryPage({
       <div className="min-h-[400px] space-y-6">
         {activeTab === 'SOAP notes' && (
           <div className="space-y-6">
-            {currentNote || isDraft ? (
+            {currentNote || canEdit ? (
               <>
                 <PostConsultationPageDetails
                   note={currentNote ?? null}
                   hideVitals={true}
-                  editable={isDraft}
+                  editable={canEdit}
                   soapFields={soapFields}
                   onSoapChange={(key, value) =>
                     setSoapFields((prev) => ({ ...prev, [key]: value }))
                   }
                 />
-                <ConsultationNoteActions
-                  appointmentId={appointmentId}
-                  note={currentNote ?? null}
-                  soapFields={soapFields}
-                />
+                {canManageNote ? (
+                  <ConsultationNoteActions
+                    appointmentId={appointmentId}
+                    note={currentNote ?? null}
+                    soapFields={soapFields}
+                  />
+                ) : null}
               </>
             ) : (
               <EmptyState

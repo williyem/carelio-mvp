@@ -518,10 +518,6 @@ export const mapAssignedPatientToAppointmentRow = (
   identityNumber: patient.patientId,
   age: calculateAge(patient.dob || patient.dateOfBirth),
   contact: { phone: patient.phoneNumber || '', email: patient.email },
-  assignedAssistantId: patient.assignedAssistantId,
-  assignedAssistantName: patient.assignedAssistant
-    ? `${patient.assignedAssistant.firstName} ${patient.assignedAssistant.lastName}`
-    : undefined,
   isRegistrationComplete: patient.isRegistrationComplete,
   linked: patient.linked,
   emailVerified: patient.emailVerified,

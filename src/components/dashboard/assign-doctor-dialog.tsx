@@ -56,14 +56,16 @@ const AssignDoctorDialog = ({
       onSuccess: (data) => {
         toast.success(data?.message || 'Approval email sent to the patient', {
           description: data?.doctorName
-            ? `${data.doctorName} can be booked now. The patient still needs to approve ongoing chart access.`
-            : 'You can book this doctor now. Chart access waits on the patient.',
+            ? `${data.doctorName} can cover this visit once booked. Ongoing chart access still needs patient approval.`
+            : 'You can book this covering doctor now. Chart access waits on the patient.',
         });
         setDoctorId('');
         onOpenChange(false);
       },
       onError: (error) => {
-        toast.error(getErrorMessage(error, 'Failed to assign doctor'));
+        toast.error(
+          getErrorMessage(error, 'Failed to request covering doctor')
+        );
       },
     });
   };
@@ -79,12 +81,12 @@ const AssignDoctorDialog = ({
         <VerificationDialogCloseButton onClose={handleClose} />
         <AlertDialogHeader className="items-start text-left p-0 pr-8">
           <AlertDialogTitle className="font-bold leading-[20px] text-(--text-dark) text-[16px]">
-            Assign a doctor
+            Request covering doctor
           </AlertDialogTitle>
           <AlertDialogDescription className="font-normal leading-[20px] text-(--text-gray) text-[14px] mt-[2px]">
             {patientName
-              ? `Ask ${patientName} to approve this doctor’s chart access. You can still book an appointment now.`
-              : 'The patient will get an email to approve chart access. You can still book an appointment now.'}
+              ? `Ask ${patientName} to approve this covering doctor’s chart access. You can still book an appointment now.`
+              : 'The patient will get an email to approve covering-doctor chart access. You can still book an appointment now.'}
           </AlertDialogDescription>
         </AlertDialogHeader>
 

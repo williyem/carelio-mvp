@@ -7,8 +7,6 @@ export interface AppointmentRow {
     phone: string;
     email: string;
   };
-  assignedAssistantId?: string | null;
-  assignedAssistantName?: string;
   accountNumber?: string;
   insId?: string;
   isRegistrationComplete?: boolean;

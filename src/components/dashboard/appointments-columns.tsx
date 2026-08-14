@@ -67,14 +67,6 @@ const useAppointmentsCols = ({ onView }: UseAppointmentsColsProps = {}) => {
         );
       },
     }),
-    columnHelper.accessor('assignedAssistantName', {
-      header: ({ column }) => (
-        <SortableColumnHeader column={column} label="Health Assistant" />
-      ),
-      cell: (info) => (
-        <span className="font-normal">{info.getValue() || 'Unassigned'}</span>
-      ),
-    }),
     columnHelper.display({
       id: 'actions',
       header: () => <span>Actions</span>,

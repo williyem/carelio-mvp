@@ -107,11 +107,13 @@ function SendPlanForm({
   return (
     <>
       <DialogHeader>
-        <DialogTitle>{step === 1 ? 'Share SOAP notes' : 'Send to'}</DialogTitle>
+        <DialogTitle>
+          {step === 1 ? 'Share SOAP notes' : 'Who should receive them?'}
+        </DialogTitle>
         <DialogDescription>
           {step === 1
-            ? 'Choose which SOAP sections to share. Step 1 of 2.'
-            : 'Choose who should receive the selected notes. Step 2 of 2.'}
+            ? 'Choose which SOAP sections to send. Step 1 of 2.'
+            : 'Sharing with the patient locks this note. Step 2 of 2.'}
         </DialogDescription>
       </DialogHeader>
 
@@ -142,7 +144,7 @@ function SendPlanForm({
             description={
               alreadySentToPatient
                 ? 'Already shared — sending again adds the selected sections'
-                : 'Share in the patient’s health records'
+                : 'Adds these notes to the patient’s health records and locks the note'
             }
             checked={sendToPatient}
             onCheckedChange={setSendToPatient}

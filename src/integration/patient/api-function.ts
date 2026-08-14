@@ -4,15 +4,12 @@ import { HEALTH_ASSISTANT_API_ENDPOINTS as HA_STAFF_API } from '../health-assist
 import { ApiResponse, apiClient, backendApiClient } from '../config';
 import { PATIENT_API_ENDPOINTS, PATIENT_ENDPOINTS } from './endpoints';
 import type {
-  Patient,
   AssignedPatient,
   PatientSearchParams,
   PatientSearchResponse,
   GetAssignedPatientsParams,
-  AssignPatientRequest,
   InvitePatientRequest,
   InvitePatientResponse,
-  UnassignPatientResponse,
   PatientConsultationTokenResponse,
 } from './type';
 
@@ -133,22 +130,6 @@ export const searchAssignedPatients = async (
   return extractResponseData(response);
 };
 
-export const searchUnAssignedPatients = async (
-  params: PatientSearchParams
-): Promise<PatientSearchResponse> => {
-  const response = await apiClient.get<ApiResponse<PatientSearchResponse>>(
-    PATIENT_API_ENDPOINTS.SEARCH_UNASSIGNED_PATIENTS,
-    {
-      params: {
-        search: params.search,
-        page: params.page,
-        limit: params.limit,
-      },
-    }
-  );
-  return extractResponseData(response);
-};
-
 export const searchAssignedHealthAssistantsPatients = async (
   params: PatientSearchParams
 ): Promise<PatientSearchResponse> => {
@@ -194,28 +175,6 @@ export const getHealthAssistantPatientById = async (
   const response = await apiClient.get<ApiResponse<AssignedPatient>>(
     PATIENT_API_ENDPOINTS.HA_GET_PATIENT_BY_ID.replace(':id', id)
   );
-  return extractResponseData(response);
-};
-
-export const assignPatient = async (
-  data: AssignPatientRequest
-): Promise<Patient> => {
-  const response = await apiClient.post<ApiResponse<Patient>>(
-    PATIENT_API_ENDPOINTS.ASSIGN_PATIENT,
-    data
-  );
-  return extractResponseData(response);
-};
-
-export const unassignPatient = async (
-  patientId: string
-): Promise<UnassignPatientResponse> => {
-  const endpoint = PATIENT_API_ENDPOINTS.UNASSIGN_PATIENT.replace(
-    ':patientId',
-    patientId
-  );
-  const response =
-    await apiClient.delete<ApiResponse<UnassignPatientResponse>>(endpoint);
   return extractResponseData(response);
 };
 

@@ -61,9 +61,9 @@ const VideoCallLiveVitals = () => {
   const getDraft = useSoapDraftStore((s) => s.getDraft);
   const saveDraft = useSoapDraftStore((s) => s.saveDraft);
 
-  const persistLocal = (status: 'DRAFT' | 'FINAL') => {
+  const persistLocal = () => {
     if (!appointmentId) return;
-    saveDraft(appointmentId, { ...soapNotes, status });
+    saveDraft(appointmentId, { ...soapNotes, status: 'DRAFT' });
   };
 
   useEffect(() => {
@@ -99,15 +99,15 @@ const VideoCallLiveVitals = () => {
     updateConsultationNoteMutation.isPending ||
     getConsultationNoteByAppointmentMutation.isPending;
 
-  const persistNotes = async (action: 'save' | 'approve') => {
+  const handleSaveNotes = async () => {
     if (!appointmentId) {
       toast.error('No active appointment found');
       return;
     }
 
-    persistLocal(action === 'approve' ? 'FINAL' : 'DRAFT');
+    persistLocal();
 
-    const payload = { ...soapNotes, action };
+    const payload = { ...soapNotes, action: 'save' as const };
 
     try {
       const existing = await new Promise<{ id?: string } | null | undefined>(
@@ -130,23 +130,13 @@ const VideoCallLiveVitals = () => {
           data: payload,
         });
       }
-      toast.success(
-        action === 'approve' ? 'SOAP notes finalized' : 'SOAP notes saved'
-      );
+      toast.success('Draft saved');
       setDoctorView('records');
     } catch {
-      toast.success(
-        action === 'approve'
-          ? 'SOAP notes finalized locally'
-          : 'SOAP notes saved locally'
-      );
+      toast.success('Draft saved locally');
       setDoctorView('records');
     }
   };
-
-  const handleSaveNotes = () => persistNotes('save');
-  const handleFinalizeNotes = () => persistNotes('approve');
-
   const handleNoteChange = (key: keyof typeof soapNotes, value: string) => {
     setSoapNotes((prev) => ({
       ...prev,
@@ -244,14 +234,7 @@ const VideoCallLiveVitals = () => {
                 onClick={handleSaveNotes}
                 disabled={isLoading}
               >
-                {isLoading ? <Spinner /> : 'Save note'}
-              </Button>
-              <Button
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full h-12 font-bold cursor-pointer"
-                onClick={handleFinalizeNotes}
-                disabled={isLoading}
-              >
-                Finalize
+                {isLoading ? <Spinner /> : 'Save'}
               </Button>
             </div>
           </div>

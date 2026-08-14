@@ -55,7 +55,7 @@ const PatientDetailsHeader = ({
             >
               <UserPlus className="w-4 h-4 mr-2" />
               <span className="text-[14px] leading-[1.2] font-normal">
-                Assign doctor
+                Request covering doctor
               </span>
             </Button>
           ) : null}
