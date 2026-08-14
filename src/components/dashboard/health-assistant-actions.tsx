@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar, Heart, FileText } from 'lucide-react';
+import { Calendar, User, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -41,9 +41,9 @@ const HealthAssistantActions = ({
         size={undefined}
         className="flex-1 bg-black cursor-pointer max-md:w-full border border-black min-h-[50px] h-[50px] px-4 py-[10px] rounded-[100px] gap-2 hover:bg-black/90 text-white"
       >
-        <Heart className="w-6 h-6" />
+        <User className="w-6 h-6" />
         <span className="text-[16px] max-md:text-sm font-bold leading-[1.2] text-white">
-          Record My Vitals
+          My information
         </span>
       </Button>
 

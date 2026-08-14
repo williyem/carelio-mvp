@@ -1,11 +1,6 @@
-import {
-  patientAccessToken,
-  patientCookieObj,
-  patientRefreshToken,
-} from '@/lib/constants';
 import { backendApiClient, API_BASE_URL } from '@/integration/config';
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { setPatientSessionCookies } from '../session-cookies';
 
 function isConnRefused(error: unknown): boolean {
   return (
@@ -16,66 +11,59 @@ function isConnRefused(error: unknown): boolean {
   );
 }
 
+function proxyError(error: unknown, fallback: string) {
+  console.error(fallback, error);
+
+  if (isConnRefused(error)) {
+    return NextResponse.json(
+      {
+        error: 'Backend unreachable',
+        message: `Cannot connect to API at ${API_BASE_URL}. Start carelio-backend (npm run dev on :4000).`,
+      },
+      { status: 503 }
+    );
+  }
+
+  if (typeof error === 'object' && error !== null && 'response' in error) {
+    const axiosError = error as {
+      response?: { status?: number; data?: unknown };
+    };
+    return NextResponse.json(axiosError.response?.data ?? { error: fallback }, {
+      status: axiosError.response?.status || 500,
+    });
+  }
+
+  return NextResponse.json({ error: fallback }, { status: 500 });
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const cookieStore = await cookies();
 
-    if (body.patientId && !body.accessToken) {
+    if ((body.identifier || body.patientId) && body.password) {
       const response = await backendApiClient.post(
         `${API_BASE_URL}/auth/patient/login`,
-        { patientId: body.patientId }
+        {
+          identifier: body.identifier || body.patientId,
+          password: body.password,
+        }
       );
       const loginResponse = response.data as {
+        requiresEmailVerification?: boolean;
+        patientId?: string;
         tokenData?: {
           access: { token: string };
           refresh: { token: string };
         };
-        user?: {
-          id: string;
-          patientId?: string;
-          [key: string]: unknown;
-        };
+        user?: { id: string; patientId?: string };
       };
 
-      if (loginResponse.tokenData && loginResponse.user) {
-        cookieStore.set(
-          patientAccessToken,
-          loginResponse.tokenData.access.token,
-          {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            path: '/',
-            maxAge: 60 * 60 * 24 * 7,
-          }
-        );
-
-        cookieStore.set(
-          patientRefreshToken,
-          loginResponse.tokenData.refresh.token,
-          {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            path: '/',
-            maxAge: 60 * 60 * 24 * 30,
-          }
-        );
-
-        cookieStore.set(
-          patientCookieObj,
-          JSON.stringify({
-            id: loginResponse.user.id,
-            patientId: loginResponse.user.patientId,
-          }),
-          {
-            httpOnly: false,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            path: '/',
-          }
-        );
+      if (
+        !loginResponse.requiresEmailVerification &&
+        loginResponse.tokenData &&
+        loginResponse.user
+      ) {
+        await setPatientSessionCookies(loginResponse);
       }
 
       return NextResponse.json(loginResponse);
@@ -84,60 +72,21 @@ export async function POST(req: Request) {
     const { accessToken, refreshToken, id } = body;
     if (!accessToken || !refreshToken) {
       return NextResponse.json(
-        { error: 'accessToken and refreshToken are required' },
+        { error: 'identifier and password are required' },
         { status: 400 }
       );
     }
 
-    const userData = JSON.stringify({ id });
-
-    cookieStore.set(patientAccessToken, accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7,
-    });
-
-    cookieStore.set(patientRefreshToken, refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 30,
-    });
-
-    cookieStore.set(patientCookieObj, userData, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/',
+    await setPatientSessionCookies({
+      tokenData: {
+        access: { token: accessToken },
+        refresh: { token: refreshToken },
+      },
+      user: { id },
     });
 
     return NextResponse.json({ message: 'Success' });
   } catch (error) {
-    console.error('Patient login error:', error);
-
-    if (isConnRefused(error)) {
-      return NextResponse.json(
-        {
-          error: 'Backend unreachable',
-          message: `Cannot connect to API at ${API_BASE_URL}. Start carelio-backend (npm run dev on :4000).`,
-        },
-        { status: 503 }
-      );
-    }
-
-    if (typeof error === 'object' && error !== null && 'response' in error) {
-      const axiosError = error as {
-        response?: { status?: number; data?: unknown };
-      };
-      return NextResponse.json(
-        axiosError.response?.data ?? { error: 'Login failed' },
-        { status: axiosError.response?.status || 500 }
-      );
-    }
-
-    return NextResponse.json({ error: 'Login failed' }, { status: 500 });
+    return proxyError(error, 'Login failed');
   }
 }

@@ -15,6 +15,7 @@ export type PatientOnboardingDemographics = {
   address?: string;
   email?: string;
   bloodType?: string;
+  password?: string;
   patientSignature?: string;
   insuranceCompany?: string;
   memberId?: string;
@@ -77,6 +78,10 @@ export async function finishInvitePatientRegistration(
     toPatientIsoDob(formData.dob) ||
     '';
 
+  if (!formData.password || formData.password.length < 8) {
+    throw new Error('Password must be at least 8 characters');
+  }
+
   const registrationResponse = await completeRegistration({
     token,
     fullName: formData.fullName || formData.printedName || '',
@@ -86,6 +91,7 @@ export async function finishInvitePatientRegistration(
     address: formData.address || '',
     bloodType: (formData.bloodType || 'O+') as BloodType,
     email: formData.email || undefined,
+    password: formData.password,
   });
   const registration = extractResponseData(registrationResponse);
 

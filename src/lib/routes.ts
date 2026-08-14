@@ -64,6 +64,7 @@ export const ROUTES = {
     ROOT: '/patient',
     ONBOARDING: '/patient/onboarding',
     RECORD_VITALS: '/patient/record-vitals',
+    PROFILE: '/patient/profile',
     VITAL_HISTORY: '/patient/vital-history',
     HEALTH_RECORDS: '/patient/health-records',
     RECORD_DETAILS: (recordId: string) => `/patient/health-records/${recordId}`,
@@ -128,6 +129,9 @@ export const NEXT_API_ROUTES = {
     SESSION: `${NEXT_API_PATIENT_BASE}/session`,
     COMPLETE_REGISTRATION: `${NEXT_API_PATIENT_BASE}/complete-registration`,
     VERIFY_INVITATION: `${NEXT_API_PATIENT_BASE}/verify-invitation`,
+    VERIFY_LOGIN_EMAIL: `${NEXT_API_PATIENT_BASE}/verify-login-email`,
+    FORGOT_PASSWORD: `${NEXT_API_PATIENT_BASE}/forgot-password`,
+    RESET_PASSWORD: `${NEXT_API_PATIENT_BASE}/reset-password`,
   },
   CLEAR_COOKIES: `${NEXT_API_BASE}/clear-cookies`,
 } as const;

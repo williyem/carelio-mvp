@@ -9,6 +9,13 @@ export interface Patient {
   phoneNumber?: string;
   address?: string;
   allergies?: string[];
+  medications?: string[];
+  conditions?: string[];
+  emergencyContact?: {
+    name?: string;
+    relationship?: string;
+    phone?: string;
+  };
   chiefComplaint?: string;
   patientId: string;
   name: string;

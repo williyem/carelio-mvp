@@ -15,12 +15,15 @@ const RecentConsultationRow = ({
   appointment,
   handlePatientSelect,
 }: RecentConsultationRowProps) => {
-  const { patient } = appointment;
+  const { patient, doctor } = appointment;
   const fullName =
     patient.fullName ||
     `${patient.firstName} ${patient.lastName}` ||
     patient.email ||
     patient.phoneNumber;
+  const doctorName = [doctor?.firstName, doctor?.lastName]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div
@@ -50,6 +53,11 @@ const RecentConsultationRow = ({
           <h3 className="font-semibold text-gray-900 leading-tight">
             {fullName || patient.patientId}
           </h3>
+          {doctorName ? (
+            <p className="text-sm font-normal text-(--text-secondary)">
+              Dr. {doctorName}
+            </p>
+          ) : null}
           <div className="flex gap-x-2 items-end text-sm text-gray-500">
             <div className="flex items-center gap-x-1">
               <CalendarSvg />

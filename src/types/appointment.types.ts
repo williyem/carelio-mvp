@@ -19,6 +19,7 @@ export interface AppointmentRow {
 export interface Appointment {
   id: string;
   doctorId: string;
+  bookedByAssistantId?: string | null;
   patientId: string;
   isImmediate?: boolean;
   date?: string; // ISO Date

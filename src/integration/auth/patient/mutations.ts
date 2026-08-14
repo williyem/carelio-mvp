@@ -3,6 +3,9 @@
 import { useMutation, UseMutationOptions } from '@tanstack/react-query';
 import {
   loginPatient,
+  verifyPatientLoginEmail,
+  forgotPatientPassword,
+  resetPatientPassword,
   refreshToken,
   logoutPatient,
   completeRegistration,
@@ -10,6 +13,9 @@ import {
 import type {
   PatientLoginRequest,
   PatientLoginResponse,
+  PatientVerifyLoginEmailRequest,
+  PatientForgotPasswordRequest,
+  PatientResetPasswordRequest,
   RefreshTokenRequest,
   RefreshTokenResponse,
   CompleteRegistrationRequest,
@@ -22,6 +28,9 @@ import { extractResponseData } from '@/integration/utils';
  */
 export const PATIENT_MUTATION_KEYS = {
   LOGIN: ['patient', 'auth', 'login'] as const,
+  VERIFY_LOGIN_EMAIL: ['patient', 'auth', 'verify-login-email'] as const,
+  FORGOT_PASSWORD: ['patient', 'auth', 'forgot-password'] as const,
+  RESET_PASSWORD: ['patient', 'auth', 'reset-password'] as const,
   REFRESH_TOKEN: ['patient', 'auth', 'refresh'] as const,
   LOGOUT: ['patient', 'auth', 'logout'] as const,
   COMPLETE_REGISTRATION: ['patient', 'auth', 'complete-registration'] as const,
@@ -37,6 +46,57 @@ export const useLoginPatient = (
     mutationKey: PATIENT_MUTATION_KEYS.LOGIN,
     mutationFn: async (data: PatientLoginRequest) => {
       const response = await loginPatient(data);
+      return extractResponseData(response);
+    },
+    ...options,
+  });
+};
+
+export const useVerifyPatientLoginEmail = (
+  options?: UseMutationOptions<
+    PatientLoginResponse,
+    Error,
+    PatientVerifyLoginEmailRequest
+  >
+) => {
+  return useMutation({
+    mutationKey: PATIENT_MUTATION_KEYS.VERIFY_LOGIN_EMAIL,
+    mutationFn: async (data: PatientVerifyLoginEmailRequest) => {
+      const response = await verifyPatientLoginEmail(data);
+      return extractResponseData(response);
+    },
+    ...options,
+  });
+};
+
+export const useForgotPatientPassword = (
+  options?: UseMutationOptions<
+    { message: string },
+    Error,
+    PatientForgotPasswordRequest
+  >
+) => {
+  return useMutation({
+    mutationKey: PATIENT_MUTATION_KEYS.FORGOT_PASSWORD,
+    mutationFn: async (data: PatientForgotPasswordRequest) => {
+      const response = await forgotPatientPassword(data);
+      return extractResponseData(response);
+    },
+    ...options,
+  });
+};
+
+export const useResetPatientPassword = (
+  options?: UseMutationOptions<
+    { message: string },
+    Error,
+    PatientResetPasswordRequest
+  >
+) => {
+  return useMutation({
+    mutationKey: PATIENT_MUTATION_KEYS.RESET_PASSWORD,
+    mutationFn: async (data: PatientResetPasswordRequest) => {
+      const response = await resetPatientPassword(data);
       return extractResponseData(response);
     },
     ...options,

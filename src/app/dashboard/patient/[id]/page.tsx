@@ -25,6 +25,10 @@ import PatientVerificationDialog from '@/components/dashboard/patient-verificati
 import RecordsLockedCard from '@/components/dashboard/records-locked-card';
 import { Patient } from '@/types/patient.types';
 import { usePatientVerificationStore } from '@/stores/patient-verifcation-store';
+import {
+  formatClinicalList,
+  formatEmergencyContact,
+} from '@/lib/patient-clinical';
 
 export default function PatientDetailsPage({
   params,
@@ -230,7 +234,23 @@ export default function PatientDetailsPage({
             <div className="bg-[#FDFAE7] rounded-xl p-5 space-y-1">
               <h4 className="text-base font-bold text-gray-900">Allergies</h4>
               <p className="text-sm text-gray-500">
-                {patient.allergies || 'None reported'}
+                {formatClinicalList(patient.allergies)}
+              </p>
+            </div>
+            <div className="bg-[#FDFAE7] rounded-xl p-5 space-y-1">
+              <h4 className="text-base font-bold text-gray-900">
+                Medical conditions
+              </h4>
+              <p className="text-sm text-gray-500">
+                {formatClinicalList(patient.conditions)}
+              </p>
+            </div>
+            <div className="bg-[#FDFAE7] rounded-xl p-5 space-y-1">
+              <h4 className="text-base font-bold text-gray-900">
+                Emergency contact
+              </h4>
+              <p className="text-sm text-gray-500">
+                {formatEmergencyContact(patient.emergencyContact)}
               </p>
             </div>
           </div>

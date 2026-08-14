@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import BigUserSvg from '@/assets/icons/big-user-svg';
 import GenderSvg from '@/assets/icons/gender-svg';
 import { Patient } from '@/integration/patient';
+import PatientClinicalIntake from '@/components/dashboard/patient-clinical-intake';
 
 interface PatientInfoCardProps {
   patient: Patient;
@@ -136,19 +137,11 @@ const PatientInfoCard = ({ patient, className }: PatientInfoCardProps) => {
         </div>
       </div>
 
-      {/* Allergies */}
-      {patient.allergies && patient.allergies.length > 0 && (
-        <div className="bg-(--bg-warning) flex items-center px-4 sm:px-5 py-3 sm:py-[15px] rounded-[10px] w-full">
-          <div className="flex flex-col items-start space-y-1 w-full">
-            <p className="font-normal leading-[1.2] text-(--text-primary) text-sm sm:text-[16px]">
-              Allergies
-            </p>
-            <p className="font-normal leading-[1.2] text-(--text-secondary) text-xs sm:text-[14px] wrap-break-word">
-              {patient.allergies?.join(', ')}
-            </p>
-          </div>
-        </div>
-      )}
+      <PatientClinicalIntake
+        allergies={patient.allergies}
+        conditions={patient.conditions}
+        emergencyContact={patient.emergencyContact}
+      />
     </div>
   );
 };

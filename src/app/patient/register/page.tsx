@@ -19,6 +19,7 @@ import {
 } from '@/integration/auth/patient';
 import { useSearchParams } from 'next/navigation';
 import PersonalInfoStep from '@/components/patient-invite/steps/consent/personal-info-step';
+import CreatePasswordStep from '@/components/patient-invite/steps/consent/create-password-step';
 import { usePatientInviteStore } from '@/stores/patient-invite-store';
 import { finishInvitePatientRegistration } from '@/lib/patient-onboarding-finish';
 
@@ -91,6 +92,7 @@ function PatientRegisterForm({
       handlePersonalInfo={handlePersonalInfo}
       isSubmitting={false}
     />,
+    <CreatePasswordStep key="create-password" />,
     <PatientAgreementsStep key="agreements" />,
     <OptionalCoverageStep
       key="coverage"

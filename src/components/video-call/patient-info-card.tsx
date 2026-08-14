@@ -3,19 +3,19 @@
 
 import * as React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  formatClinicalList,
+  formatEmergencyContact,
+} from '@/lib/patient-clinical';
 
 interface PatientInfoCardProps {
   patient: any; // Using any for now to handle both types flexibly
 }
 
 const PatientInfoCard = ({ patient }: PatientInfoCardProps) => {
-  // Default values for allergies and conditions if they don't exist
-  const allergies =
-    patient?.allergies && patient.allergies.length > 0
-      ? patient.allergies.join(', ')
-      : 'None';
-
-  const conditions = patient?.chiefComplaint || 'None';
+  const allergies = formatClinicalList(patient?.allergies);
+  const conditions = formatClinicalList(patient?.conditions);
+  const emergencyContact = formatEmergencyContact(patient?.emergencyContact);
 
   const formattedDob = React.useMemo(() => {
     const dob = patient?.dob || patient?.dateOfBirth;
@@ -56,8 +56,16 @@ const PatientInfoCard = ({ patient }: PatientInfoCardProps) => {
             <p className="font-bold text-gray-900">{allergies}</p>
           </div>
           <div className="space-y-1">
-            <p className="font-normal text-(--text-secondary)">Conditions</p>
+            <p className="font-normal text-(--text-secondary)">
+              Medical conditions
+            </p>
             <p className="font-bold text-gray-900">{conditions}</p>
+          </div>
+          <div className="space-y-1">
+            <p className="font-normal text-(--text-secondary)">
+              Emergency contact
+            </p>
+            <p className="font-bold text-gray-900">{emergencyContact}</p>
           </div>
         </div>
       </CardContent>

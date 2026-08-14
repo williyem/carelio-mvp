@@ -23,7 +23,7 @@ import DateOfBirthSvg from '@/assets/icons/date-of-birth-svg';
 import GenderIconSvg from '@/assets/icons/gender-icon-svg';
 import EmailIconSvg from '@/assets/icons/email-icon-svg';
 import PhoneNumberSvg from '@/assets/icons/phone-number-svg';
-import { AddPatientFormData } from '@/hooks/page-hooks/use-add-patient';
+import { AddPatientFormData } from '@/hooks/page-hooks/use-onboard-patient';
 import { Controller } from 'react-hook-form';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon } from 'lucide-react';

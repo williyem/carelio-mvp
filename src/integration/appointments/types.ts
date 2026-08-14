@@ -60,6 +60,7 @@ export interface Appointment {
   id: string;
   patientId: string;
   doctorId: string;
+  bookedByAssistantId?: string | null;
   date?: string;
   startTime?: string;
   endTime?: string;

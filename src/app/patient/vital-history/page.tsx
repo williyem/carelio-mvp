@@ -23,7 +23,7 @@ const VitalHistoryPage = () => {
 
   return (
     <div className="flex flex-col gap-[15px] items-start pt-4 sm:pt-10 px-4 sm:px-0 w-full max-w-[900px] mx-auto">
-      <BackButton onClick={() => router.push(ROUTES.PATIENT.RECORD_VITALS)} />
+      <BackButton onClick={() => router.push(ROUTES.PATIENT.ROOT)} />
 
       <div className="flex flex-col gap-[20px] items-start w-full">
         <h1 className="font-bold leading-[1.2] text-(--text-primary) text-[20px] sm:text-[24px]">

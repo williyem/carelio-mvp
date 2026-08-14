@@ -72,6 +72,10 @@ const PatientDetailsPage = () => {
       email: fetchedPatient.email,
       phone: fetchedPatient.phoneNumber,
       address: fetchedPatient.address,
+      allergies: fetchedPatient.allergies,
+      medications: fetchedPatient.medications,
+      conditions: fetchedPatient.conditions,
+      emergencyContact: fetchedPatient.emergencyContact,
       isRegistrationComplete: fetchedPatient.isRegistrationComplete,
     };
   }, [fetchedPatient, patientId]);

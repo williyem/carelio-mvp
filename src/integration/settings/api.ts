@@ -139,6 +139,31 @@ export async function revokeAccess(granteeId: string) {
   return extractResponseData(response);
 }
 
+export async function getPatientProfile() {
+  const response = await apiClient.get('/patient/profile');
+  return extractResponseData(response) as {
+    id?: string;
+    patientId?: string;
+    fullName?: string;
+    dob?: string;
+    dateOfBirth?: string;
+    gender?: string;
+    email?: string;
+    phone?: string;
+    phoneNumber?: string;
+    address?: string;
+    bloodType?: string;
+    allergies?: string[];
+    medications?: string[];
+    conditions?: string[];
+    emergencyContact?: {
+      name?: string;
+      relationship?: string;
+      phone?: string;
+    };
+  };
+}
+
 export async function patchPatientProfile(data: {
   fullName?: string;
   address?: string;
@@ -147,6 +172,14 @@ export async function patchPatientProfile(data: {
   dob?: string;
   gender?: 'male' | 'female' | 'other';
   bloodType?: string;
+  allergies?: string[];
+  medications?: string[];
+  conditions?: string[];
+  emergencyContact?: {
+    name?: string;
+    relationship?: string;
+    phone?: string;
+  };
   isRegistrationComplete?: boolean;
 }) {
   const response = await apiClient.patch('/patient/profile', data);

@@ -1,14 +1,16 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import { formatDistanceToNow } from 'date-fns';
+import { Info } from 'lucide-react';
 import { ROUTES } from '@/lib/routes';
 import HealthAssistantActions from '@/components/dashboard/health-assistant-actions';
 import HealthAssistantAppointments, {
   HealthAssistantAppointment,
 } from '@/components/dashboard/health-assistant-appointments';
 import ScheduleAppointmentDialog from '@/components/dashboard/schedule-appointment-dialog';
+import { Button } from '@/components/ui/button';
 import { Patient } from '@/types/patient.types';
 import { Appointment } from '@/types/appointment.types';
 import { usePatientSession } from '@/integration/auth/patient';
@@ -16,6 +18,11 @@ import { useGetMyPatientAppointments } from '@/integration/appointments';
 import { formatAppointmentDate, formatAppointmentTimeRange } from '@/lib/easy';
 import { isUpcomingAppointment } from '@/lib/appointment-status';
 import { Spinner } from '@/components/ui/spinner';
+import {
+  formatMissingClinicalPrompt,
+  listMissingPatientClinicalFields,
+  clinicalReviewStorageKey,
+} from '@/lib/patient-clinical';
 
 function mapGender(gender: string | undefined): Patient['gender'] {
   const value = (gender ?? '').toLowerCase();
@@ -30,6 +37,23 @@ function formatTimeRemaining(startTime?: string): string {
   if (Number.isNaN(start.getTime())) return '';
   if (start.getTime() <= Date.now()) return 'Starting soon';
   return `${formatDistanceToNow(start)} left`;
+}
+
+function subscribeClinicalReview(onStoreChange: () => void) {
+  window.addEventListener('storage', onStoreChange);
+  return () => window.removeEventListener('storage', onStoreChange);
+}
+
+function useHasReviewedClinical(patientId?: string) {
+  return useSyncExternalStore(
+    subscribeClinicalReview,
+    () =>
+      Boolean(
+        patientId &&
+        window.localStorage.getItem(clinicalReviewStorageKey(patientId))
+      ),
+    () => false
+  );
 }
 
 const PatientDashboardPage = () => {
@@ -65,7 +89,10 @@ const PatientDashboardPage = () => {
       phone: user.phoneNumber,
       phoneNumber: user.phoneNumber,
       address: user.address,
-      allergies: [],
+      allergies: user.allergies ?? [],
+      medications: user.medications ?? [],
+      conditions: user.conditions ?? [],
+      emergencyContact: user.emergencyContact,
       chiefComplaint: '',
       patientId: patientCode || user.id,
       isRegistrationComplete: Boolean(user.isRegistrationComplete),
@@ -94,12 +121,25 @@ const PatientDashboardPage = () => {
       }));
   }, [appointmentDocs]);
 
+  const missingClinical = useMemo(
+    () =>
+      listMissingPatientClinicalFields({
+        allergies: user?.allergies,
+        conditions: user?.conditions,
+        emergencyContact: user?.emergencyContact,
+      }),
+    [user]
+  );
+  const hasReviewedClinical = useHasReviewedClinical(user?.id);
+  const showClinicalPrompt = missingClinical.length > 0 && !hasReviewedClinical;
+  const clinicalPrompt = formatMissingClinicalPrompt(missingClinical);
+
   const handleScheduleAppointment = () => {
     setIsDialogOpen(true);
   };
 
   const handleRecordVitals = () => {
-    router.push(ROUTES.PATIENT.RECORD_VITALS);
+    router.push(ROUTES.PATIENT.PROFILE);
   };
 
   const handleViewRecords = () => {
@@ -133,6 +173,29 @@ const PatientDashboardPage = () => {
         <h1 className="font-bold leading-[1.2] text-(--text-primary) max-md:text-[20px] text-[24px] w-full">
           Welcome back{patient.name ? `, ${patient.name}` : ''}
         </h1>
+
+        {showClinicalPrompt && clinicalPrompt && (
+          <div className="bg-[#FDFAE7] w-full border border-[#FFE0A3] rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4 text-gray-900">
+            <div className="flex items-start gap-4 flex-1">
+              <div className="h-10 w-10 rounded-full bg-white border border-[#FFE0A3] flex items-center justify-center shrink-0">
+                <Info className="h-5 w-5 text-amber-600" />
+              </div>
+              <div className="space-y-0.5">
+                <h4 className="text-[15px] font-bold">
+                  Help your doctor care for you
+                </h4>
+                <p className="text-sm text-amber-900">{clinicalPrompt}</p>
+              </div>
+            </div>
+            <Button
+              variant="brand"
+              className="rounded-full h-10 px-5 shrink-0"
+              onClick={() => router.push(ROUTES.PATIENT.PROFILE)}
+            >
+              Add details
+            </Button>
+          </div>
+        )}
 
         <HealthAssistantActions
           onScheduleAppointment={handleScheduleAppointment}

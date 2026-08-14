@@ -119,11 +119,16 @@ const PatientSearch = ({
         className
       )}
     >
-      <div className="flex items-center justify-between w-full">
-        <h1 className="font-bold leading-[1.2] text-(--text-primary) max-md:text-[20px] text-[24px] w-full">
-          Welcome back
-        </h1>
-        <div className="flex items-center justify-end w-full">
+      <div className="flex items-center justify-between w-full gap-4">
+        <div className="min-w-0">
+          <h1 className="font-bold leading-[1.2] text-(--text-primary) max-md:text-[20px] text-[24px]">
+            Welcome back
+          </h1>
+          <p className="mt-1 text-sm text-(--text-secondary)">
+            Search patients and book visits with a doctor.
+          </p>
+        </div>
+        <div className="flex items-center justify-end shrink-0">
           <Button
             onClick={handleAddNewPatient}
             className="text-white cursor-pointer h-[44px] border border-brand-blue bg-brand-blue w-[168px] hover:text-gray-50 rounded-full px-6 py-3 font-normal text-sm flex items-center gap-2 transition-colors"
@@ -202,7 +207,7 @@ const PatientSearch = ({
       {!shouldShowResults && (
         <div className="w-full flex flex-col gap-4 mt-8">
           <h2 className="text-base font-normal text-gray-900">
-            Upcoming Consultation
+            Visits you booked
           </h2>
           <div className="flex flex-col gap-3">
             {isLoadingUpcoming ? (
@@ -220,8 +225,8 @@ const PatientSearch = ({
               )
             ) : (
               <AppointmentsEmptyState
-                title="No upcoming appointments"
-                description="No upcoming appointments found."
+                title="No visits booked yet"
+                description="Open a patient to schedule with a doctor."
               />
             )}
           </div>

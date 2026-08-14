@@ -33,6 +33,13 @@ export interface Patient {
   address?: string;
   bloodType?: string;
   allergies?: string[];
+  medications?: string[];
+  conditions?: string[];
+  emergencyContact?: {
+    name?: string;
+    relationship?: string;
+    phone?: string;
+  };
   chiefComplaint?: string;
   invitedByDoctorId: string | null;
   assignedAssistantId: string | null;
