@@ -23,7 +23,6 @@ import DateOfBirthSvg from '@/assets/icons/date-of-birth-svg';
 import GenderIconSvg from '@/assets/icons/gender-icon-svg';
 import EmailIconSvg from '@/assets/icons/email-icon-svg';
 import PhoneNumberSvg from '@/assets/icons/phone-number-svg';
-import BloodTypeSvg from '@/assets/icons/blood-type-svg';
 import { AddPatientFormData } from '@/hooks/page-hooks/use-add-patient';
 import { Controller } from 'react-hook-form';
 import { format } from 'date-fns';
@@ -35,17 +34,6 @@ const GENDER_OPTIONS = [
   { value: 'male', label: 'Male' },
   { value: 'female', label: 'Female' },
   { value: 'other', label: 'Other' },
-];
-
-const BLOOD_TYPE_OPTIONS = [
-  { value: 'A+', label: 'A+' },
-  { value: 'A-', label: 'A-' },
-  { value: 'B+', label: 'B+' },
-  { value: 'B-', label: 'B-' },
-  { value: 'AB+', label: 'AB+' },
-  { value: 'AB-', label: 'AB-' },
-  { value: 'O+', label: 'O+' },
-  { value: 'O-', label: 'O-' },
 ];
 
 interface PatientOnboardingFormContentProps {
@@ -62,7 +50,6 @@ interface PatientOnboardingFormContentProps {
       emergencyContact: string;
       address: string;
       emergencyContactPhone?: string;
-      primaryCarePhysician?: string;
     }
   >;
   disabledFields?: {
@@ -72,10 +59,8 @@ interface PatientOnboardingFormContentProps {
     dateOfBirth?: boolean;
     gender?: boolean;
     address?: boolean;
-    bloodType?: boolean;
     emergencyContact?: boolean;
     emergencyContactPhone?: boolean;
-    primaryCarePhysician?: boolean;
   };
 }
 
@@ -263,11 +248,11 @@ const PatientOnboardingFormContent = ({
             control={control}
             render={({ field }) => (
               <PhoneInput
-                defaultCountry="US"
+                defaultCountry="GH"
                 value={field.value || ''}
                 disabled={isPending || disabledFields?.phoneNumber}
                 onChange={field.onChange}
-                placeholder="+1 (555) 000-0000"
+                placeholder="+233 24 000 0000"
                 className="w-full"
                 inputClassName="bg-transparent border-(--border-light) h-[44px] rounded-[8px] shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]"
                 countryButtonClassName="bg-transparent border-(--border-light) hover:bg-transparent"
@@ -297,58 +282,6 @@ const PatientOnboardingFormContent = ({
             {...register('address')}
           />
           <ErrorMessage message={errors.address?.message} />
-        </div>
-      </div>
-
-      {/* Blood Type (Optional) */}
-      <div className="flex flex-col items-start w-full">
-        <div className="flex flex-col gap-2 items-start w-full">
-          <Label
-            htmlFor="bloodType"
-            className="text-[12px] leading-[16px] font-medium text-sm flex items-center gap-2"
-          >
-            <BloodTypeSvg />
-            Blood Type (Optional)
-          </Label>
-          <Controller
-            name="bloodType"
-            control={control}
-            render={({ field }) => (
-              <div className="relative w-full">
-                <Select
-                  value={field.value || ''}
-                  onValueChange={field.onChange}
-                  disabled={isPending || disabledFields?.bloodType}
-                >
-                  <SelectTrigger className=" bg-transparent border-(--border-light) data-placeholder:text-[#262626]/60 data-placeholder:font-light data-placeholder:sm:text-[14px] leading-[16px] h-[44px] rounded-[8px] shadow-[0_1px_2px_0_rgba(16,24,40,0.05)] border  text-(--text-primary) focus:ring-2 focus:ring-primary focus:ring-offset-2">
-                    <SelectValue placeholder="Select blood type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {BLOOD_TYPE_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          />
-          <ErrorMessage message={errors.bloodType?.message} />
-        </div>
-      </div>
-
-      {/* Date (Read-only Today) */}
-      <div className="flex flex-col items-start w-full">
-        <div className="flex flex-col gap-2 items-start w-full">
-          <Label className="text-[12px] leading-[16px] font-medium text-sm flex items-center gap-2">
-            Date
-          </Label>
-          <Input
-            disabled
-            value={new Date().toLocaleDateString('en-US')}
-            className="bg-transparent border-(--border-light) h-[44px] rounded-[8px] shadow-[0_1px_2px_0_rgba(16,24,40,0.05)] cursor-not-allowed opacity-75"
-          />
         </div>
       </div>
 
@@ -386,11 +319,11 @@ const PatientOnboardingFormContent = ({
             control={control}
             render={({ field }) => (
               <PhoneInput
-                defaultCountry="US"
+                defaultCountry="GH"
                 value={field.value || ''}
                 disabled={isPending || disabledFields?.emergencyContactPhone}
                 onChange={field.onChange}
-                placeholder="+1 (555) 000-0000"
+                placeholder="+233 24 000 0000"
                 className="w-full"
                 inputClassName="bg-transparent border-(--border-light) h-[44px] rounded-[8px] shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]"
                 countryButtonClassName="bg-transparent border-(--border-light) hover:bg-transparent"
@@ -398,26 +331,6 @@ const PatientOnboardingFormContent = ({
             )}
           />
           <ErrorMessage message={errors.emergencyContactPhone?.message} />
-        </div>
-      </div>
-
-      {/* Primary Care Physician */}
-      <div className="flex flex-col items-start w-full">
-        <div className="flex flex-col gap-2 items-start w-full">
-          <Label
-            htmlFor="primaryCarePhysician"
-            className="text-[12px] leading-[16px] font-medium text-sm flex items-center gap-2"
-          >
-            Primary Care Physician
-          </Label>
-          <Input
-            id="primaryCarePhysician"
-            placeholder="Primary Care Physician"
-            className="bg-transparent border-(--border-light) h-[44px] rounded-[8px] shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]"
-            disabled={isPending || disabledFields?.primaryCarePhysician}
-            {...register('primaryCarePhysician')}
-          />
-          <ErrorMessage message={errors.primaryCarePhysician?.message} />
         </div>
       </div>
 

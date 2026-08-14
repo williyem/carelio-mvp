@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { useGetDoctorAppointments } from '@/integration/appointments';
 import { format, parseISO, isToday, isTomorrow } from 'date-fns';
 import type { Appointment } from '@/integration/appointments/types';
+import AppointmentsEmptyState from '@/components/dashboard/appointments-empty-state';
 
 const formatAppointmentDate = (dateString: string): string => {
   try {
@@ -142,11 +143,10 @@ export function UpcomingAppointments() {
           ))}
         </div>
       ) : (
-        <Card className="border border-gray-100 border-dashed rounded-2xl overflow-hidden bg-white shadow-none">
-          <CardContent className="p-4 sm:p-5 flex items-center justify-center h-20 text-gray-500 text-sm">
-            No upcoming appointments scheduled
-          </CardContent>
-        </Card>
+        <AppointmentsEmptyState
+          title="No upcoming appointments"
+          description="You don't have any upcoming appointments scheduled yet."
+        />
       )}
     </div>
   );

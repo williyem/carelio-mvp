@@ -60,6 +60,7 @@ export const ROUTES = {
   // Patient portal routes
   PATIENT: {
     ROOT: '/patient',
+    ONBOARDING: '/patient/onboarding',
     RECORD_VITALS: '/patient/record-vitals',
     VITAL_HISTORY: '/patient/vital-history',
     HEALTH_RECORDS: '/patient/health-records',

@@ -30,8 +30,7 @@ const DEFAULT_WEEKDAY_RANGE: TimeRange[] = [{ start: '09:00', end: '17:00' }];
 
 export const defaultAvailability = (): DoctorAvailability => ({
   enabled: true,
-  timezone:
-    Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York',
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Africa/Accra',
   days: {
     Monday: DEFAULT_WEEKDAY_RANGE,
     Tuesday: DEFAULT_WEEKDAY_RANGE,

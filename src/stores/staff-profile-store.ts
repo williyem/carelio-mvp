@@ -33,7 +33,7 @@ export const emptyStaffProfile = (): StaffProfile => ({
   state: '',
   zip: '',
   phone: '',
-  timezone: 'America/New_York',
+  timezone: 'Africa/Accra',
   npi: '',
   licenseNumber: '',
   avatarUrl: '',

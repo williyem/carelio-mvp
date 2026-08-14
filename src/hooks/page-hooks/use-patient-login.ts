@@ -7,6 +7,7 @@ import { API_ENDPOINTS, ROUTES } from '@/lib/routes';
 import { useLoginPatient } from '@/integration/auth/patient';
 import { getErrorMessage } from '@/integration';
 import { PatientId } from '@/integration/auth/patient/types';
+import { isPatientRegistrationIncomplete } from '@/components/onboarding/patient-onboarding-gate';
 import axios from 'axios';
 
 const patientLoginSchema = z.object({
@@ -61,7 +62,11 @@ export function usePatientLoginForm() {
               );
             }
             toast.success('Login successful');
-            router.push(ROUTES.PATIENT.ROOT);
+            router.push(
+              isPatientRegistrationIncomplete(response?.user)
+                ? ROUTES.PATIENT.ONBOARDING
+                : ROUTES.PATIENT.ROOT
+            );
           } catch (error) {
             toast.error('Failed to login. Please try again.');
             console.error('Login error:', error);

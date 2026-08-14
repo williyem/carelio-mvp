@@ -4,13 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/use-debounce';
-import {
-  Search,
-  Loader2,
-  UserPlus,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
+import { Search, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import PatientSearchResultItem from './patient-search-result-item';
 import PatientVerificationDialog from './patient-verification-dialog';
 import SearchSvg from '@/assets/icons/search-svg';
@@ -26,8 +20,7 @@ import useGetUpcomingAppointments from '@/integration/appointments/queries/useGe
 import RecentConsultationRow from './recent-consultation-row';
 import { UpcomingAppointment } from '@/integration/appointments/types';
 import RecentConsultationsSkeleton from '../skeletons/recent-consultations-skeleton';
-import EmptyState from './verification/empty-state';
-import CalendarSvg from '@/assets/icons/calendar-svg';
+import AppointmentsEmptyState from '@/components/dashboard/appointments-empty-state';
 
 interface PatientSearchProps {
   placeholder?: string;
@@ -213,9 +206,9 @@ const PatientSearch = ({
                 )
               )
             ) : (
-              <EmptyState
-                icon={<CalendarSvg />}
-                message="No upcoming appointments found."
+              <AppointmentsEmptyState
+                title="No upcoming appointments"
+                description="No upcoming appointments found."
               />
             )}
           </div>

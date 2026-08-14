@@ -16,5 +16,5 @@ export default function PatientInsurancePage() {
     );
   }
 
-  return <PatientInsuranceSettings patientId={patientId} />;
+  return <PatientInsuranceSettings />;
 }

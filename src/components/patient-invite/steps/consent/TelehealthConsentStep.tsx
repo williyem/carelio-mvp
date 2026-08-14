@@ -48,20 +48,21 @@ export default function TelehealthConsentStep() {
           <p>
             I consent to receive care through telehealth, including video,
             audio, chat, and remote monitoring. I authorize the use of remote
-            devices such as Bluetooth stethoscopes, otoscopes, and other FDA-
-            approved tools.
+            diagnostic devices such as Bluetooth stethoscopes, otoscopes, and
+            other clinician-approved tools used on Carelio.
           </p>
           <p>I understand:</p>
           <ul className="list-disc pl-5 space-y-1">
             <li>Telehealth has risks, including technical failures.</li>
             <li>Data may be transmitted electronically in encrypted form.</li>
             <li>
-              Technicians may operate equipment and view information, but they
-              do not interpret medical information.
+              Health assistants may operate equipment and view information, but
+              they do not interpret medical information.
             </li>
             <li>
-              Telehealth sessions may be recorded, and data may be stored in
-              other HIPAA-compliant systems.
+              Telehealth sessions may be recorded only when disclosed, and data
+              may be stored in Carelio systems that follow Ghana’s Data
+              Protection Act, 2012 (Act 843).
             </li>
           </ul>
         </div>

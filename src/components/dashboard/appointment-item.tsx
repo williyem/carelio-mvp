@@ -18,6 +18,7 @@ interface AppointmentItemProps {
   canStart?: boolean;
   rawAppointment?: Appointment | null;
   onViewDetails?: () => void;
+  startLabel?: string;
 }
 
 const AppointmentItem = ({
@@ -27,6 +28,7 @@ const AppointmentItem = ({
   canStart = false,
   rawAppointment,
   onViewDetails,
+  startLabel = 'Start Now',
 }: AppointmentItemProps) => {
   const { startCall, setSelectedAppointment } = useVideoCallStore();
 
@@ -38,10 +40,7 @@ const AppointmentItem = ({
     if (patient) {
       startCall(patient);
     }
-    setSelectedAppointment(
-      rawAppointment as any,
-      patient as Patient
-    );
+    setSelectedAppointment(rawAppointment ?? null, patient ?? null);
   };
 
   const showButton = onStartAppointment && canStart;
@@ -86,7 +85,7 @@ const AppointmentItem = ({
             >
               <VideoRecorderSvg />
               <span className="font-semibold leading-[20px] sm:text-[14px] text-[12px] text-white">
-                Start Now
+                {startLabel}
               </span>
             </Button>
           </div>

@@ -20,12 +20,9 @@ const PersonalInfoStep = ({
     email: !!invitationData?.email,
     phoneNumber: !!invitationData?.phoneNumber,
     dateOfBirth: !!invitationData?.dob,
-    gender: !!invitationData?.gender,
     address: !!invitationData?.address,
-    bloodType: !!invitationData?.bloodType,
     emergencyContact: !!invitationData?.emergencyContact,
     emergencyContactPhone: !!invitationData?.emergencyContactPhone,
-    primaryCarePhysician: !!invitationData?.primaryCarePhysician,
   };
   const { formData } = usePatientInviteStore();
   const hasDisabledFields = Object.values(disabledFieldsState).some(Boolean);
@@ -50,7 +47,7 @@ const PersonalInfoStep = ({
           )}
         </div>
         <PatientOnboardingFormContent
-          submitButtonText="Submit"
+          submitButtonText="Continue"
           hideEmail={false}
           defaultValues={{
             email: formData.email || invitationData?.email || '',
@@ -75,7 +72,6 @@ const PersonalInfoStep = ({
                 : undefined,
             gender: formData.gender || invitationData?.gender || '',
             address: formData.address || invitationData?.address || '',
-            bloodType: formData.bloodType || invitationData?.bloodType || '',
             emergencyContact:
               formData.emergencyContact ||
               invitationData?.emergencyContact ||
@@ -83,10 +79,6 @@ const PersonalInfoStep = ({
             emergencyContactPhone:
               formData.emergencyContactPhone ||
               invitationData?.emergencyContactPhone ||
-              '',
-            primaryCarePhysician:
-              formData.primaryCarePhysician ||
-              invitationData?.primaryCarePhysician ||
               '',
           }}
           disabledFields={disabledFieldsState}

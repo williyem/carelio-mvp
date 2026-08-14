@@ -14,17 +14,14 @@ import {
 } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { PhoneInput } from '@/components/ui/phone-input';
 import ErrorMessage from '@/components/ui/error-message';
 import { Spinner } from '@/components/ui/spinner';
 import { useAddPatientForm } from '@/hooks/page-hooks/use-add-patient-form';
 import TimePicker from '../ui/time-picker';
 import { useRouter } from 'nextjs-toploader/app';
-import { toast } from 'sonner';
 
 interface SuccessModalProps {
   email: string;
-  inviteLink?: string;
   isOpen: boolean;
   onClose: () => void;
   onAddAnother: () => void;
@@ -32,23 +29,12 @@ interface SuccessModalProps {
 
 function SuccessModal({
   email,
-  inviteLink,
   isOpen,
   onClose,
   onAddAnother,
 }: SuccessModalProps) {
   const router = useRouter();
   if (!isOpen) return null;
-
-  const handleCopyLink = async () => {
-    if (!inviteLink) return;
-    try {
-      await navigator.clipboard.writeText(inviteLink);
-      toast.success('Invite link copied');
-    } catch {
-      toast.error('Could not copy invite link');
-    }
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
@@ -67,22 +53,6 @@ function SuccessModal({
               instructions to complete their profile.
             </p>
           </div>
-          {inviteLink ? (
-            <div className="w-full space-y-2 rounded-lg bg-gray-50 p-3 text-left">
-              <p className="text-xs font-medium text-gray-500">
-                Fallback invite link
-              </p>
-              <p className="break-all text-xs text-gray-700">{inviteLink}</p>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full rounded-full"
-                onClick={handleCopyLink}
-              >
-                Copy invite link
-              </Button>
-            </div>
-          ) : null}
           <div className="flex w-full flex-col gap-3 pt-2 sm:flex-row">
             <Button
               variant="outline"
@@ -119,7 +89,6 @@ export function AddPatientForm() {
     startTime,
     isSuccessOpen,
     submittedEmail,
-    inviteLink,
     isPending,
     handleAddAnother,
     handleCloseSuccess,
@@ -279,7 +248,6 @@ export function AddPatientForm() {
       <SuccessModal
         isOpen={isSuccessOpen}
         email={submittedEmail}
-        inviteLink={inviteLink}
         onClose={handleCloseSuccess}
         onAddAnother={handleAddAnother}
       />

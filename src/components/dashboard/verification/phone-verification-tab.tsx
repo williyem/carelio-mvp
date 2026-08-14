@@ -67,11 +67,11 @@ const PhoneVerificationTab = ({
           control={control}
           render={({ field }) => (
             <PhoneInput
-              defaultCountry="US"
+              defaultCountry="GH"
               value={field.value || ''}
               disabled={true}
               onChange={field.onChange}
-              placeholder="+1 (555) 000-0000"
+              placeholder="+233 24 000 0000"
               className="w-full"
             />
           )}

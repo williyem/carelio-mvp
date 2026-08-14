@@ -10,6 +10,7 @@ import HealthAssistantAppointments, {
 } from '@/components/dashboard/health-assistant-appointments';
 import ScheduleAppointmentDialog from '@/components/dashboard/schedule-appointment-dialog';
 import { Patient } from '@/types/patient.types';
+import { Appointment } from '@/types/appointment.types';
 import { usePatientSession } from '@/integration/auth/patient';
 import { useGetMyPatientAppointments } from '@/integration/appointments';
 import { formatAppointmentDate, formatAppointmentTimeRange } from '@/lib/easy';
@@ -66,7 +67,7 @@ const PatientDashboardPage = () => {
       allergies: [],
       chiefComplaint: '',
       patientId: patientCode || user.id,
-      isRegistrationComplete: true,
+      isRegistrationComplete: Boolean(user.isRegistrationComplete),
     };
   }, [user, patientCode]);
 
@@ -89,6 +90,9 @@ const PatientDashboardPage = () => {
             ? 'CONFIRMED'
             : (apt.status as HealthAssistantAppointment['status']),
         doctor: apt.doctor,
+        startTime: apt.startTime,
+        endTime: apt.endTime,
+        raw: apt as unknown as Appointment,
       }));
   }, [appointmentDocs]);
 
@@ -143,7 +147,12 @@ const PatientDashboardPage = () => {
             <Spinner />
           </div>
         ) : (
-          <HealthAssistantAppointments appointments={appointments} />
+          <HealthAssistantAppointments
+            appointments={appointments}
+            patient={patient}
+            enableJoin
+            startLabel="Join call"
+          />
         )}
       </div>
 

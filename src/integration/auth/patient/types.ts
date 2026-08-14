@@ -148,6 +148,7 @@ export interface PatientUser {
   phoneNumber: string;
   address: string;
   bloodType: BloodType;
+  isRegistrationComplete?: boolean;
   createdAt: string;
   updatedAt: string;
 }

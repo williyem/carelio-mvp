@@ -14,7 +14,7 @@ import {
   canStartAppointment,
 } from '@/lib/easy';
 import AppointmentsListSkeleton from '@/components/skeletons/appointments-list-skeleton';
-import CalendarSvg from '@/assets/icons/calendar-svg';
+import AppointmentsEmptyState from '@/components/dashboard/appointments-empty-state';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -112,19 +112,10 @@ const AppointmentsList = ({
           </p>
           <div className="flex justify-end">{StatusFilter}</div>
         </div>
-        <div className="flex flex-col items-center justify-center w-full py-12 gap-4">
-          <div className="bg-(--bg-light-gray) rounded-full w-16 h-16 flex items-center justify-center">
-            <CalendarSvg />
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="font-medium leading-[1.2] text-(--text-primary) text-[16px]">
-              No appointments found
-            </p>
-            <p className="font-normal leading-[1.2] text-(--text-muted) text-[14px] text-center">
-              {emptyMessage}
-            </p>
-          </div>
-        </div>
+        <AppointmentsEmptyState
+          title="No appointments found"
+          description={emptyMessage}
+        />
       </div>
     );
   }

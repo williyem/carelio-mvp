@@ -48,18 +48,19 @@ export default function ConsentToTreatStep() {
       <div className="space-y-6 text-left">
         <div className="space-y-4 text-[14px] leading-relaxed text-text-strong-950">
           <p>
-            I voluntarily consent to routine medical and behavioral health
-            services provided by CAREX, including examinations, diagnosis,
-            treatment, and the use of telehealth or remote diagnostic tools.
+            I voluntarily consent to routine medical and related health services
+            provided through Carelio in Ghana, including examinations,
+            diagnosis, treatment, and the use of telehealth or remote diagnostic
+            tools.
           </p>
           <p>I understand that:</p>
           <ul className="list-disc pl-5 space-y-1">
             <li>
-              Providers or supervising clinicians may be in another city,
-              county, or state.
+              Providers or supervising clinicians may be in another city or
+              region within Ghana, or elsewhere when clearly disclosed.
             </li>
             <li>
-              Trained technicians may assist under licensed provider
+              Trained health assistants may assist under licensed provider
               supervision.
             </li>
             <li>I may refuse or withdraw consent at any time.</li>

@@ -15,5 +15,5 @@ export default function DoctorBillingPage() {
     );
   }
 
-  return <DoctorBillingSettings doctorId={userId} />;
+  return <DoctorBillingSettings />;
 }

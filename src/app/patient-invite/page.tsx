@@ -5,16 +5,8 @@ import { Suspense, useEffect, useState } from 'react';
 
 import usePatientInvite from '@/hooks/page-hooks/patient-invite/usePatientInvite';
 import LandingStep from '@/components/patient-invite/steps/LandingStep';
-import TelehealthLocationStep from '@/components/patient-invite/steps/consent/TelehealthLocationStep';
-import ConsentToTreatStep from '@/components/patient-invite/steps/consent/ConsentToTreatStep';
-import TelehealthConsentStep from '@/components/patient-invite/steps/consent/TelehealthConsentStep';
-import SecurityIncidentsStep from '@/components/patient-invite/steps/consent/SecurityIncidentsStep';
-import PrivacyPracticesStep from '@/components/patient-invite/steps/consent/PrivacyPracticesStep';
-import ReleaseOfInformationStep from '@/components/patient-invite/steps/consent/ReleaseOfInformationStep';
-import FinancialResponsibilityStep from '@/components/patient-invite/steps/consent/FinancialResponsibilityStep';
-import BehavioralHealthStep from '@/components/patient-invite/steps/consent/BehavioralHealthStep';
-import MinorsConsentStep from '@/components/patient-invite/steps/consent/MinorsConsentStep';
-import FinalAcknowledgmentStep from '@/components/patient-invite/steps/consent/FinalAcknowledgmentStep';
+import PatientAgreementsStep from '@/components/patient-invite/steps/consent/PatientAgreementsStep';
+import OptionalCoverageStep from '@/components/patient-invite/steps/consent/OptionalCoverageStep';
 import SuccessStep from '@/components/patient-invite/steps/SuccessStep';
 import { InviteLoading } from '@/components/patient-invite/InviteLoading';
 import { InviteError } from '@/components/patient-invite/InviteError';
@@ -26,16 +18,9 @@ import {
 } from '@/integration/auth/patient';
 import { useSearchParams } from 'next/navigation';
 import { usePatientInviteStore } from '@/stores/patient-invite-store';
-import { uploadFile } from '@/integration/files/api-function';
-import usePatientMutations from '@/integration/patient/mutations';
 import { useVerifyConsent } from '@/integration/auth/patient/queries/use-verify-consent';
-import {
-  getPatientPacketMap,
-  processPdfOverlay,
-  UserData,
-} from '@/lib/pdf-overlay';
 import PersonalInfoStep from '@/components/patient-invite/steps/consent/personal-info-step';
-import { formatPdfDate } from '@/lib/easy';
+import { finishInvitePatientRegistration } from '@/lib/patient-onboarding-finish';
 
 function PatientInviteForm({
   onboardingComplete,
@@ -48,12 +33,9 @@ function PatientInviteForm({
   token: string;
   invitationData: VerifyInvitationResponse | null;
 }) {
-  console.log('🚀 ~ PatientInviteForm ~ invitationData:', invitationData);
   const { currentStep } = usePatientInvite();
   const { formData, updateFormData, nextStep } = usePatientInviteStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { submitConsentAgreementMutation } = usePatientMutations();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -75,102 +57,28 @@ function PatientInviteForm({
   }, [invitationData, formData.fullName, updateFormData]);
 
   if (onboardingComplete) {
-    return <SuccessStep />;
+    return <SuccessStep goToPatient />;
   }
 
   const handleSubmit = async () => {
-    const userData: UserData = {
-      // 1. Personal Information
-      fullName: formData.fullName || '',
-      dob: formatPdfDate(formData.dateOfBirth),
-      date: formData.date || '',
-      phone: formData.phoneNumber || '',
-      email: formData.email || '',
-      emergencyContact: formData.emergencyContact || '',
-      primaryCarePhysician: formData.primaryCarePhysician || '',
-      emergencyContactPhone: formData.emergencyContactPhone || '',
-
-      // 2. Telehealth Location Verification
-      locationForToday: formData.locationForToday || '',
-      cityStateZip: formData.cityStateZip || '',
-      locationType: formData.locationType || '',
-      patientSignature: formData.patientSignature || '',
-
-      // 3-9. Consents & Notices
-      patientInitials: formData.patientInitials || '',
-
-      // 8. Financial Responsibility
-      insuranceCompany: formData.insuranceCompany || '',
-      memberId: formData.memberId || '',
-      groupId: formData.groupId || '',
-      insurancePhone: formData.insurancePhone || '',
-      insuranceCardName: formData.insuranceCardName || '',
-      insuranceAddress: formData.insuranceAddress || '',
-
-      // 10. Minors
-      parentGuardianName: formData.parentGuardianName || '',
-      relationship: formData.relationship || '',
-
-      // 11. Final Acknowledgment
-      finalSignatureName: formData.patientSignature || '',
-      parentGuardianSignatureName: formData.parentGuardianName || '',
-      printedName: formData.fullName || '',
-    };
-
     setIsSubmitting(true);
     try {
-      const pdfUrl =
-        '/documents/agreements/Full%20Patient%20Packet%20Updated.pdf';
-      const fields = getPatientPacketMap(userData as UserData);
-      const pdfBytes = await processPdfOverlay(pdfUrl, fields);
-
-      const pdfBlob = new Blob([pdfBytes as unknown as ArrayBuffer], {
-        type: 'application/pdf',
-      });
-      const file = new File(
-        [pdfBlob],
-        `patient-packet-${formData.fullName || 'signed'}.pdf`,
-        {
-          type: 'application/pdf',
-        }
-      );
-      const upload = await uploadFile(file);
-
-      // 1. Upload Blank Template (so we have a valid remote URL for documentUrl)
-      const pdfResponse = await fetch(pdfUrl);
-      const pdfBlobOriginal = await pdfResponse.blob();
-      const pdfFileOriginal = new File(
-        [pdfBlobOriginal],
-        'patient-packet-template.pdf',
-        { type: 'application/pdf' }
-      );
-      const templateUpload = await uploadFile(pdfFileOriginal);
-
-      await submitConsentAgreementMutation.mutateAsync({
-        token,
-        agreements: [
-          {
-            type: 'consent',
-            signatureUrl: upload.url,
-            documentUrl: templateUpload.url,
-          },
-        ],
-      });
-
+      const latest = usePatientInviteStore.getState().formData;
+      await finishInvitePatientRegistration(token, latest as any);
       toast.success('Onboarding completed successfully!');
       setOnboardingComplete(true);
-      setIsSubmitting(false);
     } catch (error) {
-      setIsSubmitting(false);
       const errorMessage = getErrorMessage(
         error,
         'An error occurred during registration. Please try again.'
       );
       toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handlePersonalInfo = (data: UserData) => {
+  const handlePersonalInfo = (data: any) => {
     updateFormData(data);
     nextStep();
   };
@@ -183,17 +91,9 @@ function PatientInviteForm({
       handlePersonalInfo={handlePersonalInfo}
       isSubmitting={false}
     />,
-    <TelehealthLocationStep key="location" />,
-    <ConsentToTreatStep key="treat" />,
-    <TelehealthConsentStep key="telehealth" />,
-    <SecurityIncidentsStep key="security" />,
-    <PrivacyPracticesStep key="privacy" />,
-    <ReleaseOfInformationStep key="roi" />,
-    <FinancialResponsibilityStep key="finance" />,
-    <BehavioralHealthStep key="behavioral" />,
-    <MinorsConsentStep key="minors" />,
-    <FinalAcknowledgmentStep
-      key="final"
+    <PatientAgreementsStep key="agreements" />,
+    <OptionalCoverageStep
+      key="coverage"
       onFinish={handleSubmit}
       isSubmitting={isSubmitting}
     />,
@@ -202,7 +102,6 @@ function PatientInviteForm({
   return <div>{steps[currentStep - 1]}</div>;
 }
 
-// Main Page Component
 function PatientInviteContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token') as InvitationToken;

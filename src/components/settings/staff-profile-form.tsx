@@ -35,12 +35,16 @@ const FIELDS: {
   { name: 'clinicName', label: 'Clinic / practice name', doctorOnly: true },
   { name: 'phone', label: 'Phone' },
   { name: 'address', label: 'Street address' },
-  { name: 'city', label: 'City' },
-  { name: 'state', label: 'State' },
-  { name: 'zip', label: 'ZIP' },
+  { name: 'city', label: 'City / town' },
+  { name: 'state', label: 'Region' },
+  { name: 'zip', label: 'GhanaPost GPS / postal code' },
   { name: 'timezone', label: 'Timezone' },
-  { name: 'npi', label: 'NPI', doctorOnly: true },
-  { name: 'licenseNumber', label: 'License number', doctorOnly: true },
+  { name: 'npi', label: 'MDC registration number', doctorOnly: true },
+  {
+    name: 'licenseNumber',
+    label: 'Professional licence number',
+    doctorOnly: true,
+  },
 ];
 
 export default function StaffProfileForm({

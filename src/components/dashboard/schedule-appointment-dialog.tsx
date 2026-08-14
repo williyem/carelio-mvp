@@ -223,7 +223,11 @@ const ScheduleAppointmentDialog = ({
         },
         {
           onSuccess: (res) => {
-            if (data.mode === 'now' && patient && portal === 'staff') {
+            if (
+              data.mode === 'now' &&
+              patient &&
+              (portal === 'staff' || portal === 'patient')
+            ) {
               getAppointmentByIdMutation.mutate(res.id, {
                 onSuccess: (response) => {
                   if (patient?.isRegistrationComplete) {

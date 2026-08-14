@@ -138,3 +138,28 @@ export async function revokeAccess(granteeId: string) {
   );
   return extractResponseData(response);
 }
+
+export async function patchPatientProfile(data: {
+  fullName?: string;
+  address?: string;
+  phoneNumber?: string;
+  avatarUrl?: string;
+  dob?: string;
+  gender?: 'male' | 'female' | 'other';
+  bloodType?: string;
+  isRegistrationComplete?: boolean;
+}) {
+  const response = await apiClient.patch('/patient/profile', data);
+  return extractResponseData(response);
+}
+
+export async function submitAuthenticatedPatientAgreements(data: {
+  agreements: {
+    type: string;
+    signatureUrl: string;
+    documentUrl: string;
+  }[];
+}) {
+  const response = await apiClient.post('/patient/agreements', data);
+  return extractResponseData(response);
+}
