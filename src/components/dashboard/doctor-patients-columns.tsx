@@ -87,7 +87,9 @@ const useDoctorPatientsCols = ({ onView }: UseDoctorPatientsColsProps = {}) => {
               'h-[38px] px-[15px] border-[#D4D5D6] bg-[#F6F6F6] flex-1 w-full max-w-[76px] rounded-[8px]'
             )}
           >
-            <span className="font-normal text-[14px] leading-[1.2]">View</span>
+            <span className="font-normal text-[14px] leading-[1.2]">
+              {info.row.original.linked ? 'View' : 'Verify'}
+            </span>
           </Button>
         </div>
       ),

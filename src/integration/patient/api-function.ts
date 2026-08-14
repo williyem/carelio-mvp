@@ -1,5 +1,6 @@
 import { extractResponseData } from '..';
 import { HEALTH_ASSISTANT_API_ENDPOINTS } from '../auth/health-assistant/endpoints';
+import { HEALTH_ASSISTANT_API_ENDPOINTS as HA_STAFF_API } from '../health-assistant/endpoints';
 import { ApiResponse, apiClient, backendApiClient } from '../config';
 import { PATIENT_API_ENDPOINTS, PATIENT_ENDPOINTS } from './endpoints';
 import type {
@@ -14,6 +15,80 @@ import type {
   UnassignPatientResponse,
   PatientConsultationTokenResponse,
 } from './type';
+
+export type StaffPortal = 'doctor' | 'health-assistant';
+
+export const staffVerifyPatientEmail = async (
+  patientId: string,
+  portal: StaffPortal
+) => {
+  const endpoint =
+    portal === 'health-assistant'
+      ? HA_STAFF_API.VERIFY_PATIENT_EMAIL.replace(':id', patientId)
+      : PATIENT_API_ENDPOINTS.VERIFY_PATIENT_EMAIL.replace(':id', patientId);
+  const response =
+    await apiClient.post<ApiResponse<{ linked?: boolean }>>(endpoint);
+  return extractResponseData(response);
+};
+
+export const staffVerifyPatientCode = async (
+  patientId: string,
+  code: string,
+  portal: StaffPortal
+) => {
+  const endpoint =
+    portal === 'health-assistant'
+      ? HA_STAFF_API.VERIFY_PATIENT_CODE.replace(':id', patientId)
+      : PATIENT_API_ENDPOINTS.VERIFY_PATIENT_CODE.replace(':id', patientId);
+  const response = await apiClient.post<ApiResponse<{ linked?: boolean }>>(
+    endpoint,
+    { code, type: 'email' }
+  );
+  return extractResponseData(response);
+};
+
+export const requestDoctorAccess = async (
+  patientId: string,
+  doctorId: string
+) => {
+  const endpoint = PATIENT_API_ENDPOINTS.REQUEST_DOCTOR_ACCESS.replace(
+    ':id',
+    patientId
+  );
+  const response = await apiClient.post<
+    ApiResponse<{ message: string; doctorName: string }>
+  >(endpoint, { doctorId });
+  return extractResponseData(response);
+};
+
+export const getDoctorAccessRequest = async (token: string) => {
+  const endpoint = PATIENT_API_ENDPOINTS.GET_DOCTOR_ACCESS_REQUEST.replace(
+    ':token',
+    token
+  );
+  const response = await apiClient.get<
+    ApiResponse<{
+      status: string;
+      patientName: string;
+      doctorName: string;
+    }>
+  >(endpoint);
+  return extractResponseData(response);
+};
+
+export const resolveDoctorAccessRequest = async (
+  token: string,
+  action: 'approve' | 'decline'
+) => {
+  const endpoint = (
+    action === 'approve'
+      ? PATIENT_API_ENDPOINTS.APPROVE_DOCTOR_ACCESS
+      : PATIENT_API_ENDPOINTS.DECLINE_DOCTOR_ACCESS
+  ).replace(':token', token);
+  const response =
+    await apiClient.post<ApiResponse<{ status: string }>>(endpoint);
+  return extractResponseData(response);
+};
 
 /**
  * Search all patients (doctor portal)

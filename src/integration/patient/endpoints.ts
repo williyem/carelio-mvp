@@ -13,6 +13,10 @@ export const PATIENT_ENDPOINTS = {
   SUBMIT_CONSENT_AGREEMENT: '/patients/consent/agree',
   SEARCH_UNASSIGNED_PATIENTS: `/patients/unassigned`,
   SEARCH_ASSIGNED_HEALTH_ASSISTANTS: `/patients/health-assistant`,
+  REQUEST_DOCTOR_ACCESS: '/patients/:id/doctor-requests',
+  GET_DOCTOR_ACCESS_REQUEST: '/patients/doctor-requests/:token',
+  APPROVE_DOCTOR_ACCESS: '/patients/doctor-requests/:token/approve',
+  DECLINE_DOCTOR_ACCESS: '/patients/doctor-requests/:token/decline',
 } as const;
 
 export const PATIENT_API_ENDPOINTS = {
@@ -37,4 +41,10 @@ export const PATIENT_API_ENDPOINTS = {
   HA_GET_PATIENT_BY_ID: '/health-assistant/patient/:id/get',
   HA_GET_PATIENT_APPOINTMENTS: '/health-assistant/appointments/:patientId',
   HA_SCHEDULE_APPOINTMENT: '/health-assistant/appointments/schedule',
+  VERIFY_PATIENT_EMAIL: '/doctor/patient/:id/verify/email',
+  VERIFY_PATIENT_CODE: '/doctor/patient/:id/verify/code',
+  REQUEST_DOCTOR_ACCESS: '/health-assistant/patient/:id/doctor-requests',
+  GET_DOCTOR_ACCESS_REQUEST: '/patient/doctor-requests/:token',
+  APPROVE_DOCTOR_ACCESS: '/patient/doctor-requests/:token/approve',
+  DECLINE_DOCTOR_ACCESS: '/patient/doctor-requests/:token/decline',
 } as const;

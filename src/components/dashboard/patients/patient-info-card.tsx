@@ -149,20 +149,6 @@ const PatientInfoCard = ({ patient, className }: PatientInfoCardProps) => {
           </div>
         </div>
       )}
-
-      {/* Chief Complaint */}
-      {patient.chiefComplaint && (
-        <div className="bg-(--bg-info) flex items-center px-4 sm:px-5 py-3 sm:py-[15px] rounded-[10px] w-full">
-          <div className="flex flex-col items-start space-y-1 w-full">
-            <p className="font-normal leading-[1.2] text-(--text-primary) text-sm sm:text-[16px]">
-              Chief Complaint
-            </p>
-            <p className="font-normal leading-[1.2] text-(--text-blue) text-xs sm:text-[14px] wrap-break-word">
-              {patient.chiefComplaint}
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -43,6 +43,7 @@ export interface Patient {
   updatedAt: string;
   assignedAssistant?: AssignedAssistant;
   isRegistrationComplete?: boolean;
+  linked?: boolean;
 }
 
 /** Alias used by HA portal */

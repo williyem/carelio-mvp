@@ -12,6 +12,8 @@ export interface AppointmentRow {
   accountNumber?: string;
   insId?: string;
   isRegistrationComplete?: boolean;
+  linked?: boolean;
+  emailVerified?: boolean;
 }
 
 export interface Appointment {

@@ -16,11 +16,15 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useGetPatientById } from '@/integration/patient';
+import { isForbiddenError } from '@/integration';
 import { format, parseISO } from 'date-fns';
 import BigUserSvg from '@/assets/icons/big-user-svg';
 import GenderSvg from '@/assets/icons/gender-svg';
 import AppointmentsList from '@/components/dashboard/patients/appointments-list';
+import PatientVerificationDialog from '@/components/dashboard/patient-verification-dialog';
+import RecordsLockedCard from '@/components/dashboard/records-locked-card';
 import { Patient } from '@/types/patient.types';
+import { usePatientVerificationStore } from '@/stores/patient-verifcation-store';
 
 export default function PatientDetailsPage({
   params,
@@ -28,6 +32,9 @@ export default function PatientDetailsPage({
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = use(params);
+  const [showVerificationDialog, setShowVerificationDialog] =
+    React.useState(false);
+  const { setSelectedPatient } = usePatientVerificationStore();
 
   const {
     data: patient,
@@ -35,10 +42,39 @@ export default function PatientDetailsPage({
     error,
   } = useGetPatientById(resolvedParams.id);
 
+  const openVerify = () => {
+    setSelectedPatient({
+      id: resolvedParams.id,
+      fullName: patient?.fullName || 'this patient',
+      email: patient?.email || '',
+    });
+    setShowVerificationDialog(true);
+  };
+
   if (isLoadingPatient) {
     return (
       <div className="h-[400px] flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-brand-blue" />
+      </div>
+    );
+  }
+
+  if (isForbiddenError(error)) {
+    return (
+      <div className="space-y-6">
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors w-fit"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span className="text-sm font-medium">Back</span>
+        </Link>
+        <RecordsLockedCard onVerify={openVerify} />
+        <PatientVerificationDialog
+          open={showVerificationDialog}
+          onOpenChange={setShowVerificationDialog}
+          portal="doctor"
+        />
       </div>
     );
   }
@@ -195,14 +231,6 @@ export default function PatientDetailsPage({
               <h4 className="text-base font-bold text-gray-900">Allergies</h4>
               <p className="text-sm text-gray-500">
                 {patient.allergies || 'None reported'}
-              </p>
-            </div>
-            <div className="bg-[#EBF5FF] rounded-xl p-5 space-y-1">
-              <h4 className="text-base font-bold text-gray-900">
-                Chief Complaint
-              </h4>
-              <p className="text-sm text-brand-blue font-medium">
-                {patient.chiefComplaint || 'None reported'}
               </p>
             </div>
           </div>

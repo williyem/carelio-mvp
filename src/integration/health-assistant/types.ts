@@ -69,6 +69,8 @@ export interface PatientRow {
   assignedAssistantId: string | null;
   assignedAssistantName?: string;
   isRegistrationComplete?: boolean;
+  linked?: boolean;
+  emailVerified?: boolean;
 }
 
 export interface Doctor {

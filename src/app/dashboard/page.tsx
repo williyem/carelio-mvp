@@ -22,18 +22,18 @@ export default function DashboardPage() {
             <Link href="/dashboard/schedule-appointment">
               <Button
                 variant="outline"
-                className="h-11 w-full sm:w-[211px] rounded-full border-[#1792e6] bg-white px-4 py-2.5 text-base font-normal text-[#1692e5] hover:bg-brand-blue/5 hover:text-[#1692e5]"
+                className="h-11 w-full sm:w-[168px] rounded-full border-[#1792e6] bg-white px-4 py-2.5 text-sm font-normal text-[#1692e5] hover:bg-brand-blue/5 hover:text-[#1692e5]"
               >
                 <NewAppointmentSvg color="#1692E5" />
                 New Appointment
               </Button>
             </Link>
             <Link href="/dashboard/add-patient">
-              <Button
-                variant="brand"
-                className="h-11 w-full sm:w-[168px] rounded-full border border-[#1792e6] bg-[#1692e5] px-4 py-2.5 text-base font-normal text-white hover:bg-[#1692e5]/90 hover:text-white [&_svg]:size-5"
-              >
-                <AddPatientSvg color="#FFFFFF" />
+              <Button className="text-white cursor-pointer h-[44px] border border-brand-blue bg-brand-blue w-[158px] hover:text-gray-50 rounded-full px-6 py-3 font-normal text-sm flex items-center gap-2 transition-colors">
+                <div className="relative">
+                  <AddPatientSvg />
+                  <div className="absolute -top-1 -right-1 h-2 w-2 bg-brand-blue rounded-full" />
+                </div>
                 New Patient
               </Button>
             </Link>

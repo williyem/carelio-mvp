@@ -49,6 +49,25 @@ const EmailVerificationTab = ({
     await onSendCode(data.email);
   };
 
+  if (!email) {
+    return (
+      <div className="flex flex-col gap-5 items-start w-full">
+        <p className="font-normal leading-[1.2] text-(--text-label) text-[12px]">
+          A verification code will be sent to the email on file.
+        </p>
+        <Button
+          type="button"
+          variant="brand"
+          disabled={isSubmitting}
+          onClick={() => onSendCode('')}
+          className="w-full h-[50px] rounded-[8px] px-4 py-4 text-[14px] font-bold leading-[20px]"
+        >
+          {isSubmitting ? <Spinner /> : 'Send Verification Code'}
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}

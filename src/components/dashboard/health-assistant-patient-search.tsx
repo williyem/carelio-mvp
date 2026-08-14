@@ -28,7 +28,7 @@ interface PatientSearchProps {
 }
 
 const PatientSearch = ({
-  placeholder = 'Search assigned patients by name or ID',
+  placeholder = 'Search patients by name or ID',
   className,
 }: PatientSearchProps) => {
   const [searchValue, setSearchValue] = useState('');
@@ -78,12 +78,17 @@ const PatientSearch = ({
     setSearchValue(patient.fullName);
     setShowResults(false);
 
-    if (patient.emailVerified === false) {
-      setSelectedPatient(patient);
-      setShowVerificationDialog(true);
-    } else {
+    if (patient.linked) {
       router.push(ROUTES.HEALTH_ASSISTANT.PATIENT.DETAILS(patient.id));
+      return;
     }
+    setSelectedPatient({
+      id: patient.id,
+      fullName: patient.fullName || patient.patientId,
+      email: patient.email || '',
+      linked: patient.linked,
+    });
+    setShowVerificationDialog(true);
   };
 
   const handleRecentConsultationSelect = (appointment: UpcomingAppointment) => {
@@ -185,6 +190,14 @@ const PatientSearch = ({
       <PatientVerificationDialog
         open={showVerificationDialog}
         onOpenChange={setShowVerificationDialog}
+        portal="health-assistant"
+        onLinked={() => {
+          const patient =
+            usePatientVerificationStore.getState().selectedPatient;
+          if (patient?.id) {
+            router.push(ROUTES.HEALTH_ASSISTANT.PATIENT.DETAILS(patient.id));
+          }
+        }}
       />
       {!shouldShowResults && (
         <div className="w-full flex flex-col gap-4 mt-8">

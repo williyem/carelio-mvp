@@ -7,14 +7,10 @@ import { PatientRow } from '@/integration/health-assistant/types';
 import { cn } from '@/lib/utils';
 
 interface UseAppointmentsColsProps {
-  onReassign?: (patient: PatientRow) => void;
   onView?: (patient: PatientRow) => void;
 }
 
-const useAppointmentsCols = ({
-  onReassign,
-  onView,
-}: UseAppointmentsColsProps = {}) => {
+const useAppointmentsCols = ({ onView }: UseAppointmentsColsProps = {}) => {
   const columnHelper = createColumnHelper<PatientRow>();
 
   const columns = [
@@ -84,32 +80,17 @@ const useAppointmentsCols = ({
       header: () => <span>Actions</span>,
       cell: (info) => {
         const patient = info.row.original as PatientRow;
-        const isAssigned = patient.assignedAssistantId;
         return (
           <div className="flex items-center gap-x-2">
             <Button
               variant="outline"
-              onClick={() => onReassign?.(info.row.original as PatientRow)}
+              onClick={() => onView?.(patient)}
               className={cn(
-                !isAssigned
-                  ? 'border-(--text-blue) bg-(--text-blue) text-(--bg-white) hover:bg-(--text-blue) hover:text-(--bg-info)'
-                  : 'border-(--brand-blue-border) text-(--text-blue) bg-(--bg-white)  ',
-                '  h-[38px] px-[15px] flex-1 w-full max-w-[76px] rounded-[8px]'
+                'h-[38px] px-[15px] border-[#D4D5D6] bg-[#F6F6F6] flex-1 w-full max-w-[76px] rounded-[8px]'
               )}
             >
               <span className="font-normal text-[14px] leading-[1.2]">
-                {patient.assignedAssistantId ? 'Reassign' : 'Assign'}
-              </span>
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => onView?.(info.row.original as PatientRow)}
-              className={cn(
-                '  h-[38px] px-[15px] border-[#D4D5D6] bg-[#F6F6F6] flex-1 w-full max-w-[76px] rounded-[8px]'
-              )}
-            >
-              <span className="font-normal text-[14px] leading-[1.2]">
-                {'View'}
+                {patient.linked ? 'View' : 'Verify'}
               </span>
             </Button>
           </div>

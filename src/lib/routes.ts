@@ -69,6 +69,7 @@ export const ROUTES = {
     RECORD_DETAILS: (recordId: string) => `/patient/health-records/${recordId}`,
     REGISTER: '/patient/register',
     INVITE: '/patient-invite',
+    APPROVE_DOCTOR: '/patient/approve-doctor',
     SETTINGS: {
       ROOT: '/patient/settings',
       BILLING: '/patient/settings/billing',

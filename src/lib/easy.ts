@@ -498,11 +498,32 @@ export const mapAssignedPatientToAppointmentRow = (
     ? `${patient.assignedAssistant.firstName} ${patient.assignedAssistant.lastName}`
     : undefined,
   isRegistrationComplete: patient.isRegistrationComplete,
+  linked: patient.linked,
+  emailVerified: patient.emailVerified,
 });
 
 export const mapAssignedPatientsToAppointmentRows = (
   patients: AssignedPatient[]
 ): AppointmentRow[] => patients?.map(mapAssignedPatientToAppointmentRow);
+
+export const toVerificationPatient = (
+  patient: AssignedPatient | AppointmentRow
+) => {
+  if ('fullName' in patient) {
+    return {
+      id: patient.id,
+      fullName: patient.fullName || patient.patientId || '',
+      email: patient.email || '',
+      linked: patient.linked,
+    };
+  }
+  return {
+    id: patient.id,
+    fullName: patient.patientName,
+    email: patient.contact?.email || '',
+    linked: patient.linked,
+  };
+};
 
 export const mapDoctorToClinician = (doctor: {
   id: string;
