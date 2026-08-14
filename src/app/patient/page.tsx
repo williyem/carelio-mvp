@@ -14,6 +14,7 @@ import { Appointment } from '@/types/appointment.types';
 import { usePatientSession } from '@/integration/auth/patient';
 import { useGetMyPatientAppointments } from '@/integration/appointments';
 import { formatAppointmentDate, formatAppointmentTimeRange } from '@/lib/easy';
+import { isUpcomingAppointment } from '@/lib/appointment-status';
 import { Spinner } from '@/components/ui/spinner';
 
 function mapGender(gender: string | undefined): Patient['gender'] {
@@ -73,10 +74,7 @@ const PatientDashboardPage = () => {
 
   const appointments: HealthAssistantAppointment[] = useMemo(() => {
     return appointmentDocs
-      .filter(
-        (apt) =>
-          apt.status === 'CONFIRMED' || apt.status === 'PENDING_CONFIRMATION'
-      )
+      .filter((apt) => isUpcomingAppointment(apt))
       .map((apt) => ({
         id: apt.id,
         date: formatAppointmentDate(apt.startTime) || apt.date || '',

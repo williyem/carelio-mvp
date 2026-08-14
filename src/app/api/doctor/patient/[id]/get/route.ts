@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { API_BASE_URL, backendApiClient } from '@/integration/config';
 import { cookies } from 'next/headers';
 import { USER_TYPE_HEADER, doctorAccessToken } from '@/lib/constants';
-import { isDummyDataEnabled } from '@/lib/dummy-data/config';
-import { getPatientById } from '@/lib/dummy-data/loader';
 
 export async function GET(
   _: NextRequest,
@@ -24,17 +22,6 @@ export async function GET(
         { error: 'Patient ID is required' },
         { status: 400 }
       );
-    }
-
-    if (isDummyDataEnabled()) {
-      const patient = getPatientById(id);
-      if (!patient) {
-        return NextResponse.json(
-          { error: 'Patient not found' },
-          { status: 404 }
-        );
-      }
-      return NextResponse.json(patient);
     }
 
     const response = await backendApiClient.get(

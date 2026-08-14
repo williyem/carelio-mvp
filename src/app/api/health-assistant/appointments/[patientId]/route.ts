@@ -27,10 +27,12 @@ export async function GET(
     const page = searchParams.get('page');
     const limit = searchParams.get('limit');
     const status = searchParams.get('status');
+    const upcoming = searchParams.get('upcoming');
 
     const queryParams = new URLSearchParams({});
 
     if (status) queryParams.append('status', status);
+    if (upcoming) queryParams.append('upcoming', upcoming);
     if (limit) queryParams.append('limit', limit);
     if (page) queryParams.append('page', page);
 

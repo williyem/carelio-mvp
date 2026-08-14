@@ -16,6 +16,7 @@ import { useGetDoctorAppointments } from '@/integration/appointments';
 import { format, parseISO, isToday, isTomorrow } from 'date-fns';
 import type { Appointment } from '@/integration/appointments/types';
 import AppointmentsEmptyState from '@/components/dashboard/appointments-empty-state';
+import { isUpcomingAppointment } from '@/lib/appointment-status';
 
 const formatAppointmentDate = (dateString: string): string => {
   try {
@@ -86,7 +87,8 @@ function AppointmentCard({ appointment }: AppointmentCardProps) {
 
 export function UpcomingAppointments() {
   const { data, isLoading } = useGetDoctorAppointments({
-    limit: 3,
+    limit: 10,
+    upcoming: true,
   });
 
   const upcomingAppointments = React.useMemo(() => {
@@ -94,21 +96,14 @@ export function UpcomingAppointments() {
     if (!docs || docs.length === 0) return [];
 
     return docs
-      .filter((apt) => {
-        if (!apt.startTime) return false;
-        try {
-          return new Date(apt.startTime) > new Date();
-        } catch {
-          return false;
-        }
-      })
+      .filter((apt) => isUpcomingAppointment(apt))
       .sort((a, b) => {
         if (!a.startTime || !b.startTime) return 0;
         return (
           new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
         );
       })
-      .slice(0, 5); // Limit to 5 appointments
+      .slice(0, 5);
   }, [data]);
 
   return (

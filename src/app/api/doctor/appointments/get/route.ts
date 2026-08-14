@@ -4,8 +4,6 @@ import { cookies } from 'next/headers';
 import { doctorAccessToken, USER_TYPE_HEADER } from '@/lib/constants';
 import { APPOINTMENT_ENDPOINTS } from '@/integration/appointments/endpoints';
 import type { PatientAppointmentsResponse } from '@/integration/appointments/types';
-import { isDummyDataEnabled } from '@/lib/dummy-data/config';
-import { getDoctorAppointments } from '@/lib/dummy-data/loader';
 
 export async function GET(request: Request) {
   try {
@@ -17,17 +15,6 @@ export async function GET(request: Request) {
 
     if (!accessToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    if (isDummyDataEnabled()) {
-      const result = getDoctorAppointments({
-        page: params.page ? Number(params.page) : 1,
-        limit: params.limit ? Number(params.limit) : 50,
-        status: params.status,
-        startDate: params.startDate,
-        endDate: params.endDate,
-      });
-      return NextResponse.json(result);
     }
 
     const endpoint = APPOINTMENT_ENDPOINTS.GET_DOCTOR_APPOINTMENTS;

@@ -4,7 +4,6 @@ import type {
   ForgotPasswordRequest,
   ForgotPasswordResponse,
 } from '@/integration/auth/doctor/types';
-import { isDummyDataEnabled } from '@/lib/dummy-data/config';
 
 /**
  * POST /api/auth/doctor/forgot-password
@@ -13,12 +12,6 @@ import { isDummyDataEnabled } from '@/lib/dummy-data/config';
 export async function POST(request: NextRequest) {
   try {
     const body: ForgotPasswordRequest = await request.json();
-
-    if (isDummyDataEnabled()) {
-      return NextResponse.json<ForgotPasswordResponse>({
-        message: `If an account exists for ${body.email}, a reset code has been sent. Use OTP: 123456`,
-      });
-    }
 
     const response = await backendApiClient.post<ForgotPasswordResponse>(
       `${API_BASE_URL}/auth/doctor/forgot-password`,

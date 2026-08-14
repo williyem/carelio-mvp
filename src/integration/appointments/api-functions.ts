@@ -29,7 +29,14 @@ export const getDoctorAppointments = async (
 ): Promise<DoctorAppointmentsResponse> => {
   const response = await apiClient.get<ApiResponse<DoctorAppointmentsResponse>>(
     APPOINTMENT_API_ENDPOINTS.GET_DOCTOR_APPOINTMENTS,
-    { params }
+    {
+      params: params
+        ? {
+            ...params,
+            upcoming: params.upcoming ? 'true' : undefined,
+          }
+        : undefined,
+    }
   );
   return extractResponseData(response);
 };
@@ -110,22 +117,9 @@ export const getAppointmentNote = async (
     ':appointmentId',
     appointmentId
   );
-  try {
-    const response =
-      await apiClient.get<ApiResponse<AppointmentNote>>(endpoint);
-    return extractResponseData(response);
-  } catch (error: unknown) {
-    // Return null if note doesn't exist (404)
-    if (
-      error &&
-      typeof error === 'object' &&
-      'response' in error &&
-      (error as { response?: { status: number } }).response?.status === 404
-    ) {
-      return null;
-    }
-    throw error;
-  }
+  const response =
+    await apiClient.get<ApiResponse<AppointmentNote | null>>(endpoint);
+  return extractResponseData(response);
 };
 
 /**
@@ -136,18 +130,19 @@ export const getPatientAppointments = async (
   patientId: string,
   status?: 'COMPLETED' | 'CONFIRMED' | 'CANCELLED' | 'MISSED',
   page: number = 1,
-  limit: number = 10
+  limit: number = 10,
+  upcoming?: boolean
 ): Promise<PatientAppointmentsResponse> => {
   const endpoint = APPOINTMENT_API_ENDPOINTS.GET_PATIENT_APPOINTMENTS.replace(
     ':patientId',
     patientId
   );
-  // Use URLSearchParams to ensure proper query string formatting
   const params = new URLSearchParams({
     page: page.toString(),
     limit: limit.toString(),
-    status: status?.toString() || '',
   });
+  if (status) params.set('status', status);
+  if (upcoming) params.set('upcoming', 'true');
   const url = `${endpoint}?${params.toString()}`;
   const response =
     await apiClient.get<ApiResponse<PatientAppointmentsResponse>>(url);
@@ -158,7 +153,8 @@ export const getHealthAssistantPatientAppointments = async (
   patientId: string,
   status?: 'COMPLETED' | 'CONFIRMED' | 'CANCELLED' | 'MISSED',
   page: number = 1,
-  limit: number = 10
+  limit: number = 10,
+  upcoming?: boolean
 ): Promise<PatientAppointmentsResponse> => {
   const endpoint =
     APPOINTMENT_API_ENDPOINTS.HA_GET_PATIENT_APPOINTMENTS.replace(
@@ -170,6 +166,7 @@ export const getHealthAssistantPatientAppointments = async (
     limit: limit.toString(),
   });
   if (status) params.set('status', status);
+  if (upcoming) params.set('upcoming', 'true');
   const response = await apiClient.get<
     ApiResponse<PatientAppointmentsResponse>
   >(`${endpoint}?${params.toString()}`);
@@ -224,6 +221,20 @@ export const rescheduleAppointment = async (
 };
 
 /**
+ * Mark a consultation as in progress
+ */
+export const startConsultation = async (
+  appointmentId: string
+): Promise<Appointment> => {
+  const endpoint = APPOINTMENT_API_ENDPOINTS.START_CONSULTATION.replace(
+    ':id',
+    appointmentId
+  );
+  const response = await apiClient.post<ApiResponse<Appointment>>(endpoint);
+  return extractResponseData(response);
+};
+
+/**
  * Mark a consultation as complete
  */
 export const completeConsultation = async (
@@ -257,12 +268,13 @@ export const updateConsultationNote = async (
 
 export const getConsultationNoteByAppointment = async (
   appointmentId: string
-) => {
+): Promise<AppointmentNote | null> => {
   const endpoint = APPOINTMENT_API_ENDPOINTS.GET_APPOINTMENT_NOTE.replace(
     ':appointmentId',
     appointmentId
   );
-  const response = await apiClient.get<ApiResponse<AppointmentNote>>(endpoint);
+  const response =
+    await apiClient.get<ApiResponse<AppointmentNote | null>>(endpoint);
   return extractResponseData(response);
 };
 

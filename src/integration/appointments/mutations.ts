@@ -6,6 +6,7 @@ import {
   submitSoapNotes,
   rescheduleAppointment,
   completeConsultation,
+  startConsultation,
   updateConsultationNote,
   getConsultationNoteByAppointment,
 } from './api-functions';
@@ -105,6 +106,24 @@ export const useRescheduleAppointment = () => {
       });
       queryClient.invalidateQueries({
         queryKey: [APPOINTMENT_QUERY_KEYS.RECENT_APPOINTMENTS],
+      });
+    },
+  });
+};
+
+export const useStartConsultation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (appointmentId: string) => startConsultation(appointmentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [APPOINTMENT_QUERY_KEYS.DOCTOR_APPOINTMENTS],
+        exact: false,
+      });
+      queryClient.invalidateQueries({
+        queryKey: [APPOINTMENT_QUERY_KEYS.PATIENT_APPOINTMENTS],
+        exact: false,
       });
     },
   });

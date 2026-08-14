@@ -51,6 +51,7 @@ export interface AppointmentDoctor {
 export type AppointmentStatus =
   | 'PENDING_CONFIRMATION'
   | 'CONFIRMED'
+  | 'IN_PROGRESS'
   | 'COMPLETED'
   | 'CANCELLED'
   | 'MISSED';
@@ -84,6 +85,7 @@ export interface GetDoctorAppointmentsParams {
   page?: number;
   limit?: number;
   status?: AppointmentStatus;
+  upcoming?: boolean;
   startDate?: string;
   endDate?: string;
 }

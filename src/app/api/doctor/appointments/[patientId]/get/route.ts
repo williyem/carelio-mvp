@@ -4,8 +4,6 @@ import { cookies } from 'next/headers';
 import { doctorAccessToken, USER_TYPE_HEADER } from '@/lib/constants';
 import { APPOINTMENT_ENDPOINTS } from '@/integration/appointments/endpoints';
 import type { PatientAppointmentsResponse } from '@/integration/appointments/types';
-import { isDummyDataEnabled } from '@/lib/dummy-data/config';
-import { getPatientAppointments } from '@/lib/dummy-data/loader';
 
 export async function GET(
   request: NextRequest,
@@ -24,6 +22,7 @@ export async function GET(
     const page = searchParams.get('page');
     const limit = searchParams.get('limit');
     const status = searchParams.get('status') ?? undefined;
+    const upcoming = searchParams.get('upcoming') ?? undefined;
 
     if (!patientId) {
       return NextResponse.json(
@@ -32,18 +31,9 @@ export async function GET(
       );
     }
 
-    if (isDummyDataEnabled()) {
-      return NextResponse.json(
-        getPatientAppointments(patientId, {
-          page: page ? Number(page) : 1,
-          limit: limit ? Number(limit) : 10,
-          status,
-        })
-      );
-    }
-
     const queryParams = new URLSearchParams({});
     if (status) queryParams.append('status', status);
+    if (upcoming) queryParams.append('upcoming', upcoming);
     if (limit) queryParams.append('limit', limit);
     if (page) queryParams.append('page', page);
 

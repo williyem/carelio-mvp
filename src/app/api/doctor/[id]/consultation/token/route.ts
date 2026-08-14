@@ -8,8 +8,6 @@ import {
   patientAccessToken,
 } from '@/lib/constants';
 import { DOCTOR_ENDPOINTS } from '@/integration/doctor/endpoint';
-import { isDummyDataEnabled } from '@/lib/dummy-data/config';
-import { getConsultationToken } from '@/lib/dummy-data/loader';
 
 export async function GET(
   _request: NextRequest,
@@ -32,10 +30,6 @@ export async function GET(
 
     if (!accessToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    if (isDummyDataEnabled()) {
-      return NextResponse.json(getConsultationToken(appointmentId));
     }
 
     const response = await backendApiClient.get(

@@ -6,22 +6,29 @@ import {
 } from '@/lib/consultation-bff-auth';
 import { proxyError, unauthorized } from '@/lib/bff-auth';
 
-export async function GET(
+export async function POST(
   _request: NextRequest,
-  { params }: { params: Promise<{ appointmentId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const token = await getConsultationAccessToken();
     if (!token) return unauthorized();
 
-    const { appointmentId } = await params;
+    const { id } = await params;
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Appointment ID is required' },
+        { status: 400 }
+      );
+    }
 
-    const response = await backendApiClient.get(
-      `/vitals/appointment/${appointmentId}`,
+    const response = await backendApiClient.post(
+      `/consultations/${id}/start`,
+      {},
       { headers: consultationAuthHeaders(token) }
     );
     return NextResponse.json(response.data);
   } catch (error) {
-    return proxyError(error, 'Failed to load vitals');
+    return proxyError(error, 'Failed to start consultation');
   }
 }

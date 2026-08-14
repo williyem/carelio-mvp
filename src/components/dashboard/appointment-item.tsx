@@ -120,6 +120,7 @@ const AppointmentItem = ({
           <StatusBadge
             status={rawAppointment?.status}
             startTime={rawAppointment?.startTime}
+            endTime={rawAppointment?.endTime}
           />
         )}
       </div>

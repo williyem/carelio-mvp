@@ -7,7 +7,10 @@ import VideoCallPreview from './preview/video-call-preview';
 import dynamic from 'next/dynamic';
 import { toast } from 'sonner';
 import useGetDoctorConsultationToken from '@/integration/doctor/mutations';
-import { useCompleteConsultation } from '@/integration/appointments/mutations';
+import {
+  useCompleteConsultation,
+  useStartConsultation,
+} from '@/integration/appointments/mutations';
 import { Room, RoomEvent } from 'livekit-client';
 import { getCallJoinError, readPortalIdentity } from '@/lib/call-join';
 
@@ -36,6 +39,7 @@ export default function VideoCallOverlayComponent() {
   const { getDoctorConsultationTokenMutation } =
     useGetDoctorConsultationToken();
   const { mutate: completeConsultation } = useCompleteConsultation();
+  const { mutateAsync: startConsultation } = useStartConsultation();
 
   const joinSession = async (): Promise<boolean> => {
     const identity = readPortalIdentity();
@@ -122,6 +126,17 @@ export default function VideoCallOverlayComponent() {
             }
 
             setIsJoining(false);
+            try {
+              await startConsultation(selectedAppointment.id);
+            } catch (startError) {
+              console.error(
+                'Failed to mark appointment in progress',
+                startError
+              );
+              toast.error(
+                'Joined the call, but appointment status did not update'
+              );
+            }
             startCallFromPreview();
             resolve(true);
           } catch (e) {

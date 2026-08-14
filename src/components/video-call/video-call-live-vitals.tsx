@@ -110,7 +110,7 @@ const VideoCallLiveVitals = () => {
     const payload = { ...soapNotes, action };
 
     try {
-      const existing = await new Promise<{ id?: string } | undefined>(
+      const existing = await new Promise<{ id?: string } | null | undefined>(
         (resolve) => {
           getConsultationNoteByAppointmentMutation.mutate(appointmentId, {
             onSuccess: (data) => resolve(data),

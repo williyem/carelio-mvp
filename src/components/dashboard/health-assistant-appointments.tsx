@@ -16,7 +16,7 @@ export interface HealthAssistantAppointment {
   description: string;
   timeRemaining: string;
   doctor: any;
-  status: 'COMPLETED' | 'CONFIRMED' | 'CANCELLED' | 'MISSED';
+  status: 'COMPLETED' | 'CONFIRMED' | 'CANCELLED' | 'MISSED' | 'IN_PROGRESS';
   startTime?: string;
   endTime?: string;
   raw?: Appointment;

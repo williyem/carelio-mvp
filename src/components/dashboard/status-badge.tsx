@@ -5,17 +5,22 @@ import { isBefore, parseISO } from 'date-fns';
 interface StatusBadgeProps {
   status?: string;
   startTime?: string;
+  endTime?: string;
 }
 
 const StatusBadge = ({
   status: initialStatus,
   startTime,
+  endTime,
 }: StatusBadgeProps) => {
   const status = initialStatus;
   if (!status) return null;
 
   const now = new Date();
   const startObj = startTime ? parseISO(startTime) : null;
+  const endObj = endTime ? parseISO(endTime) : null;
+  const isOngoing =
+    startObj && endObj && !isBefore(now, startObj) && isBefore(now, endObj);
 
   let label = status;
   let className = '';
@@ -27,12 +32,22 @@ const StatusBadge = ({
         'bg-red-50 text-red-600 border-red-100/50 px-2.5 py-[5px] rounded-full text-[12px] font-normal border ';
       break;
 
+    case 'IN_PROGRESS':
+      label = 'In progress';
+      className =
+        'bg-emerald-50 text-emerald-700 border-emerald-100/50 px-2.5 py-[5px] rounded-full text-[12px] font-normal border ';
+      break;
+
     case 'CONFIRMED':
     case 'PENDING_CONFIRMATION':
       if (startObj && isBefore(now, startObj)) {
         label = 'Upcoming';
         className =
           'bg-blue-50 text-brand-blue border-blue-100/50 px-2.5 py-[5px] rounded-full text-[12px] font-normal border ';
+      } else if (isOngoing) {
+        label = 'Ongoing';
+        className =
+          'bg-emerald-50 text-emerald-700 border-emerald-100/50 px-2.5 py-[5px] rounded-full text-[12px] font-normal border ';
       } else {
         label = 'Confirmed';
         className =

@@ -27,11 +27,18 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-type AppointmentStatus = 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'MISSED';
+type AppointmentStatusFilter =
+  | 'UPCOMING'
+  | 'CANCELLED'
+  | 'COMPLETED'
+  | 'MISSED';
 
-const STATUS_OPTIONS: { label: string; value: AppointmentStatus | 'ALL' }[] = [
+const STATUS_OPTIONS: {
+  label: string;
+  value: AppointmentStatusFilter | 'ALL';
+}[] = [
   { label: 'All', value: 'ALL' },
-  { label: 'Upcoming', value: 'CONFIRMED' },
+  { label: 'Upcoming', value: 'UPCOMING' },
   { label: 'Cancelled', value: 'CANCELLED' },
   { label: 'Completed', value: 'COMPLETED' },
   { label: 'Missed', value: 'MISSED' },
@@ -49,9 +56,9 @@ const AppointmentsList = ({
   className,
 }: AppointmentsListProps) => {
   const [page, setPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'ALL'>(
-    'ALL'
-  );
+  const [statusFilter, setStatusFilter] = useState<
+    AppointmentStatusFilter | 'ALL'
+  >('ALL');
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
   const [isCancellationDialogOpen, setIsCancellationDialogOpen] =
@@ -59,10 +66,14 @@ const AppointmentsList = ({
 
   const { appointments, isLoading, data } = useGetPatientAppointments(
     patient?.id || '',
-    statusFilter === 'ALL' ? undefined : statusFilter,
+    statusFilter === 'ALL' || statusFilter === 'UPCOMING'
+      ? undefined
+      : statusFilter,
     true,
     page,
-    10
+    10,
+    'doctor',
+    statusFilter === 'UPCOMING'
   );
   const totalPages = data?.totalPages || 1;
   const hasNextPage = data?.hasNextPage;
@@ -77,7 +88,7 @@ const AppointmentsList = ({
     <Select
       value={statusFilter}
       onValueChange={(val) => {
-        setStatusFilter(val as AppointmentStatus | 'ALL');
+        setStatusFilter(val as AppointmentStatusFilter | 'ALL');
         setPage(1);
       }}
     >

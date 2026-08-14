@@ -3,8 +3,6 @@ import { backendApiClient } from '@/integration/config';
 import { cookies } from 'next/headers';
 import { doctorAccessToken, USER_TYPE_HEADER } from '@/lib/constants';
 import { APPOINTMENT_ENDPOINTS } from '@/integration/appointments/endpoints';
-import { isDummyDataEnabled } from '@/lib/dummy-data/config';
-import { getAppointmentById } from '@/lib/dummy-data/loader';
 
 export async function GET(
   _request: NextRequest,
@@ -25,17 +23,6 @@ export async function GET(
         { error: 'Appointment ID is required' },
         { status: 400 }
       );
-    }
-
-    if (isDummyDataEnabled()) {
-      const appointment = getAppointmentById(id);
-      if (!appointment) {
-        return NextResponse.json(
-          { error: 'Appointment not found' },
-          { status: 404 }
-        );
-      }
-      return NextResponse.json(appointment);
     }
 
     const endpoint = APPOINTMENT_ENDPOINTS.GET_APPOINTMENT_BY_ID.replace(

@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { API_BASE_URL, backendApiClient } from '@/integration/config';
 import { cookies } from 'next/headers';
 import { USER_TYPE_HEADER, doctorAccessToken } from '@/lib/constants';
-import { isDummyDataEnabled } from '@/lib/dummy-data/config';
-import { searchPatients } from '@/lib/dummy-data/loader';
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,10 +16,6 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search') || '';
     const page = Number(searchParams.get('page') || '1');
     const limit = Number(searchParams.get('limit') || '10');
-
-    if (isDummyDataEnabled()) {
-      return NextResponse.json(searchPatients(search, page, limit));
-    }
 
     const response = await backendApiClient.get(`${API_BASE_URL}/patients`, {
       params: { search, page, limit },

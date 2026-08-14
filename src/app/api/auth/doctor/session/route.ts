@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { isDummyDataEnabled } from '@/lib/dummy-data/config';
-import { getSessionResponse } from '@/lib/dummy-data/loader';
 import { backendApiClient, API_BASE_URL } from '@/integration/config';
 import type { GetSessionResponse } from '@/integration/auth/doctor/types';
 import { doctorAccessToken } from '@/lib/constants';
@@ -17,10 +15,6 @@ export async function GET(_request: NextRequest) {
 
     if (!accessToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    if (isDummyDataEnabled()) {
-      return NextResponse.json(getSessionResponse());
     }
 
     const response = await backendApiClient.get<GetSessionResponse>(

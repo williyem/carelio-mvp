@@ -19,7 +19,6 @@ export const useAppointmentNote = (
     queryKey: [APPOINTMENT_QUERY_KEYS.APPOINTMENT_NOTE, appointmentId],
     queryFn: () => getAppointmentNote(appointmentId),
     enabled: !!appointmentId,
-    retry: false, // Don't retry on 404
     ...options,
   });
 };

@@ -107,6 +107,7 @@ export const canStartAppointment = (
   if (
     status?.toLowerCase() === 'completed' ||
     status?.toLowerCase() === 'cancelled' ||
+    status?.toLowerCase() === 'missed' ||
     !patientStatus
   ) {
     return false;

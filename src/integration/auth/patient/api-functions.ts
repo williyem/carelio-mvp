@@ -21,7 +21,7 @@ import type {
 export const loginPatient = async (
   data: PatientLoginRequest
 ): Promise<AxiosResponse<PatientLoginResponse>> => {
-  // Hit Next BFF so dummy mode can set cookies in one step
+  // Hit Next BFF so login can set cookies in one step
   return apiClient.post<PatientLoginResponse>(PATIENT_ENDPOINTS.LOGIN, data);
 };
 
