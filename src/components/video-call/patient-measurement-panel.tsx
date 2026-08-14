@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import DeviceCapturePanel from './device-capture-panel';
 import VisitReadingsList from './visit-readings-list';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export default function PatientMeasurementPanel({
   appointmentId,
@@ -109,9 +110,11 @@ export default function PatientMeasurementPanel({
       </div>
 
       {requested.length === 0 && other.length === 0 ? (
-        <p className="text-sm text-(--text-secondary) rounded-[10px] bg-[#F7F9FC] p-4">
-          No measurements requested yet.
-        </p>
+        <EmptyState
+          className="py-6"
+          title="No measurements requested yet"
+          description="When the doctor asks for a reading, it will show up here with device steps."
+        />
       ) : null}
 
       {requested.length > 1 && (

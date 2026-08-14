@@ -3,6 +3,8 @@
 import { HealthRecord } from '@/types/health-records.types';
 import HealthRecordCard from './health-record-card';
 import { cn } from '@/lib/utils';
+import { EmptyState } from '@/components/ui/empty-state';
+import DocumentTextSvg from '@/assets/icons/document-text-svg';
 
 interface HealthRecordsListProps {
   records: HealthRecord[];
@@ -18,9 +20,11 @@ const HealthRecordsList = ({
   if (records.length === 0) {
     return (
       <div className={cn('flex flex-col gap-5 items-start w-full', className)}>
-        <p className="text-[var(--text-muted)] text-[14px]">
-          No health records available
-        </p>
+        <EmptyState
+          icon={<DocumentTextSvg />}
+          title="No health records available"
+          description="Visit summaries and clinical notes will appear here."
+        />
       </div>
     );
   }

@@ -7,6 +7,7 @@ import { ROUTES } from '@/lib/routes';
 import CalendarSvg from '@/assets/icons/calendar-svg';
 import { usePatientSession } from '@/integration/auth/patient';
 import { usePatientVitalsStore } from '@/stores/patient-vitals-store';
+import { EmptyState } from '@/components/ui/empty-state';
 
 const VitalHistoryPage = () => {
   const router = useRouter();
@@ -30,12 +31,12 @@ const VitalHistoryPage = () => {
           Vital History
         </h1>
 
-        {entries.length === 0 && (
-          <p className="text-sm text-(--text-secondary)">
-            No vitals recorded yet. Readings you submit stay pending until a
-            doctor confirms them in the visit.
-          </p>
-        )}
+        {entries.length === 0 ? (
+          <EmptyState
+            title="No vitals recorded yet"
+            description="Readings you submit stay pending until a doctor confirms them in the visit."
+          />
+        ) : null}
 
         <div className="flex flex-col gap-[16px] items-start w-full">
           {entries.map((record) => (

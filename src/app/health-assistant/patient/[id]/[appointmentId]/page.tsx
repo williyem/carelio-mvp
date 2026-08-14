@@ -91,8 +91,9 @@ export default function HealthAssistantAppointmentSummaryPage({
               />
             ) : (
               <EmptyState
-                icon={<Search className="h-8 w-8 text-gray-300" />}
-                message="No session summary available for this appointment"
+                icon={<Search className="h-6 w-6 text-(--text-muted)" />}
+                title="No session summary available"
+                description="Shared notes from this visit will appear here once the doctor sends them."
               />
             )}
           </div>

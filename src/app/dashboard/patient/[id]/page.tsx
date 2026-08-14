@@ -12,12 +12,14 @@ import {
   Droplets,
   Info,
   Loader2,
+  Search,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useGetPatientById } from '@/integration/patient';
 import { isForbiddenError } from '@/integration';
 import { format, parseISO } from 'date-fns';
+import { EmptyState } from '@/components/ui/empty-state';
 import BigUserSvg from '@/assets/icons/big-user-svg';
 import GenderSvg from '@/assets/icons/gender-svg';
 import AppointmentsList from '@/components/dashboard/patients/appointments-list';
@@ -94,8 +96,12 @@ export default function PatientDetailsPage({
           <span className="text-sm font-medium">Back</span>
         </Link>
         <Card className="border-gray-100 rounded-2xl">
-          <CardContent className="p-8 text-center text-gray-500">
-            Patient not found
+          <CardContent className="p-4">
+            <EmptyState
+              icon={<Search className="h-6 w-6 text-(--text-muted)" />}
+              title="Patient not found"
+              description="This patient may have been removed or you may not have access."
+            />
           </CardContent>
         </Card>
       </div>

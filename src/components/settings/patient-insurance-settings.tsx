@@ -16,6 +16,7 @@ import {
 } from '@/integration/settings/api';
 import { useUploadFile } from '@/integration/files/mutations';
 import { getErrorMessage } from '@/integration';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export default function PatientInsuranceSettings() {
   const [policies, setPolicies] = useState<InsurancePolicy[]>([]);
@@ -154,11 +155,12 @@ export default function PatientInsuranceSettings() {
       )}
 
       <div className="grid gap-4">
-        {policies.length === 0 && (
-          <p className="text-sm text-(--text-secondary)">
-            No NHIS or health scheme on file yet.
-          </p>
-        )}
+        {policies.length === 0 ? (
+          <EmptyState
+            title="No coverage on file"
+            description="Add an NHIS or health scheme so it is ready for visits."
+          />
+        ) : null}
         {policies.map((policy) => (
           <div
             key={policy.id}

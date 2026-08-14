@@ -10,6 +10,7 @@ import { formatVitalValue } from '@/lib/easy';
 import { getDeviceGuide } from '@/lib/device-guides';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export default function VisitReadingsList({
   appointmentId,
@@ -48,9 +49,11 @@ export default function VisitReadingsList({
 
   if (readings.length === 0 && rejected.length === 0) {
     return (
-      <p className="text-sm text-(--text-secondary) rounded-[10px] bg-[#F7F9FC] p-4">
-        No readings recorded for this visit yet.
-      </p>
+      <EmptyState
+        className="py-6"
+        title="No readings yet"
+        description="Vitals captured during this visit will appear here."
+      />
     );
   }
 

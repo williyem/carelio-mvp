@@ -12,6 +12,8 @@ import {
   revokeAccess,
 } from '@/integration/settings/api';
 import { getErrorMessage } from '@/integration';
+import { EmptyState } from '@/components/ui/empty-state';
+import { User } from 'lucide-react';
 
 export default function PatientAccessSettings() {
   const { clinicians } = useDoctors();
@@ -51,11 +53,13 @@ export default function PatientAccessSettings() {
         description="Grant or revoke who can view your chart and schedule visits with you."
       />
       <div className="space-y-3">
-        {people.length === 0 && (
-          <p className="text-sm text-(--text-secondary)">
-            No clinicians available yet.
-          </p>
-        )}
+        {people.length === 0 ? (
+          <EmptyState
+            icon={<User className="h-6 w-6 text-(--text-muted)" />}
+            title="No clinicians available yet"
+            description="Doctors and health assistants will show here when they are on your care team."
+          />
+        ) : null}
         {people.map((person) => {
           const granted = grantedIds.includes(person.id);
           return (

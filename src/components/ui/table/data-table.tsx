@@ -38,6 +38,7 @@ import SearchSvg from '@/assets/icons/search-svg';
 import TableSkeleton from '@/components/skeletons/table-skeleton';
 import { Pagination } from './pagination';
 import { cn } from '@/lib/utils';
+import { EmptyState } from '@/components/ui/empty-state';
 
 // Utility function to safely access nested properties
 const getNestedValue = (obj: any, path: string): string => {
@@ -58,6 +59,8 @@ export interface ITableProps {
   defaultItemsPerPage?: number;
   pageSizeOptions?: number[];
   showPagination?: boolean;
+  emptyTitle?: string;
+  emptyDescription?: string;
 }
 
 export function DataTable({
@@ -70,6 +73,8 @@ export function DataTable({
   defaultItemsPerPage = 10,
   pageSizeOptions = [10, 25, 50, 100],
   showPagination = true,
+  emptyTitle = 'No data found',
+  emptyDescription = 'Nothing to show here yet.',
 }: ITableProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -250,8 +255,12 @@ export function DataTable({
               </tr>
             ) : table.getRowModel()?.rows?.length === 0 ? (
               <tr>
-                <td colSpan={20} className="text-center max-h-[60px]  py-24">
-                  No data found
+                <td colSpan={columns.length} className="border-0">
+                  <EmptyState
+                    icon={<SearchSvg />}
+                    title={emptyTitle}
+                    description={emptyDescription}
+                  />
                 </td>
               </tr>
             ) : table.getRowModel().rows?.length ? (
@@ -276,11 +285,12 @@ export function DataTable({
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center border-0"
-                >
-                  No results.
+                <TableCell colSpan={columns.length} className="border-0">
+                  <EmptyState
+                    icon={<SearchSvg />}
+                    title={emptyTitle}
+                    description={emptyDescription}
+                  />
                 </TableCell>
               </TableRow>
             )}

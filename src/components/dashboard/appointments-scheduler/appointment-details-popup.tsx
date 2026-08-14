@@ -200,7 +200,7 @@ export function AppointmentDetailsPopup({
             className="w-full"
           >
             <Button
-              className="w-full border-brand-blue text-brand-blue hover:text-white hover:bg-brand-blue rounded-xl h-14 font-semibold text-lg"
+              className="w-full border-brand-blue text-brand-blue hover:text-white hover:bg-brand-blue rounded-xl h-12 font-semibold text-[14px]"
               variant="outline"
             >
               View Summary

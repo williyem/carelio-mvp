@@ -21,6 +21,7 @@ import RecentConsultationRow from './recent-consultation-row';
 import { UpcomingAppointment } from '@/integration/appointments/types';
 import RecentConsultationsSkeleton from '../skeletons/recent-consultations-skeleton';
 import AppointmentsEmptyState from '@/components/dashboard/appointments-empty-state';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface PatientSearchProps {
   placeholder?: string;
@@ -179,14 +180,12 @@ const PatientSearch = ({
                 />
               ))
             ) : (
-              <div className="p-12 flex flex-col  w-full items-center justify-center text-center space-y-3">
-                <div className="h-12 w-12 rounded-full  flex items-center  justify-center text-gray-400">
-                  <Search className="h-6 w-6" />
-                </div>
-                <p className="text-(--text-primary) text-sm">
-                  No patients found
-                </p>
-              </div>
+              <EmptyState
+                className="py-8"
+                icon={<Search className="h-6 w-6 text-(--text-muted)" />}
+                title="No patients found"
+                description="Try another name or patient ID."
+              />
             )}
           </div>
         )}

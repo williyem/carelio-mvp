@@ -11,6 +11,7 @@ import { useDebounce } from '@/hooks/use-debounce';
 import RecentConsultationRow from './patients/recent-consultation-row';
 import { Patient } from '@/types/patient.types';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface PatientSelectionProps {
   selectedPatient: Patient | null;
@@ -132,11 +133,18 @@ export function PatientSelection({
               handlePatientSelect={handlePatientSelect}
             />
           ) : (
-            <div className="text-center py-8 text-gray-500 text-sm">
-              {debouncedQuery
-                ? 'No patients found.'
-                : 'Start typing to search for patients.'}
-            </div>
+            <EmptyState
+              className="py-8"
+              icon={<Search className="h-6 w-6 text-(--text-muted)" />}
+              title={
+                debouncedQuery ? 'No patients found' : 'Search for a patient'
+              }
+              description={
+                debouncedQuery
+                  ? 'Try another name or patient ID.'
+                  : 'Start typing a name or ID to find someone.'
+              }
+            />
           )}
         </div>
       </div>

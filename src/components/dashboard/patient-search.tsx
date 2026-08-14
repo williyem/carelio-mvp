@@ -19,6 +19,7 @@ import { toVerificationPatient } from '@/lib/easy';
 import { ROUTES } from '@/lib/routes';
 import { usePatientVerificationStore } from '@/stores/patient-verifcation-store';
 import type { Patient } from '@/integration/patient/type';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export function PatientSearch() {
   const [query, setQuery] = React.useState('');
@@ -113,12 +114,12 @@ export function PatientSearch() {
                 ))}
               </div>
             ) : (
-              <div className="p-12 flex flex-col items-center justify-center text-center space-y-3">
-                <div className="h-12 w-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
-                  <Search className="h-6 w-6" />
-                </div>
-                <p className="text-gray-900 font-medium">No patients found</p>
-              </div>
+              <EmptyState
+                className="py-8"
+                icon={<Search className="h-6 w-6 text-(--text-muted)" />}
+                title="No patients found"
+                description="Try another name or patient ID."
+              />
             )}
           </div>
         </Card>

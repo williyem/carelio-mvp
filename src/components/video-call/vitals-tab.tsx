@@ -67,10 +67,9 @@ const VitalsTab = ({
           </div>
         ) : (
           <EmptyState
-            icon={<Search className="h-8 w-8 text-gray-300" />}
-            message="No vitals recorded"
+            icon={<Search className="h-6 w-6 text-(--text-muted)" />}
+            title="No vitals recorded"
             description="Vitals recorded during the session will appear here."
-            className="py-12"
           />
         )}
 

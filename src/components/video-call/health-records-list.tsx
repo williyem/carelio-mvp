@@ -84,10 +84,9 @@ const HealthRecordsList = ({ patientId, onBack }: HealthRecordsListProps) => {
           </ScrollArea>
         ) : (
           <EmptyState
-            icon={<FileText className="h-8 w-8 text-gray-300" />}
-            message="No health records found"
+            icon={<FileText className="h-6 w-6 text-(--text-muted)" />}
+            title="No health records found"
             description="SOAP notes and measurements from each visit will appear here"
-            className="py-12"
           />
         )}
       </div>

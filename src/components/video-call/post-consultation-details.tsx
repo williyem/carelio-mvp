@@ -72,8 +72,8 @@ const PostConsultationDetails = ({
           <VitalsTab appointmentId={appointmentId} />
         )}
         <EmptyState
-          icon={<Search className="h-8 w-8 text-gray-300" />}
-          message="The doctor has not shared notes from this visit yet"
+          icon={<Search className="h-6 w-6 text-(--text-muted)" />}
+          title="The doctor has not shared notes from this visit yet"
           description="Vitals from this visit are shown above. SOAP notes will appear here once the doctor shares them."
         />
       </div>
@@ -86,7 +86,11 @@ const PostConsultationDetails = ({
         {!hideVitals && appointmentId && (
           <VitalsTab appointmentId={appointmentId} />
         )}
-        <div className="py-12 text-center text-gray-500">{emptyMessage}</div>
+        <EmptyState
+          icon={<Search className="h-6 w-6 text-(--text-muted)" />}
+          title={emptyMessage}
+          description="Notes from this visit will show here once they are available."
+        />
       </div>
     );
   }
