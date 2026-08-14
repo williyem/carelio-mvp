@@ -10,6 +10,7 @@ import { Spinner } from '@/components/ui/spinner';
 import {
   DAYS_OF_WEEK,
   defaultAvailability,
+  fullWeekDays,
   type DayName,
   type DoctorAvailability,
   type TimeRange,
@@ -20,18 +21,13 @@ import {
 } from '@/integration/settings/api';
 import { getErrorMessage } from '@/integration';
 
-const DAY_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const DAY_SHORT = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
 function cloneAvailability(value: DoctorAvailability): DoctorAvailability {
   return {
     enabled: value.enabled,
-    timezone: value.timezone,
-    days: Object.fromEntries(
-      Object.entries(value.days).map(([day, ranges]) => [
-        day,
-        ranges?.map((range) => ({ ...range })) ?? [],
-      ])
-    ),
+    timezone: 'GMT',
+    days: fullWeekDays(value.days),
   };
 }
 
@@ -41,6 +37,7 @@ export default function ScheduleAvailabilitySettings({
   doctorId: string;
 }) {
   const [draft, setDraft] = useState<DoctorAvailability>(defaultAvailability);
+  const [saved, setSaved] = useState<DoctorAvailability>(defaultAvailability);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -49,10 +46,16 @@ export default function ScheduleAvailabilitySettings({
     let cancelled = false;
     getMyAvailability()
       .then((data) => {
-        if (!cancelled) setDraft(cloneAvailability(data));
+        if (cancelled) return;
+        const next = cloneAvailability(data);
+        setDraft(next);
+        setSaved(next);
       })
       .catch(() => {
-        if (!cancelled) setDraft(defaultAvailability());
+        if (cancelled) return;
+        const fallback = defaultAvailability();
+        setDraft(fallback);
+        setSaved(fallback);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -73,12 +76,8 @@ export default function ScheduleAvailabilitySettings({
   const toggleDay = (day: DayName) => {
     setDraft((prev) => {
       const has = (prev.days[day]?.length ?? 0) > 0;
-      const days = { ...prev.days };
-      if (has) {
-        delete days[day];
-      } else {
-        days[day] = [{ start: '09:00', end: '17:00' }];
-      }
+      const days = fullWeekDays(prev.days);
+      days[day] = has ? [] : [{ start: '09:00', end: '17:00' }];
       return { ...prev, days };
     });
   };
@@ -92,7 +91,7 @@ export default function ScheduleAvailabilitySettings({
     setDraft((prev) => {
       const ranges = [...(prev.days[day] ?? [])];
       ranges[index] = { ...ranges[index], [key]: value };
-      return { ...prev, days: { ...prev.days, [day]: ranges } };
+      return { ...prev, days: { ...fullWeekDays(prev.days), [day]: ranges } };
     });
   };
 
@@ -100,7 +99,7 @@ export default function ScheduleAvailabilitySettings({
     setDraft((prev) => ({
       ...prev,
       days: {
-        ...prev.days,
+        ...fullWeekDays(prev.days),
         [day]: [...(prev.days[day] ?? []), { start: '13:00', end: '17:00' }],
       },
     }));
@@ -109,23 +108,24 @@ export default function ScheduleAvailabilitySettings({
   const removeRange = (day: DayName, index: number) => {
     setDraft((prev) => {
       const ranges = (prev.days[day] ?? []).filter((_, i) => i !== index);
-      const days = { ...prev.days };
-      if (ranges.length === 0) delete days[day];
-      else days[day] = ranges;
-      return { ...prev, days };
+      return {
+        ...prev,
+        days: { ...fullWeekDays(prev.days), [day]: ranges },
+      };
     });
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      const saved = await saveMyAvailability({
+      const savedResult = await saveMyAvailability({
         enabled: draft.enabled,
-        days: draft.days,
-        timezone:
-          draft.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+        days: fullWeekDays(draft.days),
+        timezone: 'GMT',
       });
-      setDraft(cloneAvailability(saved));
+      const next = cloneAvailability(savedResult);
+      setDraft(next);
+      setSaved(next);
       setEditing(false);
       toast.success('Availability saved');
     } catch (error) {
@@ -147,7 +147,7 @@ export default function ScheduleAvailabilitySettings({
     <div>
       <SettingsPageHeader
         title="Schedule availability"
-        description="Patients and health assistants can only book slots inside these hours."
+        description="Patients and health assistants can only book slots inside these hours. All hours are GMT."
       />
 
       <div className="rounded-[20px] border border-(--border-stroke) p-6 space-y-6">
@@ -155,7 +155,7 @@ export default function ScheduleAvailabilitySettings({
           <div>
             <h2 className="font-semibold">Your availability</h2>
             <p className="text-sm text-(--text-secondary)">
-              Working hours used when scheduling a consultation.
+              Working hours used when scheduling a consultation. Times are GMT.
             </p>
           </div>
           {editing ? (
@@ -163,7 +163,10 @@ export default function ScheduleAvailabilitySettings({
               <Button
                 variant="outline"
                 className="rounded-full"
-                onClick={() => setEditing(false)}
+                onClick={() => {
+                  setDraft(cloneAvailability(saved));
+                  setEditing(false);
+                }}
               >
                 Cancel
               </Button>
@@ -205,26 +208,32 @@ export default function ScheduleAvailabilitySettings({
           </span>
         </label>
 
-        <div className="flex flex-wrap gap-2">
-          {DAYS_OF_WEEK.map((day, index) => {
-            const active = selectedDays.includes(day);
-            return (
-              <button
-                key={day}
-                type="button"
-                disabled={!editing || !draft.enabled}
-                onClick={() => toggleDay(day)}
-                className={cn(
-                  'size-9 rounded-full text-sm font-medium border',
-                  active
-                    ? 'bg-brand-blue text-white border-brand-blue'
-                    : 'bg-white text-(--text-secondary) border-(--border-stroke)'
-                )}
-              >
-                {DAY_SHORT[index]}
-              </button>
-            );
-          })}
+        <div className="space-y-2">
+          <p className="text-sm text-(--text-secondary)">
+            Select any day, including Saturday and Sunday.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {DAYS_OF_WEEK.map((day, index) => {
+              const active = selectedDays.includes(day);
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  aria-label={day}
+                  disabled={!editing || !draft.enabled}
+                  onClick={() => toggleDay(day)}
+                  className={cn(
+                    'h-9 min-w-9 px-2 rounded-full text-sm font-medium border',
+                    active
+                      ? 'bg-brand-blue text-white border-brand-blue'
+                      : 'bg-white text-(--text-secondary) border-(--border-stroke)'
+                  )}
+                >
+                  {DAY_SHORT[index]}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="space-y-4">
@@ -245,6 +254,7 @@ export default function ScheduleAvailabilitySettings({
                     onChange={(e) =>
                       updateRange(day, index, 'start', e.target.value)
                     }
+                    step={60}
                     className="h-10 rounded-md border border-(--border-stroke) px-2 text-sm"
                   />
                   <span className="text-sm text-(--text-secondary)">to</span>
@@ -255,6 +265,7 @@ export default function ScheduleAvailabilitySettings({
                     onChange={(e) =>
                       updateRange(day, index, 'end', e.target.value)
                     }
+                    step={60}
                     className="h-10 rounded-md border border-(--border-stroke) px-2 text-sm"
                   />
                   {editing && (

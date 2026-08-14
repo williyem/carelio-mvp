@@ -38,10 +38,7 @@ import { combineDateAndTime } from '@/lib/datetime';
 import { getErrorMessage } from '@/integration';
 import { useDoctors } from '@/hooks/page-hooks/useDoctors';
 import { Appointment } from '@/types/appointment.types';
-import {
-  getRangesForDate,
-  useAvailabilityStore,
-} from '@/stores/availability-store';
+import { isClosedCalendarDay } from '@/stores/availability-store';
 import { useAccessGrantStore } from '@/stores/access-grant-store';
 import {
   getDoctorAvailability,
@@ -136,7 +133,6 @@ const ScheduleAppointmentDialog = ({
 }: ScheduleAppointmentDialogProps) => {
   const { clinicians, cliniciansWithSearch, isLoading } = useDoctors();
   const localGrantedIds = useAccessGrantStore((s) => s.grantedIds);
-  const getAvailability = useAvailabilityStore((s) => s.getAvailability);
   const beginCall = useBeginCall();
 
   const {
@@ -175,10 +171,16 @@ const ScheduleAppointmentDialog = ({
     useAppointmentMutations(portal);
 
   const dateStr = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : undefined;
-  const { data: remoteAvailability } = useQuery({
+  const { data: weekAvailability } = useQuery({
+    queryKey: ['doctor-availability', selectedDoctorId, 'week'],
+    queryFn: () => getDoctorAvailability(selectedDoctorId),
+    enabled: Boolean(selectedDoctorId),
+    retry: 0,
+  });
+  const { data: remoteAvailability, isPending: slotsLoading } = useQuery({
     queryKey: ['doctor-availability', selectedDoctorId, dateStr],
     queryFn: () => getDoctorAvailability(selectedDoctorId, dateStr),
-    enabled: Boolean(selectedDoctorId),
+    enabled: Boolean(selectedDoctorId && dateStr),
     retry: 0,
   });
 
@@ -271,14 +273,6 @@ const ScheduleAppointmentDialog = ({
     }
     return cliniciansWithSearch.filter((c) => grantedIds.includes(c.id));
   }, [cliniciansWithSearch, grantedIds, portal]);
-
-  const allowedRanges = useMemo(() => {
-    if (!selectedDoctorId || !selectedDate) return null;
-    if (remoteAvailability) {
-      return getRangesForDate(remoteAvailability, selectedDate);
-    }
-    return getRangesForDate(getAvailability(selectedDoctorId), selectedDate);
-  }, [getAvailability, remoteAvailability, selectedDate, selectedDoctorId]);
 
   const today = useMemo(() => {
     const date = new Date();
@@ -524,9 +518,11 @@ const ScheduleAppointmentDialog = ({
                     setValue('startTime', slot.start, { shouldValidate: true });
                     setValue('endTime', slot.end, { shouldValidate: true });
                   }}
-                  ranges={allowedRanges}
                   slots={remoteAvailability?.slots}
-                  timezone={remoteAvailability?.timezone}
+                  slotsLoading={slotsLoading}
+                  timezone={
+                    remoteAvailability?.timezone ?? weekAvailability?.timezone
+                  }
                   doctorSelected={Boolean(selectedDoctorId)}
                   disabled={isSubmitting}
                   dateError={errors.date?.message}
@@ -534,6 +530,9 @@ const ScheduleAppointmentDialog = ({
                     errors.startTime?.message || errors.endTime?.message
                   }
                   minDate={today}
+                  disabledDate={(day) =>
+                    isClosedCalendarDay(weekAvailability, day)
+                  }
                 />
               )}
 

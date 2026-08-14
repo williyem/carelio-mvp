@@ -13,7 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useGetDoctorAppointments } from '@/integration/appointments';
-import { format, parseISO, isToday, isTomorrow } from 'date-fns';
+import { parseISO } from 'date-fns';
 import type { Appointment } from '@/integration/appointments/types';
 import AppointmentsEmptyState from '@/components/dashboard/appointments-empty-state';
 import { isUpcomingAppointment } from '@/lib/appointment-status';
@@ -21,9 +21,22 @@ import { isUpcomingAppointment } from '@/lib/appointment-status';
 const formatAppointmentDate = (dateString: string): string => {
   try {
     const date = parseISO(dateString);
-    if (isToday(date)) return 'Today';
-    if (isTomorrow(date)) return 'Tomorrow';
-    return format(date, 'MMM d, yyyy');
+    if (Number.isNaN(date.getTime())) return 'N/A';
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return `${months[date.getUTCMonth()]} ${date.getUTCDate()}, ${date.getUTCFullYear()}`;
   } catch {
     return 'N/A';
   }
@@ -31,7 +44,13 @@ const formatAppointmentDate = (dateString: string): string => {
 
 const formatAppointmentTime = (dateString: string): string => {
   try {
-    return format(parseISO(dateString), 'h:mm a');
+    const date = parseISO(dateString);
+    if (Number.isNaN(date.getTime())) return 'N/A';
+    const hours24 = date.getUTCHours();
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    const ampm = hours24 >= 12 ? 'PM' : 'AM';
+    const hours12 = hours24 % 12 || 12;
+    return `${hours12}:${minutes} ${ampm} GMT`;
   } catch {
     return 'N/A';
   }

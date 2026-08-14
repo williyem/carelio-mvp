@@ -10,11 +10,10 @@ import {
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import ErrorMessage from '@/components/ui/error-message';
+import { Spinner } from '@/components/ui/spinner';
 import {
   formatTimezoneCaption,
-  splitRangesIntoHourSlots,
   type HourSlot,
-  type TimeRange,
 } from '@/stores/availability-store';
 
 interface AvailabilitySlotPickerProps {
@@ -25,17 +24,16 @@ interface AvailabilitySlotPickerProps {
   selectedStart?: string;
   selectedEnd?: string;
   onSelectSlot: (slot: HourSlot) => void;
-  ranges: TimeRange[] | null;
   slots?: HourSlot[];
+  slotsLoading?: boolean;
   timezone?: string;
   doctorSelected: boolean;
   disabled?: boolean;
   dateError?: string;
   slotError?: string;
   minDate?: Date;
+  disabledDate?: (date: Date) => boolean;
 }
-
-const OPEN_DAY_FALLBACK: TimeRange[] = [{ start: '08:00', end: '18:00' }];
 
 export default function AvailabilitySlotPicker({
   date,
@@ -45,20 +43,17 @@ export default function AvailabilitySlotPicker({
   selectedStart,
   selectedEnd,
   onSelectSlot,
-  ranges,
-  slots: slotsProp,
+  slots,
+  slotsLoading,
   timezone,
   doctorSelected,
   disabled,
   dateError,
   slotError,
   minDate,
+  disabledDate,
 }: AvailabilitySlotPickerProps) {
-  const hourSlots =
-    slotsProp ??
-    splitRangesIntoHourSlots(ranges === null ? OPEN_DAY_FALLBACK : ranges);
-
-  const closedDay = doctorSelected && date && ranges && ranges.length === 0;
+  const hourSlots = slots ?? [];
 
   return (
     <div className="flex flex-col gap-2 items-start w-full">
@@ -113,7 +108,10 @@ export default function AvailabilitySlotPicker({
                   onDateChange(next);
                   if (next) onDateOpenChange(false);
                 }}
-                disabled={(day: Date) => (minDate ? day < minDate : false)}
+                disabled={(day: Date) => {
+                  if (minDate && day < minDate) return true;
+                  return disabledDate?.(day) ?? false;
+                }}
                 captionLayout="dropdown"
                 initialFocus={false}
               />
@@ -129,13 +127,13 @@ export default function AvailabilitySlotPicker({
           <p className="text-sm text-(--text-secondary)">
             Choose a date to view this doctor&apos;s available periods.
           </p>
-        ) : closedDay ? (
-          <p className="text-sm text-(--text-secondary)">
-            This doctor is not available on the selected date.
-          </p>
+        ) : slotsLoading ? (
+          <div className="flex justify-center w-full py-4">
+            <Spinner />
+          </div>
         ) : hourSlots.length === 0 ? (
           <p className="text-sm text-(--text-secondary)">
-            No open periods remain on this date.
+            This doctor is not available on the selected date.
           </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">

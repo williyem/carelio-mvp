@@ -26,18 +26,38 @@ export interface DoctorAvailability {
   days: Partial<Record<DayName, TimeRange[]>>;
 }
 
-const DEFAULT_WEEKDAY_RANGE: TimeRange[] = [{ start: '09:00', end: '17:00' }];
+const weekdayHours = (): TimeRange[] => [{ start: '09:00', end: '17:00' }];
+
+function toHhMm(value: string): string {
+  return value.slice(0, 5);
+}
+
+export function fullWeekDays(
+  days: Partial<Record<DayName, TimeRange[]>> = {}
+): Record<DayName, TimeRange[]> {
+  return Object.fromEntries(
+    DAYS_OF_WEEK.map((day) => [
+      day,
+      days[day]?.map((range) => ({
+        start: toHhMm(range.start),
+        end: toHhMm(range.end),
+      })) ?? [],
+    ])
+  ) as Record<DayName, TimeRange[]>;
+}
 
 export const defaultAvailability = (): DoctorAvailability => ({
   enabled: true,
-  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Africa/Accra',
-  days: {
-    Monday: DEFAULT_WEEKDAY_RANGE,
-    Tuesday: DEFAULT_WEEKDAY_RANGE,
-    Wednesday: DEFAULT_WEEKDAY_RANGE,
-    Thursday: DEFAULT_WEEKDAY_RANGE,
-    Friday: DEFAULT_WEEKDAY_RANGE,
-  },
+  timezone: 'GMT',
+  days: fullWeekDays({
+    Monday: weekdayHours(),
+    Tuesday: weekdayHours(),
+    Wednesday: weekdayHours(),
+    Thursday: weekdayHours(),
+    Friday: weekdayHours(),
+    Saturday: [],
+    Sunday: [],
+  }),
 });
 
 interface AvailabilityState {
@@ -80,6 +100,15 @@ export function getRangesForDate(
   const ranges = availability.days[day];
   if (!ranges || ranges.length === 0) return [];
   return ranges;
+}
+
+export function isClosedCalendarDay(
+  availability: DoctorAvailability | undefined,
+  date: Date
+): boolean {
+  if (!availability?.enabled) return false;
+  const day = DAYS_OF_WEEK[date.getDay()];
+  return (availability.days[day]?.length ?? 0) === 0;
 }
 
 export interface HourSlot {
@@ -132,28 +161,6 @@ export function splitRangesIntoHourSlots(
   return slots;
 }
 
-export function formatTimezoneCaption(timeZone?: string): string {
-  const tz =
-    timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-  try {
-    const now = new Date();
-    const longName = new Intl.DateTimeFormat('en-US', {
-      timeZone: tz,
-      timeZoneName: 'long',
-    })
-      .formatToParts(now)
-      .find((part) => part.type === 'timeZoneName')?.value;
-    const shortName = new Intl.DateTimeFormat('en-US', {
-      timeZone: tz,
-      timeZoneName: 'short',
-    })
-      .formatToParts(now)
-      .find((part) => part.type === 'timeZoneName')?.value;
-    if (longName && shortName && longName !== shortName) {
-      return `All times are displayed in ${longName} (${shortName})`;
-    }
-    return `All times are displayed in ${longName || tz}`;
-  } catch {
-    return `All times are displayed in ${tz}`;
-  }
+export function formatTimezoneCaption(_timeZone?: string): string {
+  return 'All times are in GMT';
 }

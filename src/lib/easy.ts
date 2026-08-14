@@ -51,8 +51,35 @@ export const mapHealthAssistantsToClinicians = (
   return assistants.map(mapHealthAssistantToClinician);
 };
 
+const GMT_MONTHS = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+] as const;
+
 /**
- * Format appointment date from ISO string (e.g., "2026-01-29T09:00:15.201Z" → "Jan 29, 2026")
+ * Format a clock time in hardcoded GMT (UTC). No local timezone conversion.
+ */
+const formatGmtClock = (date: Date): string => {
+  const hours24 = date.getUTCHours();
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+  const ampm = hours24 >= 12 ? 'PM' : 'AM';
+  const hours12 = hours24 % 12 || 12;
+  return `${hours12}:${minutes} ${ampm}`;
+};
+
+/**
+ * Format appointment date from ISO string in GMT
+ * (e.g., "2026-01-29T09:00:15.201Z" → "Jan 29, 2026")
  */
 export const formatAppointmentDate = (startTime?: string): string => {
   if (!startTime) return '';
@@ -61,7 +88,7 @@ export const formatAppointmentDate = (startTime?: string): string => {
     const date = new Date(startTime);
     if (isNaN(date.getTime())) return '';
 
-    return format(date, 'MMM d, yyyy');
+    return `${GMT_MONTHS[date.getUTCMonth()]} ${date.getUTCDate()}, ${date.getUTCFullYear()}`;
   } catch (error) {
     console.warn('Failed to format appointment date:', error);
     return '';
@@ -69,7 +96,7 @@ export const formatAppointmentDate = (startTime?: string): string => {
 };
 
 /**
- * Format appointment time range (e.g., "9:00 AM - 10:00 AM")
+ * Format appointment time range in GMT (e.g., "9:00 AM - 10:00 AM GMT")
  */
 export const formatAppointmentTimeRange = (
   startTime?: string,
@@ -83,10 +110,7 @@ export const formatAppointmentTimeRange = (
 
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return '';
 
-    const startFormatted = format(startDate, 'h:mm a');
-    const endFormatted = format(endDate, 'h:mm a');
-
-    return `${startFormatted} - ${endFormatted}`;
+    return `${formatGmtClock(startDate)} - ${formatGmtClock(endDate)} GMT`;
   } catch (error) {
     console.warn('Failed to format appointment time range:', error);
     return '';
@@ -151,7 +175,8 @@ export function formatTimeFromISO(isoString: string | undefined): string {
   if (!isoString) return '';
   try {
     const date = parseISO(isoString);
-    return format(date, 'h:mm a');
+    if (Number.isNaN(date.getTime())) return '';
+    return `${formatGmtClock(date)} GMT`;
   } catch {
     return '';
   }

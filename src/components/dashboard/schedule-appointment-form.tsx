@@ -5,7 +5,7 @@ import { Calendar as CalendarIcon, CalendarCheck, Loader2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { format, isBefore, isToday } from 'date-fns';
+import { format, isBefore } from 'date-fns';
 import { cn } from '@/lib/utils';
 import {
   Appointment,
@@ -21,9 +21,7 @@ import AvailabilitySlotPicker from '@/components/dashboard/availability-slot-pic
 import { combineDateAndTime } from '@/lib/datetime';
 import { getDoctorAvailability } from '@/integration/settings/api';
 import {
-  getRangesForDate,
-  splitRangesIntoHourSlots,
-  useAvailabilityStore,
+  isClosedCalendarDay,
   type HourSlot,
 } from '@/stores/availability-store';
 import useUser from '@/hooks/useUser';
@@ -82,10 +80,13 @@ function SuccessModal({
 }
 
 function isSlotInFuture(slot: HourSlot, selectedDate?: Date) {
-  if (!selectedDate || !isToday(selectedDate)) return true;
+  if (!selectedDate) return true;
+  const dateStr = format(selectedDate, 'yyyy-MM-dd');
+  const todayGmt = new Date().toISOString().slice(0, 10);
+  if (dateStr !== todayGmt) return dateStr > todayGmt;
   const [hours, minutes] = slot.start.split(':').map(Number);
   const now = new Date();
-  return hours * 60 + minutes > now.getHours() * 60 + now.getMinutes();
+  return hours * 60 + minutes > now.getUTCHours() * 60 + now.getUTCMinutes();
 }
 
 export function ScheduleAppointmentForm() {
@@ -93,7 +94,6 @@ export function ScheduleAppointmentForm() {
   const searchParams = useSearchParams();
   const patientIdFromQuery = searchParams.get('patientId');
   const { userId } = useUser();
-  const getAvailability = useAvailabilityStore((s) => s.getAvailability);
 
   const [selectedPatient, setSelectedPatient] = React.useState<Patient | null>(
     null
@@ -132,26 +132,24 @@ export function ScheduleAppointmentForm() {
     useCreateAppointment();
 
   const dateStr = date ? format(date, 'yyyy-MM-dd') : undefined;
-  const { data: remoteAvailability } = useQuery({
-    queryKey: ['doctor-availability', userId, dateStr],
-    queryFn: () => getDoctorAvailability(userId, dateStr),
+  const { data: weekAvailability } = useQuery({
+    queryKey: ['doctor-availability', userId, 'week'],
+    queryFn: () => getDoctorAvailability(userId),
     enabled: Boolean(userId),
     retry: 0,
   });
-
-  const allowedRanges = React.useMemo(() => {
-    if (!userId || !date) return null;
-    if (remoteAvailability) {
-      return getRangesForDate(remoteAvailability, date);
-    }
-    return getRangesForDate(getAvailability(userId), date);
-  }, [date, getAvailability, remoteAvailability, userId]);
+  const { data: remoteAvailability, isPending: slotsLoading } = useQuery({
+    queryKey: ['doctor-availability', userId, dateStr],
+    queryFn: () => getDoctorAvailability(userId, dateStr),
+    enabled: Boolean(userId && dateStr),
+    retry: 0,
+  });
 
   const availableSlots = React.useMemo(() => {
-    const slots =
-      remoteAvailability?.slots ?? splitRangesIntoHourSlots(allowedRanges);
-    return slots.filter((slot) => isSlotInFuture(slot, date));
-  }, [allowedRanges, date, remoteAvailability?.slots]);
+    return (remoteAvailability?.slots ?? []).filter((slot) =>
+      isSlotInFuture(slot, date)
+    );
+  }, [date, remoteAvailability?.slots]);
 
   const handlePatientSelect = (patient: Patient) => {
     setSelectedPatient(patient.id === selectedPatient?.id ? null : patient);
@@ -172,7 +170,10 @@ export function ScheduleAppointmentForm() {
       startTimeStr = combineDateAndTime(dateStr || '', startTime);
       endTimeStr = combineDateAndTime(dateStr || '', endTime);
 
-      if (isToday(date) && isBefore(new Date(startTimeStr), new Date())) {
+      if (
+        dateStr === new Date().toISOString().slice(0, 10) &&
+        isBefore(new Date(startTimeStr), new Date())
+      ) {
         setSlotError('Start time cannot be in the past');
         toast.error('Start time cannot be in the past');
         return;
@@ -288,14 +289,17 @@ export function ScheduleAppointmentForm() {
               setEndTime(slot.end);
               setSlotError('');
             }}
-            ranges={allowedRanges}
             slots={availableSlots}
-            timezone={remoteAvailability?.timezone}
+            slotsLoading={slotsLoading}
+            timezone={
+              remoteAvailability?.timezone ?? weekAvailability?.timezone
+            }
             doctorSelected={Boolean(userId)}
             disabled={isScheduleNow || isCreating}
             dateError={dateError}
             slotError={slotError}
             minDate={minDate}
+            disabledDate={(day) => isClosedCalendarDay(weekAvailability, day)}
           />
         </div>
       </div>
