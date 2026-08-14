@@ -18,6 +18,10 @@ import HomeSvg from '@/assets/icons/home-svg';
 import { ROUTES } from '@/lib/routes';
 import { cn } from '@/lib/utils';
 import StaffOnboardingGate from '@/components/onboarding/staff-onboarding-gate';
+import {
+  PortalChip,
+  doctorRoleLabel,
+} from '@/components/dashboard/portal-identity';
 
 export default function DashboardLayout({
   children,
@@ -62,19 +66,22 @@ export default function DashboardLayout({
       />
       {/* Header */}
       <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-[#EBEBEB] bg-white px-6">
-        <Link
-          href={ROUTES.DASHBOARD.ROOT}
-          className="flex items-center hover:opacity-90 transition-opacity"
-        >
-          <Image
-            src="/images/carelio-logo.png"
-            alt="Carelio"
-            width={160}
-            height={49}
-            className="object-contain w-36 md:w-40 h-auto"
-            priority
-          />
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href={ROUTES.DASHBOARD.ROOT}
+            className="flex items-center hover:opacity-90 transition-opacity"
+          >
+            <Image
+              src="/images/carelio-logo.png"
+              alt="Carelio"
+              width={160}
+              height={49}
+              className="object-contain w-36 md:w-40 h-auto"
+              priority
+            />
+          </Link>
+          <PortalChip label="Doctor portal" />
+        </div>
         <div className="flex items-center gap-5">
           <div className="hidden md:flex gap-5 items-center">
             <Link
@@ -141,7 +148,7 @@ export default function DashboardLayout({
                         {fullName || 'User'}
                       </p>
                       <p className="text-[11px] truncate text-(--text-secondary) mt-1">
-                        {email || 'Clinician'}
+                        {doctorRoleLabel(user?.isAdmin)}
                       </p>
                     </div>
                     <svg
@@ -159,6 +166,9 @@ export default function DashboardLayout({
               <DropdownMenuContent align="end" className="w-[200px] mt-2">
                 <div className="px-2 py-1.5 md:hidden">
                   <p className="text-sm font-semibold">{fullName || 'User'}</p>
+                  <p className="text-xs text-gray-500">
+                    {doctorRoleLabel(user?.isAdmin)}
+                  </p>
                   <p className="text-xs text-gray-500 truncate">{email}</p>
                 </div>
                 <DropdownMenuSeparator className="md:hidden" />

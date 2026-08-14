@@ -28,7 +28,10 @@ export default function PatientLayout({
         isLoading={isLoading}
         user={user}
       />
-      <SimpleTopbar onLogoutClick={handleLogoutClick} />
+      <SimpleTopbar
+        onLogoutClick={handleLogoutClick}
+        userName={user?.fullName || undefined}
+      />
       <div className="pt-[40px] pb-[60px] px-4">{children}</div>
     </div>
   );

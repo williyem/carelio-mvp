@@ -71,6 +71,7 @@ export interface PatientRow {
   isRegistrationComplete?: boolean;
   linked?: boolean;
   emailVerified?: boolean;
+  isActive?: boolean;
 }
 
 export interface Doctor {

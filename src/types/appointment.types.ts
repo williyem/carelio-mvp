@@ -14,6 +14,7 @@ export interface AppointmentRow {
   isRegistrationComplete?: boolean;
   linked?: boolean;
   emailVerified?: boolean;
+  isActive?: boolean;
 }
 
 export interface Appointment {

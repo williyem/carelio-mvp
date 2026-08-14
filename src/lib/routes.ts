@@ -26,6 +26,7 @@ export const ROUTES = {
       SCHEDULE: '/dashboard/settings/schedule',
       SECURITY: '/dashboard/settings/security',
       BILLING: '/dashboard/settings/billing-payout',
+      TEAM: '/dashboard/settings/team',
     },
     PATIENT: {
       ROOT: '/dashboard/patient',

@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { Users } from 'lucide-react';
+import { toast } from 'sonner';
 import DataTable from '@/components/ui/table/data-table';
 import useDoctorPatientsCols from '@/components/dashboard/doctor-patients-columns';
 import PatientSearchInput from '@/components/dashboard/patient-search-input';
@@ -13,9 +14,15 @@ import { ROUTES } from '@/lib/routes';
 import { toVerificationPatient } from '@/lib/easy';
 import { usePatientVerificationStore } from '@/stores/patient-verifcation-store';
 import { useRouter } from 'nextjs-toploader/app';
+import useUser from '@/hooks/useUser';
+import { useSetAdminPatientActive } from '@/integration/admin/mutations';
+import { getErrorMessage } from '@/integration/utils';
 
 const DoctorPatientsPageContent = () => {
   const router = useRouter();
+  const { user } = useUser();
+  const isAdmin = Boolean(user?.isAdmin);
+  const setPatientActive = useSetAdminPatientActive();
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const { setSelectedPatient } = usePatientVerificationStore();
 
@@ -41,7 +48,27 @@ const DoctorPatientsPageContent = () => {
     setShowVerificationDialog(true);
   };
 
-  const { columns } = useDoctorPatientsCols({ onView: handleView });
+  const handleToggleActive = (patient: PatientRow) => {
+    const nextActive = patient.isActive === false;
+    setPatientActive.mutate(
+      { id: patient.id, isActive: nextActive },
+      {
+        onSuccess: () =>
+          toast.success(nextActive ? 'Patient restored' : 'Patient revoked'),
+        onError: (error) =>
+          toast.error(getErrorMessage(error, 'Could not update patient')),
+      }
+    );
+  };
+
+  const { columns } = useDoctorPatientsCols({
+    onView: handleView,
+    isAdmin,
+    onToggleActive: handleToggleActive,
+    togglingPatientId: setPatientActive.isPending
+      ? (setPatientActive.variables?.id ?? null)
+      : null,
+  });
 
   return (
     <div className="flex flex-col gap-3 max-w-7xl mx-auto items-start w-full py-2">
@@ -66,7 +93,11 @@ const DoctorPatientsPageContent = () => {
 
           <div className="flex flex-wrap font-medium items-center justify-start leading-0 px-1 py-0 text-[14px] tracking-[-0.084px] gap-x-1">
             <div className="flex flex-col justify-center relative shrink-0 text-(--text-blue)">
-              <p className="leading-[20px]">Showing all patients</p>
+              <p className="leading-[20px]">
+                {isAdmin
+                  ? 'Showing all patients (including revoked)'
+                  : 'Showing all patients'}
+              </p>
             </div>
           </div>
         </div>

@@ -143,7 +143,7 @@ const TopbarNavigation = ({
                       {fullName || 'User'}
                     </p>
                     <p className="text-[11px] truncate text-(--text-secondary) mt-1">
-                      {email || 'Clinician'}
+                      Health assistant
                     </p>
                   </div>
                   <svg
@@ -162,6 +162,7 @@ const TopbarNavigation = ({
           <DropdownMenuContent align="end" className="w-[200px] mt-2">
             <div className="px-2 py-1.5 md:hidden">
               <p className="text-sm font-semibold">{fullName || 'User'}</p>
+              <p className="text-xs text-gray-500">Health assistant</p>
               <p className="text-xs text-gray-500 truncate">{email}</p>
             </div>
             <DropdownMenuSeparator className="md:hidden" />

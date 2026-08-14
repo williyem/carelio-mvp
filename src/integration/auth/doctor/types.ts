@@ -282,6 +282,7 @@ export interface DoctorUser {
   twoFactorEnabled: boolean;
   twoFactorMethod?: TwoFactorMethod;
   isActive: boolean;
+  isAdmin?: boolean;
   createdAt: string;
   updatedAt: string;
   avatarUrl?: string;

@@ -525,6 +525,7 @@ export const mapAssignedPatientToAppointmentRow = (
   isRegistrationComplete: patient.isRegistrationComplete,
   linked: patient.linked,
   emailVerified: patient.emailVerified,
+  isActive: patient.isActive,
 });
 
 export const mapAssignedPatientsToAppointmentRows = (

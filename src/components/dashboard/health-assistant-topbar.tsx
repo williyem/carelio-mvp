@@ -5,6 +5,7 @@ import Link from 'next/link';
 import TopbarNavigation from './topbar-navigation';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/routes';
+import { PortalChip } from './portal-identity';
 
 interface HealthAssistantTopbarProps {
   className?: string;
@@ -24,18 +25,21 @@ const HealthAssistantTopbar = ({
         className
       )}
     >
-      <Link
-        href={ROUTES.HEALTH_ASSISTANT.PATIENT.ROOT}
-        className="relative h-9 md:h-11 w-[120px] md:w-[140px]"
-      >
-        <Image
-          src="/images/carelio-logo.png"
-          alt="Carelio"
-          fill
-          className="object-contain object-left"
-          priority
-        />
-      </Link>
+      <div className="flex items-center gap-3">
+        <Link
+          href={ROUTES.HEALTH_ASSISTANT.PATIENT.ROOT}
+          className="relative h-9 md:h-11 w-[120px] md:w-[140px]"
+        >
+          <Image
+            src="/images/carelio-logo.png"
+            alt="Carelio"
+            fill
+            className="object-contain object-left"
+            priority
+          />
+        </Link>
+        <PortalChip label="Health assistant portal" />
+      </div>
 
       <TopbarNavigation
         onDevicesClick={onDevicesClick}

@@ -37,35 +37,37 @@ const PatientInfoCard = ({ patient }: PatientInfoCardProps) => {
         <div className="space-y-4">
           <div className="space-y-1">
             <p className="font-normal text-(--text-secondary)">Name</p>
-            <p className="font-bold text-gray-900">
+            <p className="font-bold text-gray-900 text-sm">
               {patient?.fullName || patient?.name || 'N/A'}
             </p>
           </div>
           <div className="space-y-1">
             <p className="font-normal text-(--text-secondary)">Date of Birth</p>
-            <p className="font-bold text-gray-900">{formattedDob}</p>
+            <p className="font-bold text-gray-900 text-sm">{formattedDob}</p>
           </div>
           <div className="space-y-1">
             <p className="font-normal text-(--text-secondary)">Blood Type</p>
-            <p className="font-bold text-gray-900">
+            <p className="font-bold text-gray-900 text-sm">
               {patient?.bloodType || 'N/A'}
             </p>
           </div>
           <div className="space-y-1">
             <p className="font-normal text-(--text-secondary)">Allergies</p>
-            <p className="font-bold text-gray-900">{allergies}</p>
+            <p className="font-bold text-gray-900 text-sm">{allergies}</p>
           </div>
           <div className="space-y-1">
             <p className="font-normal text-(--text-secondary)">
               Medical conditions
             </p>
-            <p className="font-bold text-gray-900">{conditions}</p>
+            <p className="font-bold text-gray-900 text-sm">{conditions}</p>
           </div>
           <div className="space-y-1">
             <p className="font-normal text-(--text-secondary)">
               Emergency contact
             </p>
-            <p className="font-bold text-gray-900">{emergencyContact}</p>
+            <p className="font-bold text-sm text-gray-900">
+              {emergencyContact}
+            </p>
           </div>
         </div>
       </CardContent>
