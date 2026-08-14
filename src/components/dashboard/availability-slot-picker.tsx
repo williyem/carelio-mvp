@@ -15,6 +15,8 @@ import {
   formatTimezoneCaption,
   type HourSlot,
 } from '@/stores/availability-store';
+import Image from 'next/image';
+import { CalendarIcon } from 'lucide-react';
 
 interface AvailabilitySlotPickerProps {
   date?: Date;
@@ -68,7 +70,7 @@ export default function AvailabilitySlotPicker({
       >
         <div className="flex items-start justify-between gap-4 w-full">
           <div className="flex flex-col gap-[6px] items-start min-w-0">
-            <p className="font-bold text-[#101828] text-[20px] leading-[20px]">
+            <p className="font-semibold text-[#101828] text-[16px] leading-[20px]">
               {date ? format(date, 'EEE, MMM d') : 'Select a date'}
             </p>
             <p className="font-medium text-[#717c9d] text-[12px] leading-[20px]">
@@ -80,18 +82,11 @@ export default function AvailabilitySlotPicker({
               <button
                 type="button"
                 disabled={!doctorSelected || disabled}
-                className="bg-white border border-[#d0d5dd] flex gap-2 items-center justify-center px-4 py-[10px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] shrink-0 disabled:cursor-not-allowed"
+                className="bg-white border border-[#d0d5dd] cursor-pointer flex gap-2 items-center justify-center px-4 py-[10px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] shrink-0 disabled:cursor-not-allowed"
               >
-                <span className="relative size-5 overflow-hidden shrink-0">
-                  <img
-                    src="/icons/select-date-calendar.svg"
-                    alt=""
-                    width={20}
-                    height={20}
-                    className="size-full"
-                  />
-                </span>
-                <span className="font-semibold text-[#667085] text-[14px] leading-[20px] whitespace-nowrap">
+                <CalendarIcon className="size-4 text-[#667085]" />
+
+                <span className=" text-[#667085] text-[14px] leading-[20px] whitespace-nowrap">
                   Select date
                 </span>
               </button>
