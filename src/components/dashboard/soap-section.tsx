@@ -1,12 +1,17 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import {
+  SOAP_SECTION_COPY,
+  hasSoapContent,
+  type SoapSectionType,
+} from '@/lib/soap-note';
 
 interface SOAPSectionProps {
-  type: 'subjective' | 'objective' | 'assessment' | 'plan';
-  title: string;
-  description: string;
-  content: string | string[];
+  type: SoapSectionType;
+  title?: string;
+  description?: string;
+  content?: string | string[] | null;
   className?: string;
 }
 
@@ -17,6 +22,10 @@ const SOAPSection = ({
   content,
   className,
 }: SOAPSectionProps) => {
+  const copy = SOAP_SECTION_COPY[type];
+  const heading = title ?? copy.title;
+  const subtitle = description ?? copy.description;
+
   const getIconStyles = () => {
     switch (type) {
       case 'subjective':
@@ -49,6 +58,13 @@ const SOAPSection = ({
 
   const renderContent = () => {
     if (Array.isArray(content)) {
+      if (!hasSoapContent(content)) {
+        return (
+          <p className="flex-[1_0_0] font-normal leading-[1.2] text-(--text-secondary) text-[12px] sm:text-[14px]">
+            No {type} notes recorded
+          </p>
+        );
+      }
       return (
         <div className="flex-[1_0_0] font-normal leading-[1.2] text-(--text-primary) text-[12px] sm:text-[14px] whitespace-pre-wrap">
           {content.map((item, index) => (
@@ -59,10 +75,20 @@ const SOAPSection = ({
         </div>
       );
     }
+
+    if (!hasSoapContent(content)) {
+      return (
+        <p className="flex-[1_0_0] font-normal leading-[1.2] text-(--text-secondary) text-[12px] sm:text-[14px]">
+          No {type} notes recorded
+        </p>
+      );
+    }
+
     return (
-      <p className="flex-[1_0_0] font-normal leading-[1.2] text-(--text-primary) text-[12px] sm:text-[14px] whitespace-pre-wrap">
-        {content}
-      </p>
+      <div
+        className="flex-[1_0_0] font-normal leading-[1.2] text-(--text-primary) text-[12px] sm:text-[14px] w-full [&_p]:mb-1"
+        dangerouslySetInnerHTML={{ __html: content || '' }}
+      />
     );
   };
 
@@ -85,11 +111,11 @@ const SOAPSection = ({
           </p>
         </div>
         <p className="font-bold leading-[1.2] text-(--text-primary) text-[14px] sm:text-[16px]">
-          {title}
+          {heading}
         </p>
       </div>
       <p className="flex-1 font-normal leading-[1.2] text-(--text-secondary) text-[12px] sm:text-[14px] w-full">
-        {description}
+        {subtitle}
       </p>
       <div className="bg-(--bg-primary) border border-(--border-stroke) space-y-1 flex flex-1 items-center justify-center p-2 sm:p-[10px] rounded-[12px] w-full">
         {renderContent()}

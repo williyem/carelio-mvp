@@ -43,6 +43,8 @@ export const ROUTES = {
     PATIENT: {
       ROOT: '/health-assistant/patient',
       DETAILS: (id: string) => `/health-assistant/patient/${id}`,
+      SUMMARY: (id: string, appointmentId: string) =>
+        `/health-assistant/patient/${id}/${appointmentId}`,
       ADD_NEW: '/health-assistant/patient/add-new-patient',
     },
     APPOINTMENTS: {

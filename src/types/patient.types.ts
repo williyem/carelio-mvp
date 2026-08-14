@@ -39,4 +39,4 @@ export interface PatientSearchResult {
   email: string;
 }
 
-export type PatientTab = 'appointments' | 'hie-records';
+export type PatientTab = 'appointments';

@@ -10,40 +10,70 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useVideoCallStore } from '@/stores/video-call-store';
-import {
-  useGetPatientNotes,
-  useUpdateConsultationNote,
-} from '@/integration/appointments';
-import PostConsultationDetails from './post-consultation-details';
+import { useGetConsultationNoteByAppointment } from '@/integration/appointments/queries/useGetConsultationNoteByAppointment';
+import { useGetAppointmentById } from '@/integration/appointments';
+import PostConsultationDetails, {
+  soapFieldsFromNote,
+} from './post-consultation-details';
+import ConsultationNoteActions from './consultation-note-actions';
+import VitalsTab from './vitals-tab';
+import AppointmentSummaryHeader from './appointment-summary-header';
 import { Spinner } from '../ui/spinner';
 import ErrorWarningFill from '@/assets/icons/error-warning-fill';
-import { toast } from 'sonner';
+import { useCallParticipantRole } from '@/hooks/page-hooks/video-call/use-call-participant-role';
+import { isClinicianCallRole } from '@/lib/call-join';
+import { useSoapDraftStore } from '@/stores/soap-draft-store';
+import { cn } from '@/lib/utils';
+import type { SoapNote } from '@/integration/appointments/types';
+
+type TabType = 'SOAP notes' | 'Vitals';
 
 const PostConsultationSummary = () => {
   const {
     postConsultationAppointmentId,
     setPostConsultationAppointmentId,
     selectedPatient,
+    selectedAppointment,
     endCall,
   } = useVideoCallStore();
+  const { role } = useCallParticipantRole();
+  const isDoctor = isClinicianCallRole(role);
+  const [activeTab, setActiveTab] = React.useState<TabType>('SOAP notes');
 
-  const [isOpen, setIsOpen] = React.useState(!!postConsultationAppointmentId);
+  const [isOpen, setIsOpen] = React.useState(
+    !!postConsultationAppointmentId && isDoctor
+  );
 
   React.useEffect(() => {
-    if (postConsultationAppointmentId) {
+    if (postConsultationAppointmentId && isDoctor) {
       setIsOpen(true);
+      setActiveTab('SOAP notes');
     }
-  }, [postConsultationAppointmentId]);
+  }, [postConsultationAppointmentId, isDoctor]);
 
-  const { data: notesData, isLoading } = useGetPatientNotes(
-    selectedPatient?.id || '',
-    {},
-    !!postConsultationAppointmentId && !!selectedPatient?.id
+  const { data: currentNote, isLoading } = useGetConsultationNoteByAppointment(
+    postConsultationAppointmentId || '',
+    !!postConsultationAppointmentId && isDoctor
+  );
+  const { data: fetchedAppointment } = useGetAppointmentById(
+    postConsultationAppointmentId || '',
+    !!postConsultationAppointmentId && isDoctor
   );
 
-  const currentNote = notesData?.docs.find(
-    (note) => note.appointmentId === postConsultationAppointmentId
+  const draft = useSoapDraftStore((s) =>
+    postConsultationAppointmentId
+      ? s.byAppointmentId[postConsultationAppointmentId]
+      : undefined
   );
+
+  const [soapFields, setSoapFields] = React.useState<Required<SoapNote>>(
+    soapFieldsFromNote(currentNote, draft)
+  );
+
+  React.useEffect(() => {
+    setSoapFields(soapFieldsFromNote(currentNote, draft));
+  }, [currentNote, draft]);
+
   const handleClose = () => {
     setIsOpen(false);
     setTimeout(() => {
@@ -52,31 +82,12 @@ const PostConsultationSummary = () => {
     }, 300);
   };
 
-  const updateNoteMutation = useUpdateConsultationNote();
+  if (!isDoctor) {
+    return null;
+  }
 
-  const handleUpdateNote = () => {
-    updateNoteMutation.mutate(
-      {
-        noteId: currentNote?.id || '',
-        data: {
-          subjective: currentNote?.soapNote?.subjective || '',
-          objective: currentNote?.soapNote?.objective || '',
-          assessment: currentNote?.soapNote?.assessment || '',
-          plan: currentNote?.soapNote?.plan || '',
-          // action: status || 'save',
-        },
-      },
-      {
-        onSuccess: () => {
-          toast.success('Consultation note updated successfully');
-          handleClose();
-        },
-        onError: () => {
-          toast.error('Failed to update consultation note');
-        },
-      }
-    );
-  };
+  const isDraft = currentNote?.status !== 'FINAL';
+  const appointment = fetchedAppointment || selectedAppointment;
 
   return (
     <Dialog
@@ -97,49 +108,80 @@ const PostConsultationSummary = () => {
           </DialogTitle>
         </DialogHeader>
 
-        <div className="px-6 pb-1 overflow-y-auto max-h-[70vh]">
+        <div className="px-6 pb-1 overflow-y-auto max-h-[70vh] space-y-6">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <Spinner />
             </div>
-          ) : currentNote ? (
-            <PostConsultationDetails note={currentNote} />
           ) : (
-            <div className="py-12 text-center text-gray-500">
-              No session summary available.
-            </div>
+            <>
+              <AppointmentSummaryHeader
+                appointment={appointment}
+                patientName={
+                  selectedPatient?.fullName ||
+                  selectedPatient?.name ||
+                  appointment?.patient?.fullName
+                }
+              />
+
+              <div className="bg-[#F9F9F9] p-1 rounded-full flex overflow-x-auto no-scrollbar">
+                {(['SOAP notes', 'Vitals'] as TabType[]).map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setActiveTab(tab)}
+                    className={cn(
+                      'flex-1 py-3 px-6 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200',
+                      activeTab === tab
+                        ? 'bg-white border-(--border-stroke) border text-gray-900'
+                        : 'text-gray-900 hover:text-gray-700'
+                    )}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
+              {activeTab === 'SOAP notes' && (
+                <div className="space-y-6">
+                  <PostConsultationDetails
+                    note={currentNote ?? null}
+                    appointmentId={postConsultationAppointmentId || undefined}
+                    hideVitals
+                    editable={isDraft}
+                    soapFields={soapFields}
+                    onSoapChange={(key, value) =>
+                      setSoapFields((prev) => ({ ...prev, [key]: value }))
+                    }
+                  />
+                  {postConsultationAppointmentId && (
+                    <ConsultationNoteActions
+                      appointmentId={postConsultationAppointmentId}
+                      note={currentNote ?? null}
+                      soapFields={soapFields}
+                    />
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'Vitals' && postConsultationAppointmentId && (
+                <VitalsTab
+                  appointmentId={postConsultationAppointmentId}
+                  hideTitle
+                />
+              )}
+            </>
           )}
         </div>
 
         <DialogFooter className="p-6 border-t border-dashed ">
-          {currentNote ? (
-            <>
-              <Button
-                onClick={() => handleUpdateNote()}
-                className="w-full bg-brand-blue rounded-full hover:bg-brand-blue/90 text-white font-bold h-12"
-              >
-                {updateNoteMutation.isPending ? (
-                  <Spinner />
-                ) : (
-                  'Approve & Send to Patient'
-                )}
-              </Button>
-              <Button
-                onClick={handleClose}
-                variant={'outline'}
-                className="w-full text-brand-blue hover:text-brand-blue rounded-full hover:bg-brand-blue/10 border-brand-blue font-bold h-12"
-              >
-                Save for Later
-              </Button>
-            </>
-          ) : (
-            <Button
-              onClick={handleClose}
-              className="w-full bg-brand-blue rounded-full hover:bg-brand-blue/90 text-white font-bold h-12"
-            >
-              Close
-            </Button>
-          )}
+          <Button
+            onClick={handleClose}
+            variant="outline"
+            className="w-full text-brand-blue hover:text-brand-blue rounded-full hover:bg-brand-blue/10 border-brand-blue font-bold h-12"
+          >
+            Close
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

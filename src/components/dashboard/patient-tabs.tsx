@@ -34,12 +34,6 @@ const PatientTabs = ({
         >
           Appointments
         </TabsTrigger>
-        <TabsTrigger
-          value="hie-records"
-          className="flex-1 rounded-[100px] data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-(--border-stroke) data-[state=active]:shadow-sm text-[14px] font-medium leading-[1.2]"
-        >
-          HIE Records
-        </TabsTrigger>
       </TabsList>
     </Tabs>
   );

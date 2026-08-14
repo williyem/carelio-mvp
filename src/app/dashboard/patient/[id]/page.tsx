@@ -11,15 +11,10 @@ import {
   MapPin,
   Droplets,
   Info,
-  Database,
-  Search,
-  History,
   Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import { EmptyState } from '@/components/ui/empty-state';
 import { useGetPatientById } from '@/integration/patient';
 import { format, parseISO } from 'date-fns';
 import BigUserSvg from '@/assets/icons/big-user-svg';
@@ -27,15 +22,12 @@ import GenderSvg from '@/assets/icons/gender-svg';
 import AppointmentsList from '@/components/dashboard/patients/appointments-list';
 import { Patient } from '@/types/patient.types';
 
-type TabType = 'Appointments' | 'Lab Results' | 'Forms' | 'HIE Records';
-
 export default function PatientDetailsPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = use(params);
-  const [activeTab, setActiveTab] = React.useState<TabType>('Appointments');
 
   const {
     data: patient,
@@ -217,111 +209,8 @@ export default function PatientDetailsPage({
         </CardContent>
       </Card>
 
-      {/* Tabs Selector */}
-      <div className="bg-[#F9F9F9] p-1 rounded-full flex overflow-x-auto no-scrollbar">
-        {(
-          ['Appointments', 'Lab Results', 'Forms', 'HIE Records'] as TabType[]
-        ).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={cn(
-              'flex-1 py-3 px-6 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200',
-              activeTab === tab
-                ? 'bg-white border-(--border-stroke) border text-gray-900'
-                : 'text-gray-900 hover:text-gray-700'
-            )}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab Content */}
       <div className="min-h-[400px]">
-        {activeTab === 'Appointments' && (
-          <AppointmentsTab patient={patient as unknown as Patient} />
-        )}
-        {activeTab === 'Lab Results' && <LabResultsTab />}
-        {activeTab === 'Forms' && <FormsTab />}
-        {activeTab === 'HIE Records' && <HIERecordsTab />}
-      </div>
-    </div>
-  );
-}
-
-// --- Tab Content Components ---
-
-function AppointmentsTab({ patient }: { patient: Patient }) {
-  return (
-    <div className="space-y-4">
-      <AppointmentsList patient={patient as Patient} />
-    </div>
-  );
-}
-
-function LabResultsTab() {
-  // Lab results would need a separate backend endpoint - showing empty state for now
-  return (
-    <div className="space-y-4">
-      <EmptyState
-        icon={<Search className="h-8 w-8 text-gray-300" />}
-        message="No lab results available"
-      />
-    </div>
-  );
-}
-
-function FormsTab() {
-  return (
-    <div className="space-y-8">
-      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center gap-3 text-brand-blue font-medium">
-        <Info className="h-5 w-5 shrink-0" />
-        <p className="text-[15px]">
-          Forms are synced with EPIC via API integration
-        </p>
-      </div>
-
-      <div className="space-y-3">
-        <h3 className="text-base font-bold text-gray-900">Billing History</h3>
-        <EmptyState
-          icon={<Search className="h-8 w-8 text-gray-300" />}
-          message="No billing information available"
-        />
-      </div>
-
-      <div className="space-y-3">
-        <h3 className="text-base font-bold text-gray-900">Compliance Forms</h3>
-        <EmptyState
-          icon={<Search className="h-8 w-8 text-gray-300" />}
-          message="No compliance form available"
-        />
-      </div>
-    </div>
-  );
-}
-
-function HIERecordsTab() {
-  return (
-    <div className="space-y-8">
-      <div className="bg-[#EEF2FF] border border-blue-100/50 rounded-xl p-4 flex items-center gap-3 text-[#6366F1] font-medium">
-        <Database className="h-5 w-5 shrink-0" />
-        <p className="text-[15px]">
-          Records aggregated from Health Information Exchange across all
-          treatment locations
-        </p>
-      </div>
-
-      <div className="space-y-3">
-        <h3 className="text-base font-bold text-gray-900">HIE Records</h3>
-        <EmptyState
-          icon={
-            <div className="p-4 border-2 border-dashed border-gray-100 rounded-xl">
-              <History className="h-8 w-8 text-gray-300" />
-            </div>
-          }
-          message="No HIE records available"
-        />
+        <AppointmentsList patient={patient as unknown as Patient} />
       </div>
     </div>
   );

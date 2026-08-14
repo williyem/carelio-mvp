@@ -115,6 +115,13 @@ export interface RescheduleAppointmentRequest {
   reschedulingReason?: string;
 }
 
+export type PlanShareRecipient = 'patient' | 'healthAssistant';
+
+export interface ShareConsultationPlanRequest {
+  recipients: PlanShareRecipient[];
+  fields: Array<'subjective' | 'objective' | 'assessment' | 'plan'>;
+}
+
 export interface SubmitSoapNotesRequest {
   subjective: string;
   objective: string;
@@ -170,6 +177,16 @@ export interface AppointmentNote {
   summary?: string | null;
   generatedNote?: string | null;
   status: 'DRAFT' | 'FINAL';
+  planSharedAt?: string | null;
+  planSharedWithPatientAt?: string | null;
+  planSharedWithHealthAssistantAt?: string | null;
+  sharedSoapFieldsPatient?: Array<
+    'subjective' | 'objective' | 'assessment' | 'plan'
+  >;
+  sharedSoapFieldsHealthAssistant?: Array<
+    'subjective' | 'objective' | 'assessment' | 'plan'
+  >;
+  sharedSoapFields?: Array<'subjective' | 'objective' | 'assessment' | 'plan'>;
   soapNote?: SoapNote;
   deletedAt?: string | null;
   createdAt: string;

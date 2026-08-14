@@ -16,6 +16,7 @@ import type {
   SubmitSoapNotesRequest,
   RescheduleAppointmentRequest,
   UpdateConsultationNoteRequest,
+  ShareConsultationPlanRequest,
   ScheduleAppointmentRequest,
   ScheduleAppointmentResponse,
   UpcomingAppointmentsResponse,
@@ -275,6 +276,21 @@ export const getConsultationNoteByAppointment = async (
   );
   const response =
     await apiClient.get<ApiResponse<AppointmentNote | null>>(endpoint);
+  return extractResponseData(response);
+};
+
+export const shareConsultationPlan = async (
+  appointmentId: string,
+  data: ShareConsultationPlanRequest
+): Promise<AppointmentNote> => {
+  const endpoint = APPOINTMENT_API_ENDPOINTS.SHARE_CONSULTATION_PLAN.replace(
+    ':appointmentId',
+    appointmentId
+  );
+  const response = await apiClient.post<ApiResponse<AppointmentNote>>(
+    endpoint,
+    data
+  );
   return extractResponseData(response);
 };
 

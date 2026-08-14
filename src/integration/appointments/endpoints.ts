@@ -14,6 +14,7 @@ export const APPOINTMENT_ENDPOINTS = {
   COMPLETE_CONSULTATION: '/consultations/:appointmentId/complete',
   START_CONSULTATION: '/consultations/:appointmentId/start',
   UPDATE_CONSULTATION_NOTE: '/consultations/notes/:noteId',
+  SHARE_CONSULTATION_PLAN: '/consultations/:appointmentId/note/share',
 } as const;
 
 export const APPOINTMENT_API_ENDPOINTS = {
@@ -23,7 +24,8 @@ export const APPOINTMENT_API_ENDPOINTS = {
   CANCEL_APPOINTMENT: '/doctor/appointments/cancel/:id',
   GET_PATIENT_NOTES: '/doctor/appointments/:patientId/health-records',
   GET_NOTE_BY_ID: '/doctor/appointments/notes/detail/:noteId',
-  GET_APPOINTMENT_NOTE: '/doctor/consultations/:appointmentId/note',
+  GET_APPOINTMENT_NOTE: '/consultations/:appointmentId/note',
+  SHARE_CONSULTATION_PLAN: '/consultations/:appointmentId/note/share',
   GET_RECENT_APPOINTMENTS: '/doctor/appointments/recent',
   RESCHEDULE_APPOINTMENT: '/doctor/appointments/reschedule/:id',
   // Backwards compatibility / HA

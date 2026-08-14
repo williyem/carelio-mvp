@@ -12,7 +12,12 @@ import {
   useStartConsultation,
 } from '@/integration/appointments/mutations';
 import { Room, RoomEvent } from 'livekit-client';
-import { getCallJoinError, readPortalIdentity } from '@/lib/call-join';
+import {
+  getCallJoinError,
+  isClinicianCallRole,
+  readPortalIdentity,
+} from '@/lib/call-join';
+import { useCallParticipantRole } from '@/hooks/page-hooks/video-call/use-call-participant-role';
 
 const FullscreenCall = dynamic<{ leaveSession: () => Promise<void> }>(
   () => import('./fullscreen-call'),
@@ -40,6 +45,7 @@ export default function VideoCallOverlayComponent() {
     useGetDoctorConsultationToken();
   const { mutate: completeConsultation } = useCompleteConsultation();
   const { mutateAsync: startConsultation } = useStartConsultation();
+  const { role } = useCallParticipantRole();
 
   const joinSession = async (): Promise<boolean> => {
     const identity = readPortalIdentity();
@@ -166,11 +172,11 @@ export default function VideoCallOverlayComponent() {
     }
     setClient(null);
 
-    if (selectedAppointment?.id) {
+    if (isClinicianCallRole(role) && selectedAppointment?.id) {
       completeConsultation(selectedAppointment.id);
+      setPostConsultationAppointmentId(selectedAppointment.id);
     }
 
-    setPostConsultationAppointmentId(selectedAppointment?.id || '');
     endCall();
   };
 
