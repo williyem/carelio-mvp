@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { format, parseISO, isAfter, isBefore, subMinutes } from 'date-fns';
 import type { Appointment } from '@/integration/appointments/types';
-import { useVideoCallStore } from '@/stores/video-call-store';
+import { useBeginCall } from '@/hooks/page-hooks/video-call/use-begin-call';
 import Link from 'next/link';
 import { Patient } from '@/types/patient.types';
 import {
@@ -32,7 +32,7 @@ export function AppointmentDetailsPopup({
   onReschedule?: (appointment: Appointment) => void;
   onCancel?: (appointment: Appointment) => void;
 }) {
-  const { startCall, setSelectedAppointment } = useVideoCallStore();
+  const beginCall = useBeginCall();
   const patientContact =
     appointment.patient?.email || appointment.patient?.phoneNumber;
 
@@ -83,14 +83,12 @@ export function AppointmentDetailsPopup({
     appointment.status !== 'COMPLETED' && appointment.status !== 'CANCELLED';
 
   const handleStartCall = () => {
-    if (appointment.patient) {
-      startCall(appointment.patient as unknown as Patient);
-      setSelectedAppointment(
-        appointment,
-        appointment.patient as unknown as Patient
-      );
-      onAction?.();
-    }
+    if (!appointment.patient) return;
+    const started = beginCall(
+      appointment,
+      appointment.patient as unknown as Patient
+    );
+    if (started) onAction?.();
   };
 
   return (

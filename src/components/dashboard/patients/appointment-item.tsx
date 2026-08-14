@@ -5,13 +5,13 @@ import { Patient } from '@/types/patient.types';
 import CalendarSvg from '@/assets/icons/calendar-svg';
 import ClockSvg from '@/assets/icons/clock-svg';
 import VideoRecorderSvg from '@/assets/icons/video-recorder';
-import { useVideoCallStore } from '@/stores/video-call-store';
-import { Appointment } from '@/integration/appointments/types';
-import { AppointmentItemData } from '@/integration/appointments/types';
+import { useBeginCall } from '@/hooks/page-hooks/video-call/use-begin-call';
 import StatusBadge from './status-badge';
 import Link from 'next/link';
 import { getFullNameFromUser } from '@/lib/easy';
 import useUser from '@/hooks/useUser';
+import { Appointment } from '@/types/appointment.types';
+import { AppointmentItemData } from '@/integration/appointments/types';
 
 interface AppointmentItemProps {
   appointment: AppointmentItemData;
@@ -30,20 +30,18 @@ const AppointmentItem = ({
   rawAppointment,
   onViewDetails,
 }: AppointmentItemProps) => {
-  const { startCall, setSelectedAppointment } = useVideoCallStore();
+  const beginCall = useBeginCall();
 
   const { userId } = useUser();
   const isMyAppointment = rawAppointment?.doctor?.id === userId;
 
   const handleStart = () => {
+    const started = beginCall(rawAppointment ?? null, patient ?? null);
+    if (!started) return;
+
     if (onStartAppointment) {
       onStartAppointment(appointment.id);
     }
-
-    if (patient) {
-      startCall(patient);
-    }
-    setSelectedAppointment(rawAppointment as Appointment, patient as Patient);
   };
 
   const showButton = onStartAppointment && canStart;

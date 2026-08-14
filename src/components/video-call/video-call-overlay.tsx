@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import useGetDoctorConsultationToken from '@/integration/doctor/mutations';
 import { useCompleteConsultation } from '@/integration/appointments/mutations';
 import { Room, RoomEvent } from 'livekit-client';
+import { getCallJoinError, readPortalIdentity } from '@/lib/call-join';
 
 const FullscreenCall = dynamic<{ leaveSession: () => Promise<void> }>(
   () => import('./fullscreen-call'),
@@ -37,6 +38,13 @@ export default function VideoCallOverlayComponent() {
   const { mutate: completeConsultation } = useCompleteConsultation();
 
   const joinSession = async (): Promise<boolean> => {
+    const identity = readPortalIdentity();
+    const joinError = getCallJoinError(selectedAppointment, identity);
+    if (joinError) {
+      toast.error(joinError);
+      return false;
+    }
+
     if (!selectedAppointment?.id) {
       toast.error('No appointment selected for this call');
       return false;

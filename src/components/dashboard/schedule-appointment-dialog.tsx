@@ -30,7 +30,7 @@ import { Patient } from '@/types/patient.types';
 import CloseSvg from '@/assets/icons/close-svg';
 import ErrorMessage from '@/components/ui/error-message';
 import ChevronDownSvg from '@/assets/icons/chevron-down-svg';
-import { useVideoCallStore } from '@/stores/video-call-store';
+import { useBeginCall } from '@/hooks/page-hooks/video-call/use-begin-call';
 import { Spinner } from '../ui/spinner';
 import { useAppointmentMutations } from '@/integration/appointments';
 import { toast } from 'sonner';
@@ -137,7 +137,7 @@ const ScheduleAppointmentDialog = ({
   const { clinicians, cliniciansWithSearch, isLoading } = useDoctors();
   const localGrantedIds = useAccessGrantStore((s) => s.grantedIds);
   const getAvailability = useAvailabilityStore((s) => s.getAvailability);
-  const { startCall, setSelectedAppointment } = useVideoCallStore();
+  const beginCall = useBeginCall();
 
   const {
     control,
@@ -231,8 +231,7 @@ const ScheduleAppointmentDialog = ({
               getAppointmentByIdMutation.mutate(res.id, {
                 onSuccess: (response) => {
                   if (patient?.isRegistrationComplete) {
-                    startCall(patient);
-                    setSelectedAppointment(response as Appointment, patient);
+                    beginCall(response as Appointment, patient);
                   }
                 },
               });
@@ -257,9 +256,8 @@ const ScheduleAppointmentDialog = ({
       onOpenChange,
       onScheduled,
       reset,
-      startCall,
+      beginCall,
       getAppointmentByIdMutation,
-      setSelectedAppointment,
     ]
   );
 

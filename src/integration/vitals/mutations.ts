@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createVital, confirmVitals } from './api-function';
+import { createVital, confirmVitals, rejectVitals } from './api-function';
 import { VITALS_QUERY_KEYS } from './query-keys';
 import { ConfirmVitalsRequest } from './type';
 
@@ -10,6 +10,20 @@ export function useCreateVital() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: VITALS_QUERY_KEYS.GET_BY_APPOINTMENT(data.appointmentId),
+      });
+    },
+  });
+}
+
+export function useRejectVitals(appointmentId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (vitalIds: string[]) =>
+      rejectVitals(appointmentId!, { vitalIds }),
+    onSuccess: () => {
+      if (!appointmentId) return;
+      queryClient.invalidateQueries({
+        queryKey: VITALS_QUERY_KEYS.GET_BY_APPOINTMENT(appointmentId),
       });
     },
   });

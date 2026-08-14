@@ -380,6 +380,55 @@ export const formatVitals = (vitals: Vital[]) => {
   };
 };
 
+export function formatVitalValue(vital: Vital): string {
+  const reading = (vital.reading || {}) as unknown as Record<string, unknown>;
+  if (reading.value != null && reading.value !== '') {
+    const note = reading.note ? ` (${reading.note})` : '';
+    return `${reading.value}${note}`;
+  }
+
+  switch (vital.vitalType) {
+    case 'blood-pressure': {
+      const bp = vital.reading as BloodPressureReading;
+      if (bp.systolic && bp.diastolic)
+        return `${bp.systolic}/${bp.diastolic} mmHg`;
+      if (bp.systolic) return `${bp.systolic} mmHg`;
+      break;
+    }
+    case 'thermometer': {
+      const thermo = vital.reading as ThermometerReading;
+      if (thermo.temperatureF)
+        return `${Number(thermo.temperatureF).toFixed(1)}°F`;
+      if (thermo.temperatureC)
+        return `${Number(thermo.temperatureC).toFixed(1)}°C`;
+      break;
+    }
+    case 'pulse-ox': {
+      const ox = vital.reading as PulseOxReading;
+      const parts: string[] = [];
+      if (ox.spo2) parts.push(`SpO₂ ${ox.spo2}%`);
+      if (ox.pulse) parts.push(`${ox.pulse} bpm`);
+      if (parts.length) return parts.join(' · ');
+      break;
+    }
+    case 'weight-scale': {
+      const weight = vital.reading as WeightScaleReading;
+      if (weight.weightLbs) return `${Number(weight.weightLbs).toFixed(1)} lbs`;
+      if (weight.weightKg) return `${Number(weight.weightKg).toFixed(1)} kg`;
+      break;
+    }
+    case 'glucose': {
+      const glucose = vital.reading as GlucoseReading;
+      if (glucose.value) return `${glucose.value} mg/dL`;
+      break;
+    }
+    default:
+      break;
+  }
+
+  return 'Recorded';
+}
+
 /**
  * Get full name from user object with firstName and lastName
  */

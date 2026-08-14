@@ -6,17 +6,24 @@ import {
 } from '@/lib/consultation-bff-auth';
 import { proxyError, unauthorized } from '@/lib/bff-auth';
 
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ appointmentId: string }> }
+) {
   try {
     const token = await getConsultationAccessToken();
     if (!token) return unauthorized();
 
+    const { appointmentId } = await params;
     const body = await request.json();
-    const response = await backendApiClient.post('/vitals', body, {
-      headers: consultationAuthHeaders(token),
-    });
+
+    const response = await backendApiClient.post(
+      `/vitals/appointment/${appointmentId}/reject`,
+      body,
+      { headers: consultationAuthHeaders(token) }
+    );
     return NextResponse.json(response.data);
   } catch (error) {
-    return proxyError(error, 'Failed to record vital');
+    return proxyError(error, 'Failed to reject vitals');
   }
 }

@@ -32,7 +32,23 @@ const MANUAL_TYPES = [
 
 type PanelStep = 'idle' | 'pick' | 'tutorial' | 'capture' | 'manual';
 
-const DeviceCapturePanel = () => {
+function resolvePatientId() {
+  const state = useVideoCallStore.getState();
+  return (
+    state.selectedPatient?.id ||
+    state.selectedAppointment?.patient?.id ||
+    state.selectedAppointment?.patientId ||
+    ''
+  );
+}
+
+const DeviceCapturePanel = ({
+  lockedSlug,
+  onRecorded,
+}: {
+  lockedSlug?: DeviceGuideSlug;
+  onRecorded?: () => void;
+} = {}) => {
   const { selectedAppointment } = useVideoCallStore();
   const appointmentId = selectedAppointment?.id;
   const liveReadings = useDeviceStore((s) => s.liveReadings);
@@ -46,12 +62,15 @@ const DeviceCapturePanel = () => {
   const { confirmVitalsMutation, createVitalMutation } = useVitalsMutations();
   const { startListening, stopListening, reset } = useDeviceConnection();
 
-  const [step, setStep] = useState<PanelStep>('idle');
+  const [step, setStep] = useState<PanelStep>(lockedSlug ? 'tutorial' : 'idle');
   const [selectedSlug, setSelectedSlug] = useState<DeviceGuideSlug | null>(
-    null
+    lockedSlug ?? null
   );
-  const [type, setType] =
-    useState<(typeof MANUAL_TYPES)[number]['value']>('blood-pressure');
+  const [type, setType] = useState<(typeof MANUAL_TYPES)[number]['value']>(
+    lockedSlug && MANUAL_TYPES.some((item) => item.value === lockedSlug)
+      ? (lockedSlug as (typeof MANUAL_TYPES)[number]['value'])
+      : 'blood-pressure'
+  );
   const [value, setValue] = useState('');
   const [note, setNote] = useState('');
   const [videoFailed, setVideoFailed] = useState(false);
@@ -137,7 +156,7 @@ const DeviceCapturePanel = () => {
     try {
       await createVitalMutation.mutateAsync({
         appointmentId,
-        patientId: useVideoCallStore.getState().selectedPatient?.id || '',
+        patientId: resolvePatientId(),
         vitalType: type,
         reading: { value, note, source: 'manual' },
         recordedAt: new Date().toISOString(),
@@ -148,7 +167,12 @@ const DeviceCapturePanel = () => {
     toast.success('Vital recorded and confirmed');
     setValue('');
     setNote('');
-    setStep('idle');
+    onRecorded?.();
+    if (lockedSlug) {
+      setStep('tutorial');
+    } else {
+      setStep('idle');
+    }
   };
 
   const handleConfirm = async (vitalId: string) => {
@@ -163,6 +187,7 @@ const DeviceCapturePanel = () => {
       // keep local confirmed status
     }
     toast.success('Vital confirmed');
+    onRecorded?.();
   };
 
   const handleDiscard = (vitalId: string) => {
@@ -172,9 +197,17 @@ const DeviceCapturePanel = () => {
   };
 
   return (
-    <Card className="border-[#EBEBEB] shadow-none rounded-[14px] overflow-hidden bg-white h-fit">
-      <CardContent className="p-6 sm:p-8 space-y-6">
-        {step !== 'idle' && (
+    <Card
+      className={
+        lockedSlug
+          ? 'border-0 shadow-none bg-transparent'
+          : 'border-[#EBEBEB] shadow-none rounded-[14px] overflow-hidden bg-white h-fit'
+      }
+    >
+      <CardContent
+        className={lockedSlug ? 'p-0 space-y-6' : 'p-6 sm:p-8 space-y-6'}
+      >
+        {step !== 'idle' && !lockedSlug && (
           <button
             type="button"
             onClick={() => {
@@ -190,7 +223,7 @@ const DeviceCapturePanel = () => {
           </button>
         )}
 
-        {step === 'idle' && (
+        {step === 'idle' && !lockedSlug && (
           <>
             <div className="space-y-2">
               <h3 className="font-bold text-brand-blue">Vitals capture</h3>

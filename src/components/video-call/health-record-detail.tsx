@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AppointmentNote } from '@/integration/appointments/types';
 import HealthRecordRow from './health-record-row';
+import VitalsTab from './vitals-tab';
 
 interface HealthRecordDetailProps {
   note: AppointmentNote;
@@ -101,6 +102,16 @@ const HealthRecordDetail = ({ note, onBack }: HealthRecordDetailProps) => {
                 />
               )
             )}
+            <div className="space-y-3 bg-white border border-(--border-stroke) rounded-[10px] p-4">
+              <p className="font-bold text-gray-900">Measurements</p>
+              <p className="text-sm text-gray-600 font-normal">
+                Readings recorded during this appointment.
+              </p>
+              <VitalsTab
+                appointmentId={note.appointmentId || note.appointment?.id}
+                hideTitle
+              />
+            </div>
           </div>
         </ScrollArea>
       </div>

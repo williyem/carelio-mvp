@@ -5,7 +5,7 @@ import { Patient } from '@/types/patient.types';
 import CalendarSvg from '@/assets/icons/calendar-svg';
 import ClockSvg from '@/assets/icons/clock-svg';
 import VideoRecorderSvg from '@/assets/icons/video-recorder';
-import { useVideoCallStore } from '@/stores/video-call-store';
+import { useBeginCall } from '@/hooks/page-hooks/video-call/use-begin-call';
 import { Appointment } from '@/types/appointment.types';
 import { AppointmentItemData } from '@/integration/appointments/types';
 import { getFullNameFromUser } from '@/lib/easy';
@@ -30,17 +30,15 @@ const AppointmentItem = ({
   onViewDetails,
   startLabel = 'Start Now',
 }: AppointmentItemProps) => {
-  const { startCall, setSelectedAppointment } = useVideoCallStore();
+  const beginCall = useBeginCall();
 
   const handleStart = () => {
+    const started = beginCall(rawAppointment ?? null, patient ?? null);
+    if (!started) return;
+
     if (onStartAppointment) {
       onStartAppointment(appointment.id);
     }
-
-    if (patient) {
-      startCall(patient);
-    }
-    setSelectedAppointment(rawAppointment ?? null, patient ?? null);
   };
 
   const showButton = onStartAppointment && canStart;

@@ -31,7 +31,7 @@ import {
 } from '@/integration/appointments';
 import { toast } from 'sonner';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useVideoCallStore } from '@/stores/video-call-store';
+import { useBeginCall } from '@/hooks/page-hooks/video-call/use-begin-call';
 import { Patient } from '@/types/patient.types';
 import { PatientSelection } from './patient-selection';
 import ErrorMessage from '@/components/ui/error-message';
@@ -154,7 +154,7 @@ export function ScheduleAppointmentForm() {
   const [startTimeError, setStartTimeError] = React.useState('');
   const [endTimeError, setEndTimeError] = React.useState('');
 
-  const { startCall, setSelectedAppointment } = useVideoCallStore();
+  const beginCall = useBeginCall();
 
   const minDate = React.useMemo(() => {
     const today = new Date();
@@ -278,12 +278,8 @@ export function ScheduleAppointmentForm() {
           const rawAppointment = response as Appointment;
 
           if (patient) {
-            startCall(patient as Patient);
+            beginCall(rawAppointment as Appointment, patient as Patient);
           }
-          setSelectedAppointment(
-            rawAppointment as Appointment,
-            patient as Patient
-          );
           setIsSuccessOpen(false);
         },
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
