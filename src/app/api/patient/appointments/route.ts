@@ -23,9 +23,11 @@ export async function GET(request: NextRequest) {
     const page = request.nextUrl.searchParams.get('page') ?? '1';
     const limit = request.nextUrl.searchParams.get('limit') ?? '20';
     const status = request.nextUrl.searchParams.get('status');
+    const upcoming = request.nextUrl.searchParams.get('upcoming');
 
     const query = new URLSearchParams({ page, limit });
     if (status) query.set('status', status);
+    if (upcoming) query.set('upcoming', upcoming);
 
     const response = await backendApiClient.get(
       `${API_BASE_URL}/patients/${patientId}/appointments?${query.toString()}`,

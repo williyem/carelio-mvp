@@ -1,11 +1,8 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
-import { isDummyDataEnabled } from '@/lib/dummy-data/config';
 
 export const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:4000';
 
 export const API_ROUTE_BASE = '/api';
-
-export const USE_DUMMY_DATA = isDummyDataEnabled();
 
 export const HTTP_METHODS = {
   GET: 'GET',
@@ -31,7 +28,7 @@ export interface ApiResponse<T = unknown> {
 }
 
 export const authApiClient: AxiosInstance = axios.create({
-  baseURL: USE_DUMMY_DATA ? API_ROUTE_BASE : API_BASE_URL,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },

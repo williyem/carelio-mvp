@@ -21,8 +21,6 @@ export const PATIENT_QUERY_KEYS = {
     ['patient', 'assigned', 'by-id', patientId] as const,
   GET_PATIENT_CONSULTATION_TOKEN: (patientId: string) =>
     ['patient', 'consultation', 'token', patientId] as const,
-  SEARCH_UNASSIGNED_PATIENTS: (search: string, page: number, limit: number) =>
-    ['patient', 'unassigned', 'search', search, page, limit] as const,
   SEARCH_ALL_PATIENTS: (search: string, page: number, limit: number) =>
     ['patient', 'all', 'search', search, page, limit] as const,
 } as const;

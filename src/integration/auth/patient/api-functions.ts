@@ -1,13 +1,15 @@
 import { AxiosResponse } from 'axios';
-import { apiClient, authApiClient } from '@/integration/config';
+import { apiClient } from '@/integration/config';
 import { PATIENT_ENDPOINTS } from './endpoints';
 import type {
   PatientLoginRequest,
   PatientLoginResponse,
+  PatientVerifyLoginEmailRequest,
+  PatientForgotPasswordRequest,
+  PatientResetPasswordRequest,
   RefreshTokenRequest,
   RefreshTokenResponse,
   InvitationToken,
-  // VerifyInvitationRequest,
   VerifyInvitationResponse,
   CompleteRegistrationRequest,
   CompleteRegistrationResponse,
@@ -21,8 +23,29 @@ import type {
 export const loginPatient = async (
   data: PatientLoginRequest
 ): Promise<AxiosResponse<PatientLoginResponse>> => {
-  // Hit Next BFF so dummy mode can set cookies in one step
+  // Hit Next BFF so login can set cookies in one step
   return apiClient.post<PatientLoginResponse>(PATIENT_ENDPOINTS.LOGIN, data);
+};
+
+export const verifyPatientLoginEmail = async (
+  data: PatientVerifyLoginEmailRequest
+): Promise<AxiosResponse<PatientLoginResponse>> => {
+  return apiClient.post<PatientLoginResponse>(
+    PATIENT_ENDPOINTS.VERIFY_LOGIN_EMAIL,
+    data
+  );
+};
+
+export const forgotPatientPassword = async (
+  data: PatientForgotPasswordRequest
+): Promise<AxiosResponse<{ message: string }>> => {
+  return apiClient.post(PATIENT_ENDPOINTS.FORGOT_PASSWORD, data);
+};
+
+export const resetPatientPassword = async (
+  data: PatientResetPasswordRequest
+): Promise<AxiosResponse<{ message: string }>> => {
+  return apiClient.post(PATIENT_ENDPOINTS.RESET_PASSWORD, data);
 };
 
 /**

@@ -7,8 +7,6 @@ import {
   USER_TYPE,
 } from '@/lib/constants';
 import { APPOINTMENT_ENDPOINTS } from '@/integration/appointments/endpoints';
-import { isDummyDataEnabled } from '@/lib/dummy-data/config';
-import { getConsultationNoteByAppointment } from '@/lib/dummy-data/loader';
 
 export async function GET(
   _request: NextRequest,
@@ -36,11 +34,6 @@ export async function GET(
       );
     }
 
-    if (isDummyDataEnabled()) {
-      const note = getConsultationNoteByAppointment(appointmentId);
-      return NextResponse.json(note);
-    }
-
     const endpoint = APPOINTMENT_ENDPOINTS.GET_APPOINTMENT_NOTE.replace(
       ':appointmentId',
       appointmentId
@@ -61,6 +54,9 @@ export async function GET(
       const axiosError = error as {
         response?: { status: number; data: unknown };
       };
+      if (axiosError.response?.status === 404) {
+        return NextResponse.json({ data: null });
+      }
       return NextResponse.json(
         {
           error: 'Get consultation note failed',

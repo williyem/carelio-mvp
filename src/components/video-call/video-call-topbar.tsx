@@ -5,9 +5,15 @@ import LiveBadge from './live-badge';
 import CallTimer from './call-timer';
 import PipExitSvg from '@/assets/icons/pip-exit-svg';
 const VideoCallTopbar = () => {
-  const { toggleMinimize, selectedPatient } = useVideoCallStore();
+  const { toggleMinimize, selectedPatient, selectedAppointment } =
+    useVideoCallStore();
 
-  const patient = selectedPatient?.fullName || selectedPatient?.patientId;
+  const patient =
+    selectedAppointment?.patient?.fullName ||
+    selectedPatient?.fullName ||
+    selectedPatient?.name ||
+    selectedPatient?.patientId ||
+    selectedAppointment?.patient?.patientId;
 
   const handleExit = () => {
     toggleMinimize();

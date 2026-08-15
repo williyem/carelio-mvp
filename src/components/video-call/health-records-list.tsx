@@ -12,7 +12,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 
 interface HealthRecordsListProps {
   patientId: string;
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 const HealthRecordsList = ({ patientId, onBack }: HealthRecordsListProps) => {
@@ -47,17 +47,23 @@ const HealthRecordsList = ({ patientId, onBack }: HealthRecordsListProps) => {
   return (
     <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300">
       <div className="flex flex-col gap-6 h-full">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-gray-500 font-bold hover:text-gray-900 transition-colors w-fit cursor-pointer"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span>Back</span>
-        </button>
+        {onBack ? (
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-gray-500 font-bold hover:text-gray-900 transition-colors w-fit cursor-pointer"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back</span>
+          </button>
+        ) : null}
 
-        <h2 className="text-xl font-bold text-gray-900">
-          Previous Health Records
-        </h2>
+        <div>
+          <h3 className="font-bold text-gray-900">Visit history</h3>
+          <p className="text-sm text-(--text-secondary) mt-1">
+            Each appointment includes SOAP notes and measurements from that
+            visit.
+          </p>
+        </div>
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
@@ -78,10 +84,9 @@ const HealthRecordsList = ({ patientId, onBack }: HealthRecordsListProps) => {
           </ScrollArea>
         ) : (
           <EmptyState
-            icon={<FileText className="h-8 w-8 text-gray-300" />}
-            message="No health records found"
-            description="Previous SOAP notes will appear here"
-            className="py-12"
+            icon={<FileText className="h-6 w-6 text-(--text-muted)" />}
+            title="No health records found"
+            description="SOAP notes and measurements from each visit will appear here"
           />
         )}
       </div>

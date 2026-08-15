@@ -14,7 +14,7 @@ import {
   canStartAppointment,
 } from '@/lib/easy';
 import AppointmentsListSkeleton from '../skeletons/appointments-list-skeleton';
-import CalendarSvg from '@/assets/icons/calendar-svg';
+import AppointmentsEmptyState from '@/components/dashboard/appointments-empty-state';
 import CancellationDetailsDialog from './cancellation-details-dialog';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -27,11 +27,18 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-type AppointmentStatus = 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'MISSED';
+type AppointmentStatusFilter =
+  | 'UPCOMING'
+  | 'CANCELLED'
+  | 'COMPLETED'
+  | 'MISSED';
 
-const STATUS_OPTIONS: { label: string; value: AppointmentStatus | 'ALL' }[] = [
+const STATUS_OPTIONS: {
+  label: string;
+  value: AppointmentStatusFilter | 'ALL';
+}[] = [
   { label: 'All', value: 'ALL' },
-  { label: 'Upcoming', value: 'CONFIRMED' },
+  { label: 'Upcoming', value: 'UPCOMING' },
   { label: 'Cancelled', value: 'CANCELLED' },
   { label: 'Completed', value: 'COMPLETED' },
   { label: 'Missed', value: 'MISSED' },
@@ -52,17 +59,20 @@ const AppointmentsList = ({
   portal = 'doctor',
 }: AppointmentsListProps) => {
   const [page, setPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'ALL'>(
-    'ALL'
-  );
+  const [statusFilter, setStatusFilter] = useState<
+    AppointmentStatusFilter | 'ALL'
+  >('ALL');
 
   const { appointments, isLoading, data } = useGetPatientAppointments(
     patient?.id || '',
-    statusFilter === 'ALL' ? undefined : statusFilter,
+    statusFilter === 'ALL' || statusFilter === 'UPCOMING'
+      ? undefined
+      : statusFilter,
     true,
     page,
     10,
-    portal
+    portal,
+    statusFilter === 'UPCOMING'
   );
 
   const [selectedAppointment, setSelectedAppointment] =
@@ -89,7 +99,7 @@ const AppointmentsList = ({
     <Select
       value={statusFilter}
       onValueChange={(val) => {
-        setStatusFilter(val as AppointmentStatus | 'ALL');
+        setStatusFilter(val as AppointmentStatusFilter | 'ALL');
         setPage(1);
       }}
     >
@@ -119,19 +129,10 @@ const AppointmentsList = ({
           </p>
           <div className="flex justify-end">{StatusFilter}</div>
         </div>
-        <div className="flex flex-col items-center justify-center w-full py-12 gap-4">
-          <div className="bg-(--bg-light-gray) rounded-full w-16 h-16 flex items-center justify-center">
-            <CalendarSvg />
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="font-medium leading-[1.2] text-(--text-primary) text-[16px]">
-              No appointments found
-            </p>
-            <p className="font-normal leading-[1.2] text-(--text-muted) text-[14px] text-center">
-              {emptyMessage}
-            </p>
-          </div>
-        </div>
+        <AppointmentsEmptyState
+          title="No appointments found"
+          description={emptyMessage}
+        />
       </div>
     );
   }

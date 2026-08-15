@@ -1,47 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { API_BASE_URL, backendApiClient } from '@/integration/config';
-import { cookies } from 'next/headers';
-import { USER_TYPE_HEADER, doctorAccessToken } from '@/lib/constants';
+import { backendApiClient } from '@/integration/config';
+import {
+  consultationAuthHeaders,
+  getConsultationAccessToken,
+} from '@/lib/consultation-bff-auth';
+import { proxyError, unauthorized } from '@/lib/bff-auth';
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get(doctorAccessToken)?.value;
-
-    if (!accessToken) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const token = await getConsultationAccessToken();
+    if (!token) return unauthorized();
 
     const body = await request.json();
-
-    const response = await backendApiClient.post(
-      `${API_BASE_URL}/vitals`,
-      body,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          ...USER_TYPE_HEADER,
-        },
-      }
-    );
-
+    const response = await backendApiClient.post('/vitals', body, {
+      headers: consultationAuthHeaders(token),
+    });
     return NextResponse.json(response.data);
-  } catch (error: unknown) {
-    console.error('Create vital error:', error);
-
-    if (error instanceof Error && 'response' in error) {
-      const axiosError = error as {
-        response?: { status: number; data: unknown };
-      };
-      return NextResponse.json(
-        { error: 'Create vital failed', details: axiosError.response?.data },
-        { status: axiosError.response?.status || 500 }
-      );
-    }
-
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+  } catch (error) {
+    return proxyError(error, 'Failed to record vital');
   }
 }

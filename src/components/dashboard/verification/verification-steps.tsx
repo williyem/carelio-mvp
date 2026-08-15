@@ -2,7 +2,6 @@
 
 import VerificationTabs from './verification-tabs';
 import VerificationCodeInput from './verification-code-input';
-import MedicalAssistantAssignment from './medical-assistant-assignment';
 import { VerificationStepData } from '@/types/verification.types';
 
 interface VerificationStepsProps {
@@ -10,7 +9,6 @@ interface VerificationStepsProps {
   stepData: VerificationStepData;
   onEmailSendCode: (email: string) => void | Promise<void>;
   onVerifyCode: (code: string) => void | Promise<void>;
-  onAssignClinician: (clinicianId: string) => void | Promise<void>;
   onUseDifferentMethod: () => void;
   isSubmitting?: boolean;
 }
@@ -20,7 +18,6 @@ const VerificationSteps = ({
   stepData,
   onEmailSendCode,
   onVerifyCode,
-  onAssignClinician,
   onUseDifferentMethod,
   isSubmitting = false,
 }: VerificationStepsProps) => {
@@ -33,22 +30,13 @@ const VerificationSteps = ({
     );
   }
 
-  if (step === 1 && stepData.contactValue) {
+  if (step === 1) {
     return (
       <VerificationCodeInput
-        contactValue={stepData.contactValue}
+        contactValue={stepData.contactValue || 'the email on file'}
         method={stepData.method}
         onVerify={onVerifyCode}
         onUseDifferentMethod={onUseDifferentMethod}
-        isSubmitting={isSubmitting}
-      />
-    );
-  }
-
-  if (step === 2) {
-    return (
-      <MedicalAssistantAssignment
-        onAssign={onAssignClinician}
         isSubmitting={isSubmitting}
       />
     );

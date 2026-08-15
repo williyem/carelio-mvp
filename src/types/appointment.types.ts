@@ -7,16 +7,18 @@ export interface AppointmentRow {
     phone: string;
     email: string;
   };
-  assignedAssistantId?: string | null;
-  assignedAssistantName?: string;
   accountNumber?: string;
   insId?: string;
   isRegistrationComplete?: boolean;
+  linked?: boolean;
+  emailVerified?: boolean;
+  isActive?: boolean;
 }
 
 export interface Appointment {
   id: string;
   doctorId: string;
+  bookedByAssistantId?: string | null;
   patientId: string;
   isImmediate?: boolean;
   date?: string; // ISO Date

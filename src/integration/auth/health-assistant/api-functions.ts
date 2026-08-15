@@ -46,7 +46,7 @@ export const registerHealthAssistant = async (
 export const loginHealthAssistant = async (
   data: HealthAssistantLoginRequest
 ): Promise<AxiosResponse<HealthAssistantLoginResponse>> => {
-  // Always hit the Next BFF so dummy mode and cookie-setting stay consistent
+  // Always hit the Next BFF so cookie-setting stays consistent
   return apiClient.post<HealthAssistantLoginResponse>(
     '/auth/health-assistant/login',
     data

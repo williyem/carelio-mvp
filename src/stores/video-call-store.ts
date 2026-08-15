@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Patient } from '@/types/patient.types';
 import { Appointment } from '@/types/appointment.types';
 import type { Room } from 'livekit-client';
+import { readPortalIdentity, type CallParticipantRole } from '@/lib/call-join';
 
 export interface PreviewSettings {
   isMuted: boolean;
@@ -39,6 +40,8 @@ interface VideoCallState {
   ) => void;
   selectedAppointment: Appointment | null;
   selectedPatient: Patient | null;
+  participantRole: CallParticipantRole | null;
+  setParticipantRole: (role: CallParticipantRole | null) => void;
   isMuted: boolean;
   setIsMuted: (isMuted: boolean) => void;
   isVideoPaused: boolean;
@@ -48,6 +51,19 @@ interface VideoCallState {
   postConsultationAppointmentId: string | null;
   setPostConsultationAppointmentId: (appointmentId: string | null) => void;
 }
+
+const clearCallFields = {
+  isActive: false,
+  isMinimized: false,
+  isInPreview: false,
+  patient: null,
+  callDuration: 0,
+  previewSettings: null,
+  selectedAppointment: null,
+  selectedPatient: null,
+  participantRole: null,
+  client: null,
+} as const;
 
 export const useVideoCallStore = create<VideoCallState>((set) => ({
   client: null,
@@ -61,6 +77,8 @@ export const useVideoCallStore = create<VideoCallState>((set) => ({
   previewSettings: null,
   selectedAppointment: null,
   selectedPatient: null,
+  participantRole: null,
+  setParticipantRole: (role) => set({ participantRole: role }),
   startCall: (patient: Patient) =>
     set({
       isActive: true,
@@ -68,17 +86,11 @@ export const useVideoCallStore = create<VideoCallState>((set) => ({
       isInPreview: true,
       patient,
       callDuration: 0,
+      participantRole: readPortalIdentity()?.role ?? null,
     }),
   endCall: () =>
     set({
-      isActive: false,
-      isMinimized: false,
-      isInPreview: false,
-      patient: null,
-      callDuration: 0,
-      previewSettings: null,
-      selectedAppointment: null,
-      client: null,
+      ...clearCallFields,
     }),
   toggleMinimize: () =>
     set((state) => ({
@@ -102,14 +114,7 @@ export const useVideoCallStore = create<VideoCallState>((set) => ({
     }),
   closePreview: () =>
     set({
-      isActive: false,
-      isMinimized: false,
-      isInPreview: false,
-      patient: null,
-      callDuration: 0,
-      previewSettings: null,
-      selectedAppointment: null,
-      client: null,
+      ...clearCallFields,
     }),
   setSelectedAppointment: (
     appointment: Appointment | null,
@@ -118,6 +123,9 @@ export const useVideoCallStore = create<VideoCallState>((set) => ({
     set({
       selectedAppointment: appointment,
       selectedPatient: patient,
+      participantRole:
+        readPortalIdentity()?.role ??
+        useVideoCallStore.getState().participantRole,
     }),
   isMuted: false,
   setIsMuted: (isMuted: boolean) =>

@@ -12,7 +12,9 @@ export const APPOINTMENT_ENDPOINTS = {
   SCHEDULE_APPOINTMENT: '/appointments',
   SUBMIT_SOAP_NOTES: '/consultations/:appointmentId/soap',
   COMPLETE_CONSULTATION: '/consultations/:appointmentId/complete',
+  START_CONSULTATION: '/consultations/:appointmentId/start',
   UPDATE_CONSULTATION_NOTE: '/consultations/notes/:noteId',
+  SHARE_CONSULTATION_PLAN: '/consultations/:appointmentId/note/share',
 } as const;
 
 export const APPOINTMENT_API_ENDPOINTS = {
@@ -22,7 +24,8 @@ export const APPOINTMENT_API_ENDPOINTS = {
   CANCEL_APPOINTMENT: '/doctor/appointments/cancel/:id',
   GET_PATIENT_NOTES: '/doctor/appointments/:patientId/health-records',
   GET_NOTE_BY_ID: '/doctor/appointments/notes/detail/:noteId',
-  GET_APPOINTMENT_NOTE: '/doctor/consultations/:appointmentId/note',
+  GET_APPOINTMENT_NOTE: '/consultations/:appointmentId/note',
+  SHARE_CONSULTATION_PLAN: '/consultations/:appointmentId/note/share',
   GET_RECENT_APPOINTMENTS: '/doctor/appointments/recent',
   RESCHEDULE_APPOINTMENT: '/doctor/appointments/reschedule/:id',
   // Backwards compatibility / HA
@@ -30,6 +33,7 @@ export const APPOINTMENT_API_ENDPOINTS = {
   SCHEDULE_APPOINTMENT: '/doctor/appointments/schedule',
   SUBMIT_SOAP_NOTES: '/doctor/consultations/:appointmentId/soap',
   COMPLETE_CONSULTATION: '/doctor/consultations/:appointmentId/complete',
+  START_CONSULTATION: '/consultations/:id/start',
   UPDATE_CONSULTATION_NOTE: '/doctor/consultations/notes/:noteId',
   GET_UPCOMING_APPOINTMENTS: '/health-assistant/appointments/upcoming',
   PATIENT_GET_APPOINTMENTS: '/patient/appointments',

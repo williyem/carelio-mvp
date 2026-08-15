@@ -15,7 +15,9 @@ export function proxy(request: NextRequest) {
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/favicon.ico') ||
     pathname.startsWith('/patient-invite') ||
+    pathname.startsWith('/staff-invite') ||
     pathname.startsWith('/patient/register') ||
+    pathname.startsWith('/patient/approve-doctor') ||
     pathname.match(/\.(ico|png|jpg|jpeg|svg|gif|webp|woff|woff2|ttf|eot)$/)
   ) {
     return NextResponse.next();
@@ -82,54 +84,12 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  // Doctor routes
+  // Prefer the cookie that matches this portal so leftover sessions from
+  // another role cannot kick a logged-in doctor/HA/patient off their own pages.
   if (isDoctorRoute) {
-    if (isPatientLoggedIn || isHealthAssistantLoggedIn) {
-      const home = isPatientLoggedIn
-        ? ROUTES.PATIENT.ROOT
-        : ROUTES.HEALTH_ASSISTANT.PATIENT.ROOT;
-      const res = NextResponse.redirect(new URL(home, request.url));
-      res.headers.set('Cache-Control', 'no-store');
-      return res;
-    }
-    if (!isDoctorLoggedIn) {
-      const res = NextResponse.redirect(
-        new URL(ROUTES.AUTH.LOGIN, request.url)
-      );
-      res.headers.set('Cache-Control', 'no-store');
-      return res;
-    }
-    return NextResponse.next();
-  }
-
-  // Health Assistant routes
-  if (isHealthAssistantRoute) {
-    if (isPatientLoggedIn) {
-      const res = NextResponse.redirect(
-        new URL(ROUTES.PATIENT.ROOT, request.url)
-      );
-      res.headers.set('Cache-Control', 'no-store');
-      return res;
-    }
     if (isDoctorLoggedIn) {
-      const res = NextResponse.redirect(
-        new URL(ROUTES.DASHBOARD.ROOT, request.url)
-      );
-      res.headers.set('Cache-Control', 'no-store');
-      return res;
+      return NextResponse.next();
     }
-    if (!isHealthAssistantLoggedIn) {
-      const res = NextResponse.redirect(
-        new URL(ROUTES.AUTH.LOGIN, request.url)
-      );
-      res.headers.set('Cache-Control', 'no-store');
-      return res;
-    }
-    return NextResponse.next();
-  }
-
-  // Patient portal routes
-  if (isPatientRoute) {
     if (isHealthAssistantLoggedIn) {
       const res = NextResponse.redirect(
         new URL(ROUTES.HEALTH_ASSISTANT.PATIENT.ROOT, request.url)
@@ -137,6 +97,22 @@ export function proxy(request: NextRequest) {
       res.headers.set('Cache-Control', 'no-store');
       return res;
     }
+    if (isPatientLoggedIn) {
+      const res = NextResponse.redirect(
+        new URL(ROUTES.PATIENT.ROOT, request.url)
+      );
+      res.headers.set('Cache-Control', 'no-store');
+      return res;
+    }
+    const res = NextResponse.redirect(new URL(ROUTES.AUTH.LOGIN, request.url));
+    res.headers.set('Cache-Control', 'no-store');
+    return res;
+  }
+
+  if (isHealthAssistantRoute) {
+    if (isHealthAssistantLoggedIn) {
+      return NextResponse.next();
+    }
     if (isDoctorLoggedIn) {
       const res = NextResponse.redirect(
         new URL(ROUTES.DASHBOARD.ROOT, request.url)
@@ -144,14 +120,39 @@ export function proxy(request: NextRequest) {
       res.headers.set('Cache-Control', 'no-store');
       return res;
     }
-    if (!isPatientLoggedIn) {
+    if (isPatientLoggedIn) {
       const res = NextResponse.redirect(
-        new URL(ROUTES.AUTH.LOGIN, request.url)
+        new URL(ROUTES.PATIENT.ROOT, request.url)
       );
       res.headers.set('Cache-Control', 'no-store');
       return res;
     }
-    return NextResponse.next();
+    const res = NextResponse.redirect(new URL(ROUTES.AUTH.LOGIN, request.url));
+    res.headers.set('Cache-Control', 'no-store');
+    return res;
+  }
+
+  if (isPatientRoute) {
+    if (isPatientLoggedIn) {
+      return NextResponse.next();
+    }
+    if (isDoctorLoggedIn) {
+      const res = NextResponse.redirect(
+        new URL(ROUTES.DASHBOARD.ROOT, request.url)
+      );
+      res.headers.set('Cache-Control', 'no-store');
+      return res;
+    }
+    if (isHealthAssistantLoggedIn) {
+      const res = NextResponse.redirect(
+        new URL(ROUTES.HEALTH_ASSISTANT.PATIENT.ROOT, request.url)
+      );
+      res.headers.set('Cache-Control', 'no-store');
+      return res;
+    }
+    const res = NextResponse.redirect(new URL(ROUTES.AUTH.LOGIN, request.url));
+    res.headers.set('Cache-Control', 'no-store');
+    return res;
   }
 
   return NextResponse.next();

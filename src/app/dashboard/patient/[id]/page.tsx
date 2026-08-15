@@ -11,23 +11,26 @@ import {
   MapPin,
   Droplets,
   Info,
-  Database,
-  Search,
-  History,
   Loader2,
+  Search,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import { EmptyState } from '@/components/ui/empty-state';
 import { useGetPatientById } from '@/integration/patient';
+import { isForbiddenError } from '@/integration';
 import { format, parseISO } from 'date-fns';
+import { EmptyState } from '@/components/ui/empty-state';
 import BigUserSvg from '@/assets/icons/big-user-svg';
 import GenderSvg from '@/assets/icons/gender-svg';
 import AppointmentsList from '@/components/dashboard/patients/appointments-list';
+import PatientVerificationDialog from '@/components/dashboard/patient-verification-dialog';
+import RecordsLockedCard from '@/components/dashboard/records-locked-card';
 import { Patient } from '@/types/patient.types';
-
-type TabType = 'Appointments' | 'Lab Results' | 'Forms' | 'HIE Records';
+import { usePatientVerificationStore } from '@/stores/patient-verifcation-store';
+import {
+  formatClinicalList,
+  formatEmergencyContact,
+} from '@/lib/patient-clinical';
 
 export default function PatientDetailsPage({
   params,
@@ -35,7 +38,9 @@ export default function PatientDetailsPage({
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = use(params);
-  const [activeTab, setActiveTab] = React.useState<TabType>('Appointments');
+  const [showVerificationDialog, setShowVerificationDialog] =
+    React.useState(false);
+  const { setSelectedPatient } = usePatientVerificationStore();
 
   const {
     data: patient,
@@ -43,10 +48,39 @@ export default function PatientDetailsPage({
     error,
   } = useGetPatientById(resolvedParams.id);
 
+  const openVerify = () => {
+    setSelectedPatient({
+      id: resolvedParams.id,
+      fullName: patient?.fullName || 'this patient',
+      email: patient?.email || '',
+    });
+    setShowVerificationDialog(true);
+  };
+
   if (isLoadingPatient) {
     return (
       <div className="h-[400px] flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-brand-blue" />
+      </div>
+    );
+  }
+
+  if (isForbiddenError(error)) {
+    return (
+      <div className="space-y-6">
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors w-fit"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span className="text-sm font-medium">Back</span>
+        </Link>
+        <RecordsLockedCard onVerify={openVerify} />
+        <PatientVerificationDialog
+          open={showVerificationDialog}
+          onOpenChange={setShowVerificationDialog}
+          portal="doctor"
+        />
       </div>
     );
   }
@@ -62,8 +96,12 @@ export default function PatientDetailsPage({
           <span className="text-sm font-medium">Back</span>
         </Link>
         <Card className="border-gray-100 rounded-2xl">
-          <CardContent className="p-8 text-center text-gray-500">
-            Patient not found
+          <CardContent className="p-4">
+            <EmptyState
+              icon={<Search className="h-6 w-6 text-(--text-muted)" />}
+              title="Patient not found"
+              description="This patient may have been removed or you may not have access."
+            />
           </CardContent>
         </Card>
       </div>
@@ -202,126 +240,31 @@ export default function PatientDetailsPage({
             <div className="bg-[#FDFAE7] rounded-xl p-5 space-y-1">
               <h4 className="text-base font-bold text-gray-900">Allergies</h4>
               <p className="text-sm text-gray-500">
-                {patient.allergies || 'None reported'}
+                {formatClinicalList(patient.allergies)}
               </p>
             </div>
-            <div className="bg-[#EBF5FF] rounded-xl p-5 space-y-1">
+            <div className="bg-[#FDFAE7] rounded-xl p-5 space-y-1">
               <h4 className="text-base font-bold text-gray-900">
-                Chief Complaint
+                Medical conditions
               </h4>
-              <p className="text-sm text-brand-blue font-medium">
-                {patient.chiefComplaint || 'None reported'}
+              <p className="text-sm text-gray-500">
+                {formatClinicalList(patient.conditions)}
+              </p>
+            </div>
+            <div className="bg-[#FDFAE7] rounded-xl p-5 space-y-1">
+              <h4 className="text-base font-bold text-gray-900">
+                Emergency contact
+              </h4>
+              <p className="text-sm text-gray-500">
+                {formatEmergencyContact(patient.emergencyContact)}
               </p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Tabs Selector */}
-      <div className="bg-[#F9F9F9] p-1 rounded-full flex overflow-x-auto no-scrollbar">
-        {(
-          ['Appointments', 'Lab Results', 'Forms', 'HIE Records'] as TabType[]
-        ).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={cn(
-              'flex-1 py-3 px-6 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200',
-              activeTab === tab
-                ? 'bg-white border-(--border-stroke) border text-gray-900'
-                : 'text-gray-900 hover:text-gray-700'
-            )}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab Content */}
       <div className="min-h-[400px]">
-        {activeTab === 'Appointments' && (
-          <AppointmentsTab patient={patient as unknown as Patient} />
-        )}
-        {activeTab === 'Lab Results' && <LabResultsTab />}
-        {activeTab === 'Forms' && <FormsTab />}
-        {activeTab === 'HIE Records' && <HIERecordsTab />}
-      </div>
-    </div>
-  );
-}
-
-// --- Tab Content Components ---
-
-function AppointmentsTab({ patient }: { patient: Patient }) {
-  return (
-    <div className="space-y-4">
-      <AppointmentsList patient={patient as Patient} />
-    </div>
-  );
-}
-
-function LabResultsTab() {
-  // Lab results would need a separate backend endpoint - showing empty state for now
-  return (
-    <div className="space-y-4">
-      <EmptyState
-        icon={<Search className="h-8 w-8 text-gray-300" />}
-        message="No lab results available"
-      />
-    </div>
-  );
-}
-
-function FormsTab() {
-  return (
-    <div className="space-y-8">
-      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center gap-3 text-brand-blue font-medium">
-        <Info className="h-5 w-5 shrink-0" />
-        <p className="text-[15px]">
-          Forms are synced with EPIC via API integration
-        </p>
-      </div>
-
-      <div className="space-y-3">
-        <h3 className="text-base font-bold text-gray-900">Billing History</h3>
-        <EmptyState
-          icon={<Search className="h-8 w-8 text-gray-300" />}
-          message="No billing information available"
-        />
-      </div>
-
-      <div className="space-y-3">
-        <h3 className="text-base font-bold text-gray-900">Compliance Forms</h3>
-        <EmptyState
-          icon={<Search className="h-8 w-8 text-gray-300" />}
-          message="No compliance form available"
-        />
-      </div>
-    </div>
-  );
-}
-
-function HIERecordsTab() {
-  return (
-    <div className="space-y-8">
-      <div className="bg-[#EEF2FF] border border-blue-100/50 rounded-xl p-4 flex items-center gap-3 text-[#6366F1] font-medium">
-        <Database className="h-5 w-5 shrink-0" />
-        <p className="text-[15px]">
-          Records aggregated from Health Information Exchange across all
-          treatment locations
-        </p>
-      </div>
-
-      <div className="space-y-3">
-        <h3 className="text-base font-bold text-gray-900">HIE Records</h3>
-        <EmptyState
-          icon={
-            <div className="p-4 border-2 border-dashed border-gray-100 rounded-xl">
-              <History className="h-8 w-8 text-gray-300" />
-            </div>
-          }
-          message="No HIE records available"
-        />
+        <AppointmentsList patient={patient as unknown as Patient} />
       </div>
     </div>
   );

@@ -26,6 +26,8 @@ export const ROUTES = {
       SCHEDULE: '/dashboard/settings/schedule',
       SECURITY: '/dashboard/settings/security',
       BILLING: '/dashboard/settings/billing-payout',
+      TEAM: '/dashboard/settings/team',
+      DEVICES: '/dashboard/settings/devices',
     },
     PATIENT: {
       ROOT: '/dashboard/patient',
@@ -38,11 +40,15 @@ export const ROUTES = {
     HEALTH_ASSISTANT: '/onboarding/health-assistant',
   },
 
+  STAFF_INVITE: '/staff-invite',
+
   // Health Assistant routes
   HEALTH_ASSISTANT: {
     PATIENT: {
       ROOT: '/health-assistant/patient',
       DETAILS: (id: string) => `/health-assistant/patient/${id}`,
+      SUMMARY: (id: string, appointmentId: string) =>
+        `/health-assistant/patient/${id}/${appointmentId}`,
       ADD_NEW: '/health-assistant/patient/add-new-patient',
     },
     APPOINTMENTS: {
@@ -60,12 +66,15 @@ export const ROUTES = {
   // Patient portal routes
   PATIENT: {
     ROOT: '/patient',
+    ONBOARDING: '/patient/onboarding',
     RECORD_VITALS: '/patient/record-vitals',
+    PROFILE: '/patient/profile',
     VITAL_HISTORY: '/patient/vital-history',
     HEALTH_RECORDS: '/patient/health-records',
     RECORD_DETAILS: (recordId: string) => `/patient/health-records/${recordId}`,
     REGISTER: '/patient/register',
     INVITE: '/patient-invite',
+    APPROVE_DOCTOR: '/patient/approve-doctor',
     SETTINGS: {
       ROOT: '/patient/settings',
       BILLING: '/patient/settings/billing',
@@ -124,6 +133,9 @@ export const NEXT_API_ROUTES = {
     SESSION: `${NEXT_API_PATIENT_BASE}/session`,
     COMPLETE_REGISTRATION: `${NEXT_API_PATIENT_BASE}/complete-registration`,
     VERIFY_INVITATION: `${NEXT_API_PATIENT_BASE}/verify-invitation`,
+    VERIFY_LOGIN_EMAIL: `${NEXT_API_PATIENT_BASE}/verify-login-email`,
+    FORGOT_PASSWORD: `${NEXT_API_PATIENT_BASE}/forgot-password`,
+    RESET_PASSWORD: `${NEXT_API_PATIENT_BASE}/reset-password`,
   },
   CLEAR_COOKIES: `${NEXT_API_BASE}/clear-cookies`,
 } as const;

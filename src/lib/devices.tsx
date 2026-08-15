@@ -7,15 +7,29 @@ import PulseOxSvg from '@/assets/icons/pulse-ox-svg';
 import GlucoseMeterSvg from '@/assets/icons/glucose-meter-svg';
 import OtoscopeSvg from '@/assets/icons/otoscope-svg';
 import EkgSvg from '@/assets/icons/ekg-svg';
-import { getDevices as getDevicesFromDummyData } from '@/lib/dummy-data/loader';
 
-type DummyDevice = {
+type DeviceCatalogItem = {
   id: string;
   name: string;
   status: DeviceStatus;
   type: DeviceType;
-  lastReading?: { value: string; timestamp: string };
 };
+
+const DEVICE_CATALOG: DeviceCatalogItem[] = [
+  { id: 'DEV001', name: 'Thermometer', status: 'connected', type: 'known' },
+  { id: 'DEV002', name: 'Weight Scale', status: 'connected', type: 'known' },
+  {
+    id: 'DEV003',
+    name: 'Blood Pressure Cuff',
+    status: 'connected',
+    type: 'known',
+  },
+  { id: 'DEV004', name: 'Stethoscope', status: 'disconnected', type: 'known' },
+  { id: 'DEV005', name: 'Pulse Ox', status: 'connected', type: 'known' },
+  { id: 'DEV006', name: 'Glucose Meter', status: 'connected', type: 'known' },
+  { id: 'DEV007', name: 'Otoscope', status: 'disconnected', type: 'unknown' },
+  { id: 'DEV008', name: 'EKG', status: 'disconnected', type: 'unknown' },
+];
 
 const DEVICE_ICONS: Record<string, React.ReactNode> = {
   Thermometer: <ThermometerSvg />,
@@ -31,19 +45,12 @@ const DEVICE_ICONS: Record<string, React.ReactNode> = {
 const mapDeviceIcon = (name: string): React.ReactNode =>
   DEVICE_ICONS[name] ?? <StethoscopeSvg />;
 
-/**
- * Get list of devices from dummy-data/devices.json.
- * Icon components are mapped in code; swap to API call when backend is ready.
- */
 export async function getDevices(): Promise<Device[]> {
-  const devices = getDevicesFromDummyData() as DummyDevice[];
-
-  return devices.map((device) => ({
+  return DEVICE_CATALOG.map((device) => ({
     id: device.id,
     name: device.name,
     status: device.status,
     type: device.type,
     icon: mapDeviceIcon(device.name),
-    lastReading: device.lastReading,
   }));
 }

@@ -1,22 +1,4 @@
 // ============================================
-// Assigned Assistant Types
-// ============================================
-
-export interface AssignedAssistant {
-  id: string;
-  staffCode: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-  twoFactorEnabled: boolean;
-  twoFactorSecret: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// ============================================
 // Patient Types
 // ============================================
 
@@ -33,16 +15,22 @@ export interface Patient {
   address?: string;
   bloodType?: string;
   allergies?: string[];
+  medications?: string[];
+  conditions?: string[];
+  emergencyContact?: {
+    name?: string;
+    relationship?: string;
+    phone?: string;
+  };
   chiefComplaint?: string;
   invitedByDoctorId: string | null;
-  assignedAssistantId: string | null;
   phoneVerified: boolean;
   emailVerified: boolean;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  assignedAssistant?: AssignedAssistant;
   isRegistrationComplete?: boolean;
+  linked?: boolean;
 }
 
 /** Alias used by HA portal */
@@ -64,11 +52,6 @@ export interface GetAssignedPatientsParams {
   search?: string;
   page?: number;
   limit?: number;
-}
-
-export interface AssignPatientRequest {
-  patientId: string;
-  assistantId: string;
 }
 
 export interface InvitePatientRequest {
@@ -100,10 +83,6 @@ export interface InvitePatientResponse {
   invitationId?: string;
   inviteLink?: string;
   patientId?: string;
-}
-
-export interface UnassignPatientResponse {
-  message: string;
 }
 
 export interface PatientConsultationTokenResponse {

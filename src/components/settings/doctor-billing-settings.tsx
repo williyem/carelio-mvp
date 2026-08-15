@@ -18,11 +18,7 @@ import {
 } from '@/integration/settings/api';
 import { getErrorMessage } from '@/integration';
 
-export default function DoctorBillingSettings({
-  doctorId: _doctorId,
-}: {
-  doctorId: string;
-}) {
+export default function DoctorBillingSettings() {
   const [billing, setBilling] = useState<DoctorBilling>(defaultDoctorBilling());
   const [tab, setTab] = useState<'billing' | 'payouts'>('billing');
   const [loading, setLoading] = useState(true);
@@ -100,15 +96,15 @@ export default function DoctorBillingSettings({
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1.5 col-span-1">
-                  <Label>City</Label>
+                  <Label>City / town</Label>
                   <Input className="h-11" {...register('address.city')} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>State</Label>
+                  <Label>Region</Label>
                   <Input className="h-11" {...register('address.state')} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>ZIP</Label>
+                  <Label>GhanaPost GPS / postal</Label>
                   <Input className="h-11" {...register('address.zip')} />
                 </div>
               </div>

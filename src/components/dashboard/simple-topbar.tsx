@@ -8,13 +8,19 @@ import HomeSvg from '@/assets/icons/home-svg';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/routes';
+import { PortalChip } from './portal-identity';
 
 interface SimpleTopbarProps {
   className?: string;
   onLogoutClick?: () => void;
+  userName?: string;
 }
 
-const SimpleTopbar = ({ className, onLogoutClick }: SimpleTopbarProps) => {
+const SimpleTopbar = ({
+  className,
+  onLogoutClick,
+  userName,
+}: SimpleTopbarProps) => {
   const pathname = usePathname();
   const isHomeActive = pathname === ROUTES.PATIENT.ROOT;
   const isSettingsActive = pathname?.startsWith(ROUTES.PATIENT.SETTINGS.ROOT);
@@ -30,18 +36,21 @@ const SimpleTopbar = ({ className, onLogoutClick }: SimpleTopbarProps) => {
         className
       )}
     >
-      <Link
-        href={ROUTES.PATIENT.ROOT}
-        className="relative h-9 md:h-11 w-[120px] md:w-[140px]"
-      >
-        <Image
-          src="/images/carelio-logo.png"
-          alt="Carelio"
-          fill
-          className="object-contain object-left"
-          priority
-        />
-      </Link>
+      <div className="flex items-center gap-3">
+        <Link
+          href={ROUTES.PATIENT.ROOT}
+          className="relative h-9 md:h-11 w-[120px] md:w-[140px]"
+        >
+          <Image
+            src="/images/carelio-logo.png"
+            alt="Carelio"
+            fill
+            className="object-contain object-left"
+            priority
+          />
+        </Link>
+        <PortalChip label="Patient portal" />
+      </div>
 
       <div className="flex gap-5 items-center justify-end">
         <Link
@@ -71,6 +80,13 @@ const SimpleTopbar = ({ className, onLogoutClick }: SimpleTopbarProps) => {
         </Link>
 
         <div className="bg-(--border-stroke) h-[44px] w-px" />
+
+        <div className="hidden sm:block text-right">
+          <p className="text-[14px] font-medium text-(--text-primary) leading-none">
+            {userName || 'Patient'}
+          </p>
+          <p className="text-[11px] text-(--text-secondary) mt-1">Patient</p>
+        </div>
 
         <Button
           variant="outline"

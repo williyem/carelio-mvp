@@ -1,5 +1,9 @@
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import type { StaffRole } from '@/stores/staff-profile-store';
+import {
+  agreementsToPlainText,
+  getStaffAgreements,
+} from '@/lib/legal/carelio-agreements';
 
 export async function buildProviderAgreementPdf({
   name,
@@ -13,47 +17,68 @@ export async function buildProviderAgreementPdf({
   signatureDataUrl: string;
 }): Promise<string> {
   const pdf = await PDFDocument.create();
-  const page = pdf.addPage([612, 792]);
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
 
-  page.drawText('Carelio Provider Agreement', {
-    x: 56,
-    y: 720,
-    size: 18,
-    font: bold,
-    color: rgb(0.1, 0.2, 0.35),
-  });
-
-  const body = [
+  const header = [
+    'Carelio Provider Agreement',
+    '',
     `Role: ${role === 'doctor' ? 'Physician' : 'Health Assistant'}`,
-    clinicName ? `Practice: ${clinicName}` : '',
-    '',
-    'This Business Associate Agreement and telehealth addendum governs use of the Carelio platform. The undersigned agrees to protect patient information, obtain informed consent, and document care in the medical record.',
-    '',
+    clinicName ? `Practice / facility: ${clinicName}` : '',
     `Signed electronically by ${name} on ${new Date().toLocaleDateString()}.`,
+    '',
   ]
-    .filter(Boolean)
+    .filter((line, index, arr) => line !== '' || arr[index - 1] !== '')
     .join('\n');
 
-  const lines = wrapText(body, 80);
-  let y = 680;
-  for (const line of lines) {
-    page.drawText(line, {
-      x: 56,
+  const body = `${header}\n${agreementsToPlainText(getStaffAgreements(role))}`;
+  const lines = wrapText(body, 88);
+
+  let page = pdf.addPage([612, 792]);
+  let y = 740;
+
+  const drawLine = (text: string, useBold = false) => {
+    if (y < 56) {
+      page = pdf.addPage([612, 792]);
+      y = 740;
+    }
+    page.drawText(text, {
+      x: 48,
       y,
-      size: 11,
-      font,
-      color: rgb(0.15, 0.15, 0.15),
+      size: useBold ? 12 : 10,
+      font: useBold ? bold : font,
+      color: rgb(0.12, 0.12, 0.12),
     });
-    y -= 16;
+    y -= useBold ? 18 : 14;
+  };
+
+  for (const line of lines) {
+    const isHeading =
+      /^\d+\.\s/.test(line) || line === 'Carelio Provider Agreement';
+    if (line === 'Carelio Provider Agreement') {
+      drawLine(line, true);
+      y -= 4;
+      continue;
+    }
+    drawLine(line, isHeading);
   }
 
   if (signatureDataUrl.startsWith('data:image')) {
+    if (y < 120) {
+      page = pdf.addPage([612, 792]);
+      y = 740;
+    }
     const base64 = signatureDataUrl.split(',')[1];
     const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
     const image = await pdf.embedPng(bytes);
-    page.drawImage(image, { x: 56, y: y - 70, width: 180, height: 48 });
+    page.drawText('Signature:', {
+      x: 48,
+      y: y - 12,
+      size: 10,
+      font: bold,
+      color: rgb(0.12, 0.12, 0.12),
+    });
+    page.drawImage(image, { x: 48, y: y - 80, width: 180, height: 48 });
   }
 
   const bytes = await pdf.save();

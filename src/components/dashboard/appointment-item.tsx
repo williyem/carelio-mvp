@@ -1,15 +1,17 @@
 'use client';
 
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Patient } from '@/types/patient.types';
 import CalendarSvg from '@/assets/icons/calendar-svg';
 import ClockSvg from '@/assets/icons/clock-svg';
 import VideoRecorderSvg from '@/assets/icons/video-recorder';
-import { useVideoCallStore } from '@/stores/video-call-store';
+import { useBeginCall } from '@/hooks/page-hooks/video-call/use-begin-call';
 import { Appointment } from '@/types/appointment.types';
 import { AppointmentItemData } from '@/integration/appointments/types';
 import { getFullNameFromUser } from '@/lib/easy';
 import StatusBadge from './status-badge';
+import { ROUTES } from '@/lib/routes';
 
 interface AppointmentItemProps {
   appointment: AppointmentItemData;
@@ -18,6 +20,7 @@ interface AppointmentItemProps {
   canStart?: boolean;
   rawAppointment?: Appointment | null;
   onViewDetails?: () => void;
+  startLabel?: string;
 }
 
 const AppointmentItem = ({
@@ -27,25 +30,21 @@ const AppointmentItem = ({
   canStart = false,
   rawAppointment,
   onViewDetails,
+  startLabel = 'Start Now',
 }: AppointmentItemProps) => {
-  const { startCall, setSelectedAppointment } = useVideoCallStore();
+  const beginCall = useBeginCall();
 
   const handleStart = () => {
+    const started = beginCall(rawAppointment ?? null, patient ?? null);
+    if (!started) return;
+
     if (onStartAppointment) {
       onStartAppointment(appointment.id);
     }
-
-    if (patient) {
-      startCall(patient);
-    }
-    setSelectedAppointment(
-      rawAppointment as any,
-      patient as Patient
-    );
   };
 
   const showButton = onStartAppointment && canStart;
-  // const isCompleted = rawAppointment?.status?.toUpperCase() === 'COMPLETED';
+  const isCompleted = rawAppointment?.status?.toUpperCase() === 'COMPLETED';
   const isCancelled = rawAppointment?.status?.toUpperCase() === 'CANCELLED';
   return (
     <div className="border border-(--border-stroke) flex flex-col items-start px-5 py-[23px] rounded-[10px] w-full">
@@ -86,7 +85,7 @@ const AppointmentItem = ({
             >
               <VideoRecorderSvg />
               <span className="font-semibold leading-[20px] sm:text-[14px] text-[12px] text-white">
-                Start Now
+                {startLabel}
               </span>
             </Button>
           </div>
@@ -102,27 +101,30 @@ const AppointmentItem = ({
               </span>
             </Button>
           </div>
+        ) : isCompleted && patient?.id ? (
+          <div className="flex max-md:w-full items-center">
+            <Link
+              href={ROUTES.HEALTH_ASSISTANT.PATIENT.SUMMARY(
+                patient.id,
+                appointment.id
+              )}
+              className="max-md:w-full"
+            >
+              <Button
+                variant="outline"
+                className="border-brand-blue text-brand-blue hover:text-primary/90   hover:bg-brand-blue/10 h-[44px] max-md:w-full px-4 py-[10px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] gap-2"
+              >
+                <span className="font-semibold leading-[20px] sm:text-[14px] hover:text-primary/90 text-[12px]">
+                  View Summary
+                </span>
+              </Button>
+            </Link>
+          </div>
         ) : (
-          // isCompleted ? (
-          //   <div className="flex max-md:w-full items-center">
-          //     <Link
-          //       href={`/health-assistant/patient/${patient?.id}/${appointment.id}`}
-          //       className="max-md:w-full"
-          //     >
-          //       <Button
-          //         variant="outline"
-          //         className="border-brand-blue text-brand-blue hover:text-primary/90   hover:bg-brand-blue/10 h-[44px] max-md:w-full px-4 py-[10px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] gap-2"
-          //       >
-          //         <span className="font-semibold leading-[20px] sm:text-[14px] hover:text-primary/90 text-[12px]">
-          //           View Summary
-          //         </span>
-          //       </Button>
-          //     </Link>
-          //   </div>
-          // )
           <StatusBadge
             status={rawAppointment?.status}
             startTime={rawAppointment?.startTime}
+            endTime={rawAppointment?.endTime}
           />
         )}
       </div>

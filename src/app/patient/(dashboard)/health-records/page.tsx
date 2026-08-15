@@ -1,16 +1,23 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useMemo } from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import { ROUTES } from '@/lib/routes';
 import BackButton from '@/components/dashboard/back-button';
 import HealthRecordsList from '@/components/dashboard/health-records-list';
 import { HealthRecord } from '@/types/health-records.types';
+import { usePatientSession } from '@/integration/auth/patient';
+import { useGetMyPatientAppointments } from '@/integration/appointments';
+import { formatAppointmentDate, getFullNameFromUser } from '@/lib/easy';
+import { Spinner } from '@/components/ui/spinner';
 
 const HealthRecordsPage = () => {
-  const params = useParams();
   const router = useRouter();
-  const patientId = params.id as string;
+  const { data: session, isLoading: isSessionLoading } = usePatientSession();
+  const patientMongoId = session?.user?.id;
+
+  const { appointments, isLoading: isAppointmentsLoading } =
+    useGetMyPatientAppointments(patientMongoId, 'COMPLETED', !!patientMongoId);
 
   const handleBack = () => {
     router.push(ROUTES.PATIENT.ROOT);
@@ -20,30 +27,20 @@ const HealthRecordsPage = () => {
     router.push(ROUTES.PATIENT.RECORD_DETAILS(recordId));
   };
 
-  // TODO: Fetch health records using patientId
-  // For now, using mock data
-  const healthRecords: HealthRecord[] = [
-    {
-      id: '1',
-      patientName: 'Kwabena Sarfo',
-      date: 'Dec 4, 2025',
-    },
-    {
-      id: '2',
-      patientName: 'Kwabena Sarfo',
-      date: 'Dec 4, 2025',
-    },
-    {
-      id: '3',
-      patientName: 'Kwabena Sarfo',
-      date: 'Dec 4, 2025',
-    },
-    {
-      id: '4',
-      patientName: 'Kwabena Sarfo',
-      date: 'Dec 4, 2025',
-    },
-  ];
+  const healthRecords: HealthRecord[] = useMemo(
+    () =>
+      appointments.map((apt) => ({
+        id: apt.id,
+        patientName: apt.doctor
+          ? getFullNameFromUser(apt.doctor)
+          : 'Consultation',
+        date:
+          formatAppointmentDate(apt.startTime) ||
+          formatAppointmentDate(apt.createdAt) ||
+          'Date unavailable',
+      })),
+    [appointments]
+  );
 
   return (
     <div className="flex flex-col gap-[15px] items-start pt-4 sm:pt-10 px-4 sm:px-0 w-full max-w-[900px] mx-auto">
@@ -54,10 +51,16 @@ const HealthRecordsPage = () => {
           Health Records
         </h1>
 
-        <HealthRecordsList
-          records={healthRecords}
-          onRecordClick={handleRecordClick}
-        />
+        {isSessionLoading || isAppointmentsLoading ? (
+          <div className="flex items-center justify-center py-16 w-full">
+            <Spinner />
+          </div>
+        ) : (
+          <HealthRecordsList
+            records={healthRecords}
+            onRecordClick={handleRecordClick}
+          />
+        )}
       </div>
     </div>
   );

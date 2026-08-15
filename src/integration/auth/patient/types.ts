@@ -54,13 +54,17 @@ export type BloodType = (typeof BLOOD_TYPE)[keyof typeof BLOOD_TYPE];
  * Patient Login Request
  */
 export interface PatientLoginRequest {
-  patientId: PatientId;
+  identifier: string;
+  password: string;
 }
 
-/**
- * Patient Login Response
- */
-export interface PatientLoginResponse {
+export interface PatientLoginChallenge {
+  requiresEmailVerification: true;
+  patientId: string;
+}
+
+export interface PatientLoginSuccess {
+  requiresEmailVerification?: false;
   tokenData: {
     access: {
       token: AccessToken;
@@ -72,6 +76,23 @@ export interface PatientLoginResponse {
     };
   };
   user: PatientUser;
+}
+
+export type PatientLoginResponse = PatientLoginChallenge | PatientLoginSuccess;
+
+export interface PatientVerifyLoginEmailRequest {
+  patientId: string;
+  otp: string;
+}
+
+export interface PatientForgotPasswordRequest {
+  identifier: string;
+}
+
+export interface PatientResetPasswordRequest {
+  identifier: string;
+  otp: string;
+  password: string;
 }
 
 /**
@@ -123,6 +144,7 @@ export interface CompleteRegistrationRequest {
   address: string;
   bloodType: BloodType;
   email?: string;
+  password: string;
   agreements?: Record<string, { pdf: Blob; original?: Blob | string }>;
 }
 
@@ -148,6 +170,16 @@ export interface PatientUser {
   phoneNumber: string;
   address: string;
   bloodType: BloodType;
+  allergies?: string[];
+  medications?: string[];
+  conditions?: string[];
+  emergencyContact?: {
+    name: string;
+    relationship: string;
+    phone: string;
+  };
+  emailVerified?: boolean;
+  isRegistrationComplete?: boolean;
   createdAt: string;
   updatedAt: string;
 }

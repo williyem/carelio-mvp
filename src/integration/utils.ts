@@ -75,6 +75,10 @@ export const isAxiosError = (error: unknown): error is AxiosError => {
   return error instanceof AxiosError;
 };
 
+export const isForbiddenError = (error: unknown): boolean => {
+  return isAxiosError(error) && error.response?.status === 403;
+};
+
 export const isApiErrorResponse = (
   error: unknown
 ): error is AxiosError<ApiErrorResponse> => {

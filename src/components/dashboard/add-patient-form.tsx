@@ -1,54 +1,51 @@
 'use client';
+import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Controller } from 'react-hook-form';
-import { Mail, Calendar as CalendarIcon, Send } from 'lucide-react';
+import { format } from 'date-fns';
+import { Mail, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Calendar } from '@/components/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
-import { PhoneInput } from '@/components/ui/phone-input';
 import ErrorMessage from '@/components/ui/error-message';
 import { Spinner } from '@/components/ui/spinner';
 import { useAddPatientForm } from '@/hooks/page-hooks/use-add-patient-form';
-import TimePicker from '../ui/time-picker';
 import { useRouter } from 'nextjs-toploader/app';
-import { toast } from 'sonner';
+import AvailabilitySlotPicker from '@/components/dashboard/availability-slot-picker';
+import { getDoctorAvailability } from '@/integration/settings/api';
+import {
+  isClosedCalendarDay,
+  type HourSlot,
+} from '@/stores/availability-store';
+import useUser from '@/hooks/useUser';
 
 interface SuccessModalProps {
   email: string;
-  inviteLink?: string;
   isOpen: boolean;
   onClose: () => void;
   onAddAnother: () => void;
 }
 
+function isSlotInFuture(slot: HourSlot, selectedDate?: Date) {
+  if (!selectedDate) return true;
+  const dateStr = format(selectedDate, 'yyyy-MM-dd');
+  const todayGmt = new Date().toISOString().slice(0, 10);
+  if (dateStr !== todayGmt) return dateStr > todayGmt;
+  const [hours, minutes] = slot.start.split(':').map(Number);
+  const now = new Date();
+  return hours * 60 + minutes > now.getUTCHours() * 60 + now.getUTCMinutes();
+}
+
 function SuccessModal({
   email,
-  inviteLink,
   isOpen,
   onClose,
   onAddAnother,
 }: SuccessModalProps) {
   const router = useRouter();
   if (!isOpen) return null;
-
-  const handleCopyLink = async () => {
-    if (!inviteLink) return;
-    try {
-      await navigator.clipboard.writeText(inviteLink);
-      toast.success('Invite link copied');
-    } catch {
-      toast.error('Could not copy invite link');
-    }
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
@@ -67,22 +64,6 @@ function SuccessModal({
               instructions to complete their profile.
             </p>
           </div>
-          {inviteLink ? (
-            <div className="w-full space-y-2 rounded-lg bg-gray-50 p-3 text-left">
-              <p className="text-xs font-medium text-gray-500">
-                Fallback invite link
-              </p>
-              <p className="break-all text-xs text-gray-700">{inviteLink}</p>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full rounded-full"
-                onClick={handleCopyLink}
-              >
-                Copy invite link
-              </Button>
-            </div>
-          ) : null}
           <div className="flex w-full flex-col gap-3 pt-2 sm:flex-row">
             <Button
               variant="outline"
@@ -109,26 +90,54 @@ function SuccessModal({
 }
 
 export function AddPatientForm() {
+  const { userId } = useUser();
+  const [dateOpen, setDateOpen] = useState(false);
   const {
     register,
     control,
+    setValue,
     handleSubmit,
     formState: { errors, isValid },
     includeAppointment,
     date,
     startTime,
+    endTime,
     isSuccessOpen,
     submittedEmail,
-    inviteLink,
     isPending,
     handleAddAnother,
     handleCloseSuccess,
   } = useAddPatientForm();
 
+  const minDate = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  }, []);
+
+  const dateStr = date ? format(date, 'yyyy-MM-dd') : undefined;
+  const { data: weekAvailability } = useQuery({
+    queryKey: ['doctor-availability', userId, 'week'],
+    queryFn: () => getDoctorAvailability(userId),
+    enabled: Boolean(userId && includeAppointment),
+    retry: 0,
+  });
+  const { data: remoteAvailability, isPending: slotsLoading } = useQuery({
+    queryKey: ['doctor-availability', userId, dateStr],
+    queryFn: () => getDoctorAvailability(userId, dateStr),
+    enabled: Boolean(userId && includeAppointment && dateStr),
+    retry: 0,
+  });
+
+  const availableSlots = useMemo(() => {
+    return (remoteAvailability?.slots ?? []).filter((slot) =>
+      isSlotInFuture(slot, date)
+    );
+  }, [date, remoteAvailability?.slots]);
+
   return (
     <div className="space-y-6">
       <form onSubmit={handleSubmit} className="space-y-3">
-        {/* Patient Email & Phone Card */}
         <Card className="overflow-hidden  card">
           <CardContent className="space-y-6 p-6">
             <div className="space-y-3 flex items-start justify-between gap-4">
@@ -161,7 +170,6 @@ export function AddPatientForm() {
           </CardContent>
         </Card>
 
-        {/* Schedule Appointment Card */}
         <Card className="overflow-hidden card ">
           <CardContent className="space-y-6 p-6">
             <div className="flex items-center justify-between">
@@ -179,94 +187,57 @@ export function AddPatientForm() {
                 render={({ field }) => (
                   <Switch
                     checked={field.value}
-                    onCheckedChange={field.onChange}
+                    onCheckedChange={(checked) => {
+                      field.onChange(checked);
+                      if (!checked) {
+                        setValue('date', undefined, { shouldValidate: true });
+                        setValue('startTime', '', { shouldValidate: true });
+                        setValue('endTime', '', { shouldValidate: true });
+                      }
+                    }}
                   />
                 )}
               />
             </div>
 
             {includeAppointment && (
-              <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
-                {/* Date row — full width on top */}
-                <div className="flex flex-col space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">
-                    Date
-                  </Label>
-                  <Controller
-                    name="date"
-                    control={control}
-                    render={({ field }) => (
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className={cn(
-                              'h-11 w-full  justify-between rounded-lg border-(--border-light) input-shadow  font-normal hover:bg-gray-50',
-                              !field.value && 'text-muted-foreground'
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, 'PPP')
-                            ) : (
-                              <span>dd/mm/yyyy</span>
-                            )}
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) =>
-                              date < new Date(new Date().setHours(0, 0, 0, 0))
-                            }
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    )}
-                  />
-                  <ErrorMessage message={errors.date?.message} />
-                </div>
-                {/* Start time + End time — one row */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="flex flex-col space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">
-                      Start time
-                    </Label>
-                    <TimePicker
-                      control={control}
-                      name="startTime"
-                      placeholder="Select start time"
-                      selectedDate={date}
-                      ignorePastTimes={!!date}
-                      disabled={isPending}
-                    />
-                    <ErrorMessage message={errors.startTime?.message} />
-                  </div>
-                  <div className="flex flex-col space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">
-                      End time
-                    </Label>
-                    <TimePicker
-                      control={control}
-                      name="endTime"
-                      placeholder="Select end time"
-                      selectedDate={date}
-                      ignorePastTimes={!!date}
-                      disabled={isPending || !startTime}
-                    />
-                    <ErrorMessage message={errors.endTime?.message} />
-                  </div>
-                </div>
+              <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                <AvailabilitySlotPicker
+                  date={date}
+                  onDateChange={(next) => {
+                    setValue('date', next, { shouldValidate: true });
+                    setValue('startTime', '', { shouldValidate: true });
+                    setValue('endTime', '', { shouldValidate: true });
+                  }}
+                  dateOpen={dateOpen}
+                  onDateOpenChange={setDateOpen}
+                  selectedStart={startTime || undefined}
+                  selectedEnd={endTime || undefined}
+                  onSelectSlot={(slot) => {
+                    setValue('startTime', slot.start, { shouldValidate: true });
+                    setValue('endTime', slot.end, { shouldValidate: true });
+                  }}
+                  slots={availableSlots}
+                  slotsLoading={slotsLoading}
+                  timezone={
+                    remoteAvailability?.timezone ?? weekAvailability?.timezone
+                  }
+                  doctorSelected={Boolean(userId)}
+                  disabled={isPending}
+                  dateError={errors.date?.message}
+                  slotError={
+                    errors.startTime?.message || errors.endTime?.message
+                  }
+                  minDate={minDate}
+                  disabledDate={(day) =>
+                    isClosedCalendarDay(weekAvailability, day)
+                  }
+                />
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Action Button */}
         <Button
           type="submit"
           className="h-12 w-full rounded-full bg-brand-blue text-base font-semibold text-white  hover:bg-brand-blue/90 disabled:cursor-not-allowed disabled:opacity-50"
@@ -279,7 +250,6 @@ export function AddPatientForm() {
       <SuccessModal
         isOpen={isSuccessOpen}
         email={submittedEmail}
-        inviteLink={inviteLink}
         onClose={handleCloseSuccess}
         onAddAnother={handleAddAnother}
       />

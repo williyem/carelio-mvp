@@ -6,8 +6,10 @@ import {
   submitSoapNotes,
   rescheduleAppointment,
   completeConsultation,
+  startConsultation,
   updateConsultationNote,
   getConsultationNoteByAppointment,
+  shareConsultationPlan,
 } from './api-functions';
 import { APPOINTMENT_QUERY_KEYS } from './query-keys';
 import type {
@@ -16,6 +18,7 @@ import type {
   SubmitSoapNotesRequest,
   RescheduleAppointmentRequest,
   UpdateConsultationNoteRequest,
+  ShareConsultationPlanRequest,
 } from './types';
 
 export const useCreateAppointment = () => {
@@ -77,10 +80,18 @@ export const useSubmitSoapNotes = () => {
       appointmentId: string;
       data: SubmitSoapNotesRequest;
     }) => submitSoapNotes(appointmentId, data),
-    onSuccess: () => {
-      // Invalidate specific appointment and notes if needed
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
         queryKey: [APPOINTMENT_QUERY_KEYS.PATIENT_NOTES],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [APPOINTMENT_QUERY_KEYS.APPOINTMENT_NOTE],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [
+          APPOINTMENT_QUERY_KEYS.PATIENT_NOTES,
+          variables.appointmentId,
+        ],
       });
     },
   });
@@ -105,6 +116,24 @@ export const useRescheduleAppointment = () => {
       });
       queryClient.invalidateQueries({
         queryKey: [APPOINTMENT_QUERY_KEYS.RECENT_APPOINTMENTS],
+      });
+    },
+  });
+};
+
+export const useStartConsultation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (appointmentId: string) => startConsultation(appointmentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [APPOINTMENT_QUERY_KEYS.DOCTOR_APPOINTMENTS],
+        exact: false,
+      });
+      queryClient.invalidateQueries({
+        queryKey: [APPOINTMENT_QUERY_KEYS.PATIENT_APPOINTMENTS],
+        exact: false,
       });
     },
   });
@@ -140,6 +169,37 @@ export const useUpdateConsultationNote = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [APPOINTMENT_QUERY_KEYS.PATIENT_NOTES],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [APPOINTMENT_QUERY_KEYS.APPOINTMENT_NOTE],
+      });
+    },
+  });
+};
+
+export const useShareConsultationPlan = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      appointmentId,
+      data,
+    }: {
+      appointmentId: string;
+      data: ShareConsultationPlanRequest;
+    }) => shareConsultationPlan(appointmentId, data),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [APPOINTMENT_QUERY_KEYS.PATIENT_NOTES],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [APPOINTMENT_QUERY_KEYS.APPOINTMENT_NOTE],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [
+          APPOINTMENT_QUERY_KEYS.PATIENT_NOTES,
+          variables.appointmentId,
+        ],
       });
     },
   });

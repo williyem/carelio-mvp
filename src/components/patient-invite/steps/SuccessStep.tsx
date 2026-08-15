@@ -1,30 +1,56 @@
-import { CircleCheckIcon } from 'lucide-react';
+'use client';
 
-export default function SuccessStep() {
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { CircleCheckIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/lib/routes';
+
+const COUNTDOWN_SECONDS = 5;
+
+export default function SuccessStep({
+  goToPatient = false,
+}: {
+  goToPatient?: boolean;
+}) {
+  const router = useRouter();
+  const [secondsLeft, setSecondsLeft] = useState(COUNTDOWN_SECONDS);
+  const destination = goToPatient ? ROUTES.PATIENT.ROOT : ROUTES.AUTH.LOGIN;
+
+  useEffect(() => {
+    if (secondsLeft <= 0) {
+      router.replace(destination);
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      setSecondsLeft((value) => value - 1);
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [secondsLeft, router, destination]);
+
   return (
-    <div className="max-w-xl mx-auto flex flex-col items-center justify-center min-h-[60vh] text-center p-8 bg-bg-white-0 rounded-16 shadow-custom-large">
-      <div className="mb-6">
-        <CircleCheckIcon
-          size={64}
-          color="#1fc16b"
-          className="mx-auto mb-4 rounded-full"
-        />
-        <h4 className="typography-h4 font-normal  mb-2">
-          Patient has been onboarded!
-        </h4>
-        <p className="typography-paragraph-medium text-text-sub-600 mb-4">
-          Registration is complete. Your patient profile has been successfully
-          created and you are now ready to use our services.
-        </p>
-      </div>
-      <div className="w-full flex flex-col items-center">
-        <div className="rounded-8 bg-bg-weak-50 text-text-sub-600 px-4 py-2 typography-label-small">
-          Thank you for completing the registration!
-        </div>
-        <p className="typography-label-medium text-text-strong-950 mt-4">
-          You&apos;re all set! Please close this tab or window to finish.
-        </p>
-      </div>
+    <div className="w-[900px] mx-auto mt-8 max-w-[90%] flex flex-col items-center justify-center min-h-[50vh] text-center p-8 rounded-[16px] x-small-shadow border border-(--border-stroke) bg-bg-white-0">
+      <CircleCheckIcon
+        size={64}
+        color="#1fc16b"
+        className="mx-auto mb-4 rounded-full"
+      />
+      <h2 className="text-[24px] font-bold mb-2">You&apos;re registered</h2>
+      <p className="font-normal text-text-secondary mb-4 max-w-md">
+        {goToPatient
+          ? 'Your Carelio patient profile is ready. Continuing to your home…'
+          : 'Your Carelio patient profile is ready. Sign in with your Patient ID to book visits, join calls, and manage your records.'}
+      </p>
+      <p className="text-sm text-text-sub-600 mb-6">
+        Redirecting in {secondsLeft}s…
+      </p>
+      <Button
+        variant="brand"
+        className="h-[48px] rounded-[8px] font-bold px-8"
+        onClick={() => router.replace(destination)}
+      >
+        {goToPatient ? 'Go to home' : 'Go to sign in'}
+      </Button>
     </div>
   );
 }

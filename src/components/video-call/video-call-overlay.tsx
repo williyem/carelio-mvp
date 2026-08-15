@@ -7,8 +7,17 @@ import VideoCallPreview from './preview/video-call-preview';
 import dynamic from 'next/dynamic';
 import { toast } from 'sonner';
 import useGetDoctorConsultationToken from '@/integration/doctor/mutations';
-import { useCompleteConsultation } from '@/integration/appointments/mutations';
+import {
+  useCompleteConsultation,
+  useStartConsultation,
+} from '@/integration/appointments/mutations';
 import { Room, RoomEvent } from 'livekit-client';
+import {
+  getCallJoinError,
+  isClinicianCallRole,
+  readPortalIdentity,
+} from '@/lib/call-join';
+import { useCallParticipantRole } from '@/hooks/page-hooks/video-call/use-call-participant-role';
 
 const FullscreenCall = dynamic<{ leaveSession: () => Promise<void> }>(
   () => import('./fullscreen-call'),
@@ -35,8 +44,17 @@ export default function VideoCallOverlayComponent() {
   const { getDoctorConsultationTokenMutation } =
     useGetDoctorConsultationToken();
   const { mutate: completeConsultation } = useCompleteConsultation();
+  const { mutateAsync: startConsultation } = useStartConsultation();
+  const { role } = useCallParticipantRole();
 
   const joinSession = async (): Promise<boolean> => {
+    const identity = readPortalIdentity();
+    const joinError = getCallJoinError(selectedAppointment, identity);
+    if (joinError) {
+      toast.error(joinError);
+      return false;
+    }
+
     if (!selectedAppointment?.id) {
       toast.error('No appointment selected for this call');
       return false;
@@ -114,6 +132,17 @@ export default function VideoCallOverlayComponent() {
             }
 
             setIsJoining(false);
+            try {
+              await startConsultation(selectedAppointment.id);
+            } catch (startError) {
+              console.error(
+                'Failed to mark appointment in progress',
+                startError
+              );
+              toast.error(
+                'Joined the call, but appointment status did not update'
+              );
+            }
             startCallFromPreview();
             resolve(true);
           } catch (e) {
@@ -143,11 +172,11 @@ export default function VideoCallOverlayComponent() {
     }
     setClient(null);
 
-    if (selectedAppointment?.id) {
+    if (isClinicianCallRole(role) && selectedAppointment?.id) {
       completeConsultation(selectedAppointment.id);
+      setPostConsultationAppointmentId(selectedAppointment.id);
     }
 
-    setPostConsultationAppointmentId(selectedAppointment?.id || '');
     endCall();
   };
 

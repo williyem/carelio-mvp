@@ -20,6 +20,7 @@ const useGetPatientByIdQuery = (
         ? getHealthAssistantPatientById(id)
         : getPatientById(id),
     enabled: !!id,
+    retry: false,
   });
 
   return {
@@ -47,6 +48,7 @@ export const useGetPatientById = (
         ? getHealthAssistantPatientById(id)
         : getPatientById(id),
     enabled: !!id && enabled,
+    retry: false,
   });
 };
 

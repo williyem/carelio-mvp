@@ -1,35 +1,47 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+import CalendarSvg from '@/assets/icons/calendar-svg';
 
 interface EmptyStateProps {
-  icon?: React.ReactNode;
-  message: string;
+  title: string;
   description?: string;
+  icon?: React.ReactNode;
   className?: string;
+  /** @deprecated Use `title` instead */
+  message?: string;
 }
 
 export function EmptyState({
-  icon,
+  title,
   message,
   description,
+  icon,
   className,
 }: EmptyStateProps) {
+  const heading = title || message || '';
+
   return (
     <div
       className={cn(
-        'border border-gray-100 shadow-none rounded-2xl bg-white border-dashed min-h-[200px] flex flex-col items-center justify-center text-center p-6 space-y-4',
+        'flex flex-col items-center justify-center w-full py-12 gap-4',
         className
       )}
     >
-      {icon && <div className="text-gray-300">{icon}</div>}
-      <div className="space-y-1">
-        <p className="text-gray-500 font-medium">{message}</p>
-        {description && (
-          <p className="text-xs text-gray-400 text-center px-4 max-w-xs">
+      <div className="bg-(--bg-light-gray) rounded-full w-16 h-16 flex items-center justify-center shrink-0">
+        {icon ?? <CalendarSvg />}
+      </div>
+      <div className="flex flex-col items-center gap-2">
+        <p className="font-medium leading-[1.2] text-(--text-primary) text-[16px] text-center">
+          {heading}
+        </p>
+        {description ? (
+          <p className="font-normal leading-[1.2] text-(--text-muted) text-[14px] text-center max-w-sm">
             {description}
           </p>
-        )}
+        ) : null}
       </div>
     </div>
   );
 }
+
+export default EmptyState;

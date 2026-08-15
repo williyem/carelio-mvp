@@ -4,8 +4,6 @@ import { backendApiClient } from '@/integration/config';
 import { cookies } from 'next/headers';
 import { doctorAccessToken, USER_TYPE_HEADER } from '@/lib/constants';
 import { APPOINTMENT_ENDPOINTS } from '@/integration/appointments/endpoints';
-import { isDummyDataEnabled } from '@/lib/dummy-data/config';
-import { getRecentAppointments } from '@/lib/dummy-data/loader';
 
 export async function GET() {
   try {
@@ -14,10 +12,6 @@ export async function GET() {
 
     if (!accessToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    if (isDummyDataEnabled()) {
-      return NextResponse.json(getRecentAppointments());
     }
 
     const endpoint = APPOINTMENT_ENDPOINTS.GET_RECENT_APPOINTMENTS;

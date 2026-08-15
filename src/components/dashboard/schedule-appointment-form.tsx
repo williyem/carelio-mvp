@@ -1,28 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import {
-  Calendar as CalendarIcon,
-  Clock,
-  CalendarCheck,
-  Loader2,
-} from 'lucide-react';
+import { Calendar as CalendarIcon, CalendarCheck, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Calendar } from '@/components/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { format, isToday, isBefore } from 'date-fns';
+import { format, isBefore } from 'date-fns';
 import { cn } from '@/lib/utils';
 import {
   Appointment,
@@ -31,48 +14,18 @@ import {
 } from '@/integration/appointments';
 import { toast } from 'sonner';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useVideoCallStore } from '@/stores/video-call-store';
+import { useBeginCall } from '@/hooks/page-hooks/video-call/use-begin-call';
 import { Patient } from '@/types/patient.types';
 import { PatientSelection } from './patient-selection';
-import ErrorMessage from '@/components/ui/error-message';
+import AvailabilitySlotPicker from '@/components/dashboard/availability-slot-picker';
+import { combineDateAndTime } from '@/lib/datetime';
+import { getDoctorAvailability } from '@/integration/settings/api';
+import {
+  isClosedCalendarDay,
+  type HourSlot,
+} from '@/stores/availability-store';
+import useUser from '@/hooks/useUser';
 import { useGetPatientById } from '@/integration/patient';
-
-const TIME_SLOTS = [
-  '08:00 AM',
-  '08:30 AM',
-  '09:00 AM',
-  '09:30 AM',
-  '10:00 AM',
-  '10:30 AM',
-  '11:00 AM',
-  '11:30 AM',
-  '12:00 PM',
-  '12:30 PM',
-  '01:00 PM',
-  '01:30 PM',
-  '02:00 PM',
-  '02:30 PM',
-  '03:00 PM',
-  '03:30 PM',
-  '04:00 PM',
-  '04:30 PM',
-  '05:00 PM',
-  '05:30 PM',
-  '06:00 PM',
-  '06:30 PM',
-  '07:00 PM',
-  '07:30 PM',
-  '08:00 PM',
-];
-
-const getTimeValue = (timeStr: string) => {
-  const [timePart, period] = timeStr.split(' ');
-  const [hours, minutes] = timePart.split(':').map(Number);
-  let h24 = hours;
-  if (period === 'PM' && h24 !== 12) h24 += 12;
-  if (period === 'AM' && h24 === 12) h24 = 0;
-  return h24 * 60 + minutes;
-};
 
 function SuccessModal({
   isOpen,
@@ -126,10 +79,21 @@ function SuccessModal({
   );
 }
 
+function isSlotInFuture(slot: HourSlot, selectedDate?: Date) {
+  if (!selectedDate) return true;
+  const dateStr = format(selectedDate, 'yyyy-MM-dd');
+  const todayGmt = new Date().toISOString().slice(0, 10);
+  if (dateStr !== todayGmt) return dateStr > todayGmt;
+  const [hours, minutes] = slot.start.split(':').map(Number);
+  const now = new Date();
+  return hours * 60 + minutes > now.getUTCHours() * 60 + now.getUTCMinutes();
+}
+
 export function ScheduleAppointmentForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const patientIdFromQuery = searchParams.get('patientId');
+  const { userId } = useUser();
 
   const [selectedPatient, setSelectedPatient] = React.useState<Patient | null>(
     null
@@ -145,16 +109,14 @@ export function ScheduleAppointmentForm() {
 
   const [isScheduleNow, setIsScheduleNow] = React.useState(false);
   const [date, setDate] = React.useState<Date>();
+  const [dateOpen, setDateOpen] = React.useState(false);
   const [startTime, setStartTime] = React.useState('');
   const [endTime, setEndTime] = React.useState('');
   const [isSuccessOpen, setIsSuccessOpen] = React.useState(false);
-
-  // Error states
   const [dateError, setDateError] = React.useState('');
-  const [startTimeError, setStartTimeError] = React.useState('');
-  const [endTimeError, setEndTimeError] = React.useState('');
+  const [slotError, setSlotError] = React.useState('');
 
-  const { startCall, setSelectedAppointment } = useVideoCallStore();
+  const beginCall = useBeginCall();
 
   const minDate = React.useMemo(() => {
     const today = new Date();
@@ -169,18 +131,25 @@ export function ScheduleAppointmentForm() {
   const { mutate: createAppointment, isPending: isCreating } =
     useCreateAppointment();
 
-  // Reset times and errors when date changes
-  React.useEffect(() => {
-    if (!isScheduleNow) {
-      setStartTime('');
-      setEndTime('');
-      setStartTimeError('');
-      setEndTimeError('');
-      if (date) {
-        setDateError('');
-      }
-    }
-  }, [date, isScheduleNow]);
+  const dateStr = date ? format(date, 'yyyy-MM-dd') : undefined;
+  const { data: weekAvailability } = useQuery({
+    queryKey: ['doctor-availability', userId, 'week'],
+    queryFn: () => getDoctorAvailability(userId),
+    enabled: Boolean(userId),
+    retry: 0,
+  });
+  const { data: remoteAvailability, isPending: slotsLoading } = useQuery({
+    queryKey: ['doctor-availability', userId, dateStr],
+    queryFn: () => getDoctorAvailability(userId, dateStr),
+    enabled: Boolean(userId && dateStr),
+    retry: 0,
+  });
+
+  const availableSlots = React.useMemo(() => {
+    return (remoteAvailability?.slots ?? []).filter((slot) =>
+      isSlotInFuture(slot, date)
+    );
+  }, [date, remoteAvailability?.slots]);
 
   const handlePatientSelect = (patient: Patient) => {
     setSelectedPatient(patient.id === selectedPatient?.id ? null : patient);
@@ -189,12 +158,7 @@ export function ScheduleAppointmentForm() {
   const isFormValid =
     selectedPatient &&
     (isScheduleNow ||
-      (date &&
-        startTime &&
-        endTime &&
-        !dateError &&
-        !startTimeError &&
-        !endTimeError));
+      (date && startTime && endTime && !dateError && !slotError));
 
   const handleConfirm = () => {
     if (!isFormValid || !selectedPatient) return;
@@ -203,42 +167,17 @@ export function ScheduleAppointmentForm() {
     let endTimeStr: string | undefined;
 
     if (!isScheduleNow && date && startTime && endTime) {
-      const parseTime = (timeStr: string) => {
-        const [timePart, period] = timeStr.split(' ');
-        const [hours, minutes] = timePart.split(':').map(Number);
-        let hour24 = hours;
-        if (period === 'PM' && hours !== 12) hour24 += 12;
-        if (period === 'AM' && hours === 12) hour24 = 0;
-        return { hour24, minutes };
-      };
+      startTimeStr = combineDateAndTime(dateStr || '', startTime);
+      endTimeStr = combineDateAndTime(dateStr || '', endTime);
 
-      const startParsed = parseTime(startTime);
-      const startDate = new Date(date);
-      startDate.setHours(startParsed.hour24, startParsed.minutes, 0, 0);
-
-      // Final validation before confirm
-      if (isToday(date)) {
-        const now = new Date();
-        if (isBefore(startDate, now)) {
-          setStartTimeError('Start time cannot be in the past');
-          toast.error('Start time cannot be in the past');
-          return;
-        }
-      }
-
-      startTimeStr = startDate.toISOString();
-
-      const endParsed = parseTime(endTime);
-      const endDate = new Date(date);
-      endDate.setHours(endParsed.hour24, endParsed.minutes, 0, 0);
-
-      if (isBefore(endDate, startDate)) {
-        setEndTimeError('End time must be after start time');
-        toast.error('End time must be after start time');
+      if (
+        dateStr === new Date().toISOString().slice(0, 10) &&
+        isBefore(new Date(startTimeStr), new Date())
+      ) {
+        setSlotError('Start time cannot be in the past');
+        toast.error('Start time cannot be in the past');
         return;
       }
-
-      endTimeStr = endDate.toISOString();
     }
 
     createAppointment(
@@ -278,12 +217,8 @@ export function ScheduleAppointmentForm() {
           const rawAppointment = response as Appointment;
 
           if (patient) {
-            startCall(patient as Patient);
+            beginCall(rawAppointment as Appointment, patient as Patient);
           }
-          setSelectedAppointment(
-            rawAppointment as Appointment,
-            patient as Patient
-          );
           setIsSuccessOpen(false);
         },
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -297,55 +232,6 @@ export function ScheduleAppointmentForm() {
     }
   };
 
-  const handleStartTimeChange = (newStartTime: string) => {
-    setStartTime(newStartTime);
-    setStartTimeError(''); // Clear error on change
-    const startValue = getTimeValue(newStartTime);
-
-    // Validation for past time today
-    if (date && isToday(date)) {
-      const now = new Date();
-      const currentTimeValue = now.getHours() * 60 + now.getMinutes();
-      if (startValue <= currentTimeValue) {
-        setStartTimeError('Start time cannot be in the past');
-      }
-    }
-
-    const defaultEndValue = startValue + 60;
-    const defaultEndTime = TIME_SLOTS.find(
-      (slot) => getTimeValue(slot) === defaultEndValue
-    );
-    if (defaultEndTime) {
-      setEndTime(defaultEndTime);
-      setEndTimeError('');
-    } else {
-      setEndTime('');
-    }
-  };
-
-  const handleEndTimeChange = (newEndTime: string) => {
-    setEndTime(newEndTime);
-    setEndTimeError('');
-    if (startTime) {
-      if (getTimeValue(newEndTime) <= getTimeValue(startTime)) {
-        setEndTimeError('End time must be after start time');
-      }
-    }
-  };
-
-  const filteredStartTimeSlots = React.useMemo(() => {
-    if (!date || !isToday(date)) return TIME_SLOTS;
-    const now = new Date();
-    const currentTimeValue = now.getHours() * 60 + now.getMinutes();
-    return TIME_SLOTS.filter((slot) => getTimeValue(slot) > currentTimeValue);
-  }, [date]);
-
-  const filteredEndTimeSlots = React.useMemo(() => {
-    if (!startTime) return TIME_SLOTS;
-    const startValue = getTimeValue(startTime);
-    return TIME_SLOTS.filter((slot) => getTimeValue(slot) > startValue);
-  }, [startTime]);
-
   return (
     <div className="space-y-8">
       <PatientSelection
@@ -353,7 +239,6 @@ export function ScheduleAppointmentForm() {
         onSelect={handlePatientSelect}
       />
 
-      {/* Schedule Time */}
       <div className="space-y-4">
         <Label className="text-sm font-medium text-gray-700 mb-4">
           Schedule Time
@@ -382,91 +267,43 @@ export function ScheduleAppointmentForm() {
 
         <div
           className={cn(
-            'grid grid-cols-1 sm:grid-cols-3 gap-4 transition-opacity',
+            'transition-opacity',
             isScheduleNow && 'opacity-50 pointer-events-none'
           )}
         >
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">Date</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={'outline'}
-                  className={cn(
-                    'w-full h-14 justify-start text-left font-normal rounded-lg bg-gray-50 border-gray-200 hover:bg-gray-50',
-                    !date && 'text-muted-foreground'
-                  )}
-                  disabled={isScheduleNow}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, 'PPP') : <span>dd/mm/yyyy</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 duration-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  disabled={{ before: minDate }}
-                />
-              </PopoverContent>
-            </Popover>
-            <ErrorMessage message={dateError} />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">
-              Start Time
-            </Label>
-            <Select
-              value={startTime}
-              onValueChange={handleStartTimeChange}
-              disabled={isScheduleNow}
-            >
-              <SelectTrigger className="w-full h-14! rounded-lg bg-gray-50 border-gray-200">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-gray-500" />
-                  <SelectValue placeholder="Start Time" />
-                </div>
-              </SelectTrigger>
-              <SelectContent position="popper">
-                {filteredStartTimeSlots.map((slot) => (
-                  <SelectItem key={slot} value={slot}>
-                    {slot}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <ErrorMessage message={startTimeError} />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">
-              End Time
-            </Label>
-            <Select
-              value={endTime}
-              onValueChange={handleEndTimeChange}
-              disabled={isScheduleNow || !startTime}
-            >
-              <SelectTrigger className="w-full h-14! rounded-lg bg-gray-50 border-gray-200">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-gray-500" />
-                  <SelectValue placeholder="End Time" />
-                </div>
-              </SelectTrigger>
-              <SelectContent position="popper">
-                {filteredEndTimeSlots.map((slot) => (
-                  <SelectItem key={slot} value={slot}>
-                    {slot}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <ErrorMessage message={endTimeError} />
-          </div>
+          <AvailabilitySlotPicker
+            date={date}
+            onDateChange={(next) => {
+              setDate(next);
+              setStartTime('');
+              setEndTime('');
+              setSlotError('');
+              setDateError(next ? '' : dateError);
+            }}
+            dateOpen={dateOpen}
+            onDateOpenChange={setDateOpen}
+            selectedStart={startTime || undefined}
+            selectedEnd={endTime || undefined}
+            onSelectSlot={(slot) => {
+              setStartTime(slot.start);
+              setEndTime(slot.end);
+              setSlotError('');
+            }}
+            slots={availableSlots}
+            slotsLoading={slotsLoading}
+            timezone={
+              remoteAvailability?.timezone ?? weekAvailability?.timezone
+            }
+            doctorSelected={Boolean(userId)}
+            disabled={isScheduleNow || isCreating}
+            dateError={dateError}
+            slotError={slotError}
+            minDate={minDate}
+            disabledDate={(day) => isClosedCalendarDay(weekAvailability, day)}
+          />
         </div>
       </div>
 
-      {/* Action Button */}
       <Button
         className="w-full h-14 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white font-semibold text-base shadow-lg shadow-brand-blue/20 disabled:opacity-50 disabled:cursor-not-allowed"
         onClick={handleConfirm}

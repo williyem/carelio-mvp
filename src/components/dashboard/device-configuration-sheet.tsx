@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ExternalLink } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -9,6 +9,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
 import {
   AllDevices,
   Devices,
@@ -29,6 +30,12 @@ import {
 } from '@/native-bridge';
 import CloseSvg from '@/assets/icons/close-svg';
 import { formatReading } from '@/lib/format-reading';
+import { useDeviceGuides } from '@/hooks/use-device-guides';
+import {
+  guideImage,
+  toYouTubeEmbedUrl,
+  type DeviceGuide,
+} from '@/lib/device-guides';
 
 interface DeviceConfigurationSheetProps {
   open: boolean;
@@ -137,6 +144,12 @@ const DeviceConfigurationSheet = ({
   const [permissionErrors, setPermissionErrors] = useState<PermissionErrorMap>(
     {}
   );
+
+  const inNativeShell = isRunningInNativeShell();
+  const [mode, setMode] = useState<'ergocart' | 'hospital'>(
+    inNativeShell ? 'ergocart' : 'hospital'
+  );
+  const { data: hospitalGuides } = useDeviceGuides();
 
   const appendLog = useCallback((message: string) => {
     setLogs((prev) => {
@@ -332,14 +345,15 @@ const DeviceConfigurationSheet = ({
   }, [appendLog, open]);
 
   useEffect(() => {
-    if (!open || !allPermissionsAuthorized) return;
+    if (!open || !allPermissionsAuthorized || mode !== 'ergocart') return;
+    if (!isRunningInNativeShell()) return;
 
     Devices.startListening({ models: LISTENING_MODELS });
 
     return () => {
       Devices.stopListening();
     };
-  }, [open, allPermissionsAuthorized]);
+  }, [open, allPermissionsAuthorized, mode]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -365,234 +379,296 @@ const DeviceConfigurationSheet = ({
           </div>
           <SheetHeader>
             <SheetTitle className="font-bold text-(--text-primary) text-base sm:text-[20px] leading-[1.2] text-left">
-              Device Configuration
+              Devices
             </SheetTitle>
+            <p className="text-(--text-secondary) text-xs sm:text-sm text-left mt-1">
+              Connect ErgoCart meters when available, or follow hospital device
+              instructions for standard equipment.
+            </p>
           </SheetHeader>
         </div>
 
-        <ScrollArea className="h-[calc(100vh-100px)] sm:h-[calc(100vh-121px)]">
-          <div className="flex flex-col gap-4 sm:gap-[19px] items-start px-3 sm:px-[15px] pb-8 sm:pb-16 py-4 sm:py-0 w-full max-w-full sm:max-w-[657px] mx-auto">
-            <div className="bg-(--bg-white) border border-(--border-stroke) rounded-[10px] p-3 sm:p-4 w-full">
-              <h2 className="font-normal leading-[1.2] text-(--text-primary) text-base sm:text-[18px] w-full mb-2">
-                Permissions
-              </h2>
-              <p className="text-(--text-secondary) text-xs sm:text-[12px] mb-3">
-                {requiredPermissionsLabel} permission
-                {REQUIRED_PERMISSIONS.length > 1 ? 's' : ''} must be authorized
-                before device payload listening starts.
-              </p>
+        <div className="px-3 sm:px-4 pt-3 flex gap-2 border-b border-(--border-stroke) bg-(--bg-white)">
+          <button
+            type="button"
+            onClick={() => setMode('ergocart')}
+            className={`px-3 py-2 text-sm rounded-t-[8px] border border-b-0 ${
+              mode === 'ergocart'
+                ? 'bg-(--bg-primary) text-(--text-primary) font-medium border-(--border-stroke)'
+                : 'text-(--text-secondary) border-transparent'
+            }`}
+          >
+            ErgoCart / Bluetooth
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('hospital')}
+            className={`px-3 py-2 text-sm rounded-t-[8px] border border-b-0 ${
+              mode === 'hospital'
+                ? 'bg-(--bg-primary) text-(--text-primary) font-medium border-(--border-stroke)'
+                : 'text-(--text-secondary) border-transparent'
+            }`}
+          >
+            Hospital device guides
+          </button>
+        </div>
 
-              <div className="flex flex-col gap-2">
-                {ALL_PERMISSIONS.map((permission) => {
-                  const state = permissionStates[permission];
-                  const error = permissionErrors[permission];
-                  const statusText = error
-                    ? `Error: ${error}`
-                    : state
-                      ? formatPermissionStatus(state.status)
-                      : 'Unknown';
-
-                  return (
-                    <div
-                      key={permission}
-                      className="bg-(--bg-primary) border border-(--border-stroke) rounded-[8px] px-3 py-2 flex items-center justify-between gap-2"
-                    >
-                      <span className="text-(--text-primary) text-xs sm:text-[13px] font-medium">
-                        {formatPermissionLabel(permission)}
-                        {!REQUIRED_PERMISSION_SET.has(permission) &&
-                          ' (optional)'}
-                      </span>
-                      <span className="text-(--text-secondary) text-[10px] sm:text-[12px] text-right">
-                        {statusText}
-                      </span>
-                    </div>
-                  );
-                })}
+        <ScrollArea className="h-[calc(100vh-160px)] sm:h-[calc(100vh-180px)]">
+          <div className="flex flex-col gap-4 sm:gap-[19px] items-start px-3 sm:px-[15px] pb-8 sm:pb-16 py-4 w-full max-w-full sm:max-w-[657px] mx-auto">
+            {mode === 'hospital' ? (
+              <HospitalDeviceGuides guides={hospitalGuides} />
+            ) : !inNativeShell ? (
+              <div className="bg-(--bg-white) border border-(--border-stroke) rounded-[10px] p-4 w-full space-y-3">
+                <h2 className="font-medium text-(--text-primary) text-base">
+                  Connect ErgoCart meters
+                </h2>
+                <p className="text-(--text-secondary) text-sm">
+                  Bluetooth pairing is available in the Carelio native shell on
+                  the ErgoCart. Open Devices from that app to grant permissions
+                  and connect meters. For standard hospital equipment without a
+                  cart, use Hospital device guides.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-full"
+                  onClick={() => setMode('hospital')}
+                >
+                  View hospital device guides
+                </Button>
               </div>
-
-              <div className="flex flex-wrap gap-2 mt-3">
-                <button
-                  type="button"
-                  onClick={readPermissions}
-                  className="px-3 py-2 rounded-[8px] text-xs sm:text-[12px] bg-(--bg-primary) border border-(--border-stroke) text-(--text-primary) disabled:opacity-60"
-                >
-                  Check permissions
-                </button>
-                <button
-                  type="button"
-                  onClick={requestMissingPermissions}
-                  disabled={requestablePermissions.length === 0}
-                  className="px-3 py-2 rounded-[8px] text-xs sm:text-[12px] bg-(--bg-success) text-(--text-green) disabled:opacity-60"
-                >
-                  Request missing permissions
-                </button>
-                <button
-                  type="button"
-                  onClick={openAppSettings}
-                  className="px-3 py-2 rounded-[8px] text-xs sm:text-[12px] bg-(--bg-primary) border border-(--border-stroke) text-(--text-primary) disabled:opacity-60"
-                >
-                  Open app settings
-                </button>
-              </div>
-
-              {allPermissionsAuthorized ? (
-                <p className="text-(--text-green) text-xs sm:text-[12px] mt-3">
-                  All required permissions are authorized. Listening is active.
-                </p>
-              ) : (
-                <p className="text-(--text-secondary) text-xs sm:text-[12px] mt-3">
-                  Listening is blocked until all required permissions are
-                  authorized.
-                </p>
-              )}
-
-              {requiredBlockedPermissions.length > 0 && (
-                <p className="text-(--text-secondary) text-xs sm:text-[12px] mt-2">
-                  {requiredBlockedPermissions
-                    .map((permission) => formatPermissionLabel(permission))
-                    .join(', ')}{' '}
-                  currently cannot be requested here. Enable them from iOS
-                  Settings for this app, then use &quot;Check permissions&quot;.
-                </p>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-3 sm:gap-[17px] items-start w-full">
-              <h2 className="font-normal leading-[1.2] text-(--text-primary) text-base sm:text-[18px] w-full">
-                Devices
-              </h2>
-
-              <div className="bg-(--bg-white) border border-(--border-stroke) rounded-[10px] p-3 sm:p-4 w-full">
-                <div className="flex flex-col gap-1 mb-3">
-                  <h3 className="font-normal leading-[1.2] text-(--text-primary) text-sm sm:text-[16px]">
-                    Nearby Meters
-                  </h3>
-                  <p className="text-(--text-secondary) text-[10px] sm:text-[12px]">
-                    Auto-connect continues for discovered/disconnected devices.
-                    Failed devices show a reason and allow manual retry.
+            ) : (
+              <>
+                <div className="bg-(--bg-white) border border-(--border-stroke) rounded-[10px] p-3 sm:p-4 w-full">
+                  <h2 className="font-normal leading-[1.2] text-(--text-primary) text-base sm:text-[18px] w-full mb-2">
+                    Connect ErgoCart meters
+                  </h2>
+                  <p className="text-(--text-secondary) text-xs sm:text-[12px] mb-3">
+                    {requiredPermissionsLabel} permission
+                    {REQUIRED_PERMISSIONS.length > 1 ? 's' : ''} must be
+                    authorized before device payload listening starts.
                   </p>
-                </div>
 
-                {catalogDevices.length === 0 ? (
-                  <p className="text-(--text-secondary) text-xs sm:text-[12px]">
-                    No devices detected yet.
-                  </p>
-                ) : (
                   <div className="flex flex-col gap-2">
-                    {catalogDevices.map((catalogDevice) => {
-                      const normalizedState = catalogDevice.state
-                        .trim()
-                        .toLowerCase();
-                      const isKnownModel = isKnownCatalogDevice(catalogDevice);
-                      const isConnected =
-                        catalogDevice.connected ||
-                        normalizedState === 'connected';
-                      const isFailed = normalizedState === 'failed';
-                      const modelLabel =
-                        catalogDevice.identifier?.trim() ||
-                        catalogDevice.meterName?.trim() ||
-                        'Unknown model';
-                      const rssiLabel =
-                        catalogDevice.rssi != null
-                          ? `${catalogDevice.rssi} dBm`
-                          : 'RSSI unavailable';
-                      const badgeClass = isConnected
-                        ? 'bg-(--bg-success) text-(--text-green)'
-                        : 'bg-(--bg-primary) border border-(--border-stroke) text-(--text-secondary)';
+                    {ALL_PERMISSIONS.map((permission) => {
+                      const state = permissionStates[permission];
+                      const error = permissionErrors[permission];
+                      const statusText = error
+                        ? `Error: ${error}`
+                        : state
+                          ? formatPermissionStatus(state.status)
+                          : 'Unknown';
 
                       return (
                         <div
-                          key={catalogDevice.id}
-                          className="bg-(--bg-primary) border border-(--border-stroke) rounded-[8px] p-3"
+                          key={permission}
+                          className="bg-(--bg-primary) border border-(--border-stroke) rounded-[8px] px-3 py-2 flex items-center justify-between gap-2"
                         >
-                          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                            <div className="min-w-0">
-                              <p className="text-(--text-primary) text-xs sm:text-[14px] font-medium truncate">
-                                {catalogDevice.name}
-                              </p>
-                              {isKnownModel && (
-                                <p className="text-(--text-secondary) text-[10px] sm:text-[12px] mt-1">
-                                  {modelLabel} • {rssiLabel}
-                                </p>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              <span
-                                className={`px-2 py-1 rounded-[20px] text-[10px] sm:text-[12px] whitespace-nowrap ${badgeClass}`}
-                              >
-                                {catalogDevice.state}
-                              </span>
-                              {isFailed && (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    retryFailedDevice(catalogDevice)
-                                  }
-                                  disabled={!allPermissionsAuthorized}
-                                  className="px-3 py-1 rounded-[8px] text-[10px] sm:text-[12px] bg-(--bg-success) text-(--text-green) disabled:opacity-60"
-                                >
-                                  Retry
-                                </button>
-                              )}
-                            </div>
-                          </div>
-
-                          {catalogDevice.errorDescription && (
-                            <p className="text-(--text-secondary) text-[10px] sm:text-[12px] mt-2">
-                              Reason: {catalogDevice.errorDescription}
-                            </p>
-                          )}
-
-                          {isKnownModel && (
-                            <p className="text-(--text-secondary) text-[10px] mt-2 break-all">
-                              {catalogDevice.id}
-                            </p>
-                          )}
+                          <span className="text-(--text-primary) text-xs sm:text-[13px] font-medium">
+                            {formatPermissionLabel(permission)}
+                            {!REQUIRED_PERMISSION_SET.has(permission) &&
+                              ' (optional)'}
+                          </span>
+                          <span className="text-(--text-secondary) text-[10px] sm:text-[12px] text-right">
+                            {statusText}
+                          </span>
                         </div>
                       );
                     })}
                   </div>
-                )}
-              </div>
 
-              <div className="flex flex-col gap-2 items-start w-full">
-                {AllDevices.map((device) => (
-                  <DeviceCard
-                    key={device.slug}
-                    device={device}
-                    onLog={appendLog}
-                    canListen={allPermissionsAuthorized}
-                  />
-                ))}
-              </div>
-            </div>
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    <button
+                      type="button"
+                      onClick={readPermissions}
+                      className="px-3 py-2 rounded-[8px] text-xs sm:text-[12px] bg-(--bg-primary) border border-(--border-stroke) text-(--text-primary) disabled:opacity-60"
+                    >
+                      Check permissions
+                    </button>
+                    <button
+                      type="button"
+                      onClick={requestMissingPermissions}
+                      disabled={requestablePermissions.length === 0}
+                      className="px-3 py-2 rounded-[8px] text-xs sm:text-[12px] bg-(--bg-success) text-(--text-green) disabled:opacity-60"
+                    >
+                      Request missing permissions
+                    </button>
+                    <button
+                      type="button"
+                      onClick={openAppSettings}
+                      className="px-3 py-2 rounded-[8px] text-xs sm:text-[12px] bg-(--bg-primary) border border-(--border-stroke) text-(--text-primary) disabled:opacity-60"
+                    >
+                      Open app settings
+                    </button>
+                  </div>
 
-            {process.env.NODE_ENV !== 'production' && (
-              <div className="flex flex-col gap-2 sm:gap-3 items-start w-full">
-                <h2 className="font-normal leading-[1.2] text-(--text-primary) text-base sm:text-[18px] w-full">
-                  Temporary Logs
-                </h2>
-                <div className="bg-(--bg-white) border border-(--border-stroke) rounded-[10px] p-3 sm:p-4 w-full max-h-[240px] overflow-y-auto">
-                  {logs.length === 0 ? (
-                    <p className="text-(--text-secondary) text-xs sm:text-[12px]">
-                      No logs yet.
+                  {allPermissionsAuthorized ? (
+                    <p className="text-(--text-green) text-xs sm:text-[12px] mt-3">
+                      All required permissions are authorized. Listening is
+                      active.
                     </p>
                   ) : (
-                    <div className="flex flex-col gap-2">
-                      {[...logs].reverse().map((entry) => (
-                        <div key={entry.id} className="text-xs sm:text-[12px]">
-                          <span className="text-(--text-secondary)">
-                            [{entry.timestamp}]
-                          </span>{' '}
-                          <span className="text-(--text-primary)">
-                            {entry.message}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                    <p className="text-(--text-secondary) text-xs sm:text-[12px] mt-3">
+                      Listening is blocked until all required permissions are
+                      authorized.
+                    </p>
+                  )}
+
+                  {requiredBlockedPermissions.length > 0 && (
+                    <p className="text-(--text-secondary) text-xs sm:text-[12px] mt-2">
+                      {requiredBlockedPermissions
+                        .map((permission) => formatPermissionLabel(permission))
+                        .join(', ')}{' '}
+                      currently cannot be requested here. Enable them from iOS
+                      Settings for this app, then use &quot;Check
+                      permissions&quot;.
+                    </p>
                   )}
                 </div>
-              </div>
+
+                <div className="flex flex-col gap-3 sm:gap-[17px] items-start w-full">
+                  <h2 className="font-normal leading-[1.2] text-(--text-primary) text-base sm:text-[18px] w-full">
+                    Nearby meters
+                  </h2>
+
+                  <div className="bg-(--bg-white) border border-(--border-stroke) rounded-[10px] p-3 sm:p-4 w-full">
+                    <div className="flex flex-col gap-1 mb-3">
+                      <h3 className="font-normal leading-[1.2] text-(--text-primary) text-sm sm:text-[16px]">
+                        Nearby Meters
+                      </h3>
+                      <p className="text-(--text-secondary) text-[10px] sm:text-[12px]">
+                        Auto-connect continues for discovered/disconnected
+                        devices. Failed devices show a reason and allow manual
+                        retry.
+                      </p>
+                    </div>
+
+                    {catalogDevices.length === 0 ? (
+                      <p className="text-(--text-secondary) text-xs sm:text-[12px]">
+                        No devices detected yet.
+                      </p>
+                    ) : (
+                      <div className="flex flex-col gap-2">
+                        {catalogDevices.map((catalogDevice) => {
+                          const normalizedState = catalogDevice.state
+                            .trim()
+                            .toLowerCase();
+                          const isKnownModel =
+                            isKnownCatalogDevice(catalogDevice);
+                          const isConnected =
+                            catalogDevice.connected ||
+                            normalizedState === 'connected';
+                          const isFailed = normalizedState === 'failed';
+                          const modelLabel =
+                            catalogDevice.identifier?.trim() ||
+                            catalogDevice.meterName?.trim() ||
+                            'Unknown model';
+                          const rssiLabel =
+                            catalogDevice.rssi != null
+                              ? `${catalogDevice.rssi} dBm`
+                              : 'RSSI unavailable';
+                          const badgeClass = isConnected
+                            ? 'bg-(--bg-success) text-(--text-green)'
+                            : 'bg-(--bg-primary) border border-(--border-stroke) text-(--text-secondary)';
+
+                          return (
+                            <div
+                              key={catalogDevice.id}
+                              className="bg-(--bg-primary) border border-(--border-stroke) rounded-[8px] p-3"
+                            >
+                              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                <div className="min-w-0">
+                                  <p className="text-(--text-primary) text-xs sm:text-[14px] font-medium truncate">
+                                    {catalogDevice.name}
+                                  </p>
+                                  {isKnownModel && (
+                                    <p className="text-(--text-secondary) text-[10px] sm:text-[12px] mt-1">
+                                      {modelLabel} • {rssiLabel}
+                                    </p>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <span
+                                    className={`px-2 py-1 rounded-[20px] text-[10px] sm:text-[12px] whitespace-nowrap ${badgeClass}`}
+                                  >
+                                    {catalogDevice.state}
+                                  </span>
+                                  {isFailed && (
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        retryFailedDevice(catalogDevice)
+                                      }
+                                      disabled={!allPermissionsAuthorized}
+                                      className="px-3 py-1 rounded-[8px] text-[10px] sm:text-[12px] bg-(--bg-success) text-(--text-green) disabled:opacity-60"
+                                    >
+                                      Retry
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+
+                              {catalogDevice.errorDescription && (
+                                <p className="text-(--text-secondary) text-[10px] sm:text-[12px] mt-2">
+                                  Reason: {catalogDevice.errorDescription}
+                                </p>
+                              )}
+
+                              {isKnownModel && (
+                                <p className="text-(--text-secondary) text-[10px] mt-2 break-all">
+                                  {catalogDevice.id}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-2 items-start w-full">
+                    {AllDevices.map((device) => (
+                      <DeviceCard
+                        key={device.slug}
+                        device={device}
+                        onLog={appendLog}
+                        canListen={allPermissionsAuthorized}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {process.env.NODE_ENV !== 'production' && (
+                  <div className="flex flex-col gap-2 sm:gap-3 items-start w-full">
+                    <h2 className="font-normal leading-[1.2] text-(--text-primary) text-base sm:text-[18px] w-full">
+                      Temporary Logs
+                    </h2>
+                    <div className="bg-(--bg-white) border border-(--border-stroke) rounded-[10px] p-3 sm:p-4 w-full max-h-[240px] overflow-y-auto">
+                      {logs.length === 0 ? (
+                        <p className="text-(--text-secondary) text-xs sm:text-[12px]">
+                          No logs yet.
+                        </p>
+                      ) : (
+                        <div className="flex flex-col gap-2">
+                          {[...logs].reverse().map((entry) => (
+                            <div
+                              key={entry.id}
+                              className="text-xs sm:text-[12px]"
+                            >
+                              <span className="text-(--text-secondary)">
+                                [{entry.timestamp}]
+                              </span>{' '}
+                              <span className="text-(--text-primary)">
+                                {entry.message}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </ScrollArea>
@@ -600,6 +676,123 @@ const DeviceConfigurationSheet = ({
     </Sheet>
   );
 };
+
+function HospitalDeviceGuides({ guides }: { guides: DeviceGuide[] }) {
+  const [expandedSlug, setExpandedSlug] = useState<string | null>(null);
+
+  return (
+    <div className="flex flex-col gap-4 w-full">
+      <div className="space-y-1">
+        <h2 className="font-medium text-(--text-primary) text-base sm:text-lg">
+          Hospital device instructions
+        </h2>
+        <p className="text-(--text-secondary) text-sm">
+          Use these when the clinic has standard meters (no ErgoCart). Photos,
+          steps, and optional YouTube how-tos are managed in Admin → Devices.
+        </p>
+      </div>
+      {guides.length === 0 ? (
+        <p className="text-(--text-secondary) text-sm">
+          No active device guides yet.
+        </p>
+      ) : (
+        guides.map((guide) => {
+          const embed = toYouTubeEmbedUrl(guide.youtubeUrl);
+          const open = expandedSlug === guide.slug;
+          return (
+            <div
+              key={guide.slug}
+              className="bg-(--bg-white) border border-(--border-stroke) rounded-[10px] p-3 sm:p-4 w-full space-y-3"
+            >
+              <div className="flex gap-3 items-start">
+                <div className="relative size-16 rounded-[8px] overflow-hidden bg-gray-100 shrink-0 border border-(--border-stroke)">
+                  {guideImage(guide) ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={guideImage(guide)}
+                      alt=""
+                      className="size-full object-cover"
+                    />
+                  ) : null}
+                </div>
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p className="font-medium text-(--text-primary)">
+                    {guide.title}
+                  </p>
+                  <p className="text-xs text-(--text-secondary)">
+                    {guide.shortLabel}
+                  </p>
+                  <p className="text-sm text-(--text-secondary) line-clamp-2">
+                    {guide.description}
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full"
+                  onClick={() => setExpandedSlug(open ? null : guide.slug)}
+                >
+                  {open ? 'Hide steps' : 'Show steps'}
+                </Button>
+                {guide.youtubeUrl ? (
+                  <a
+                    href={guide.youtubeUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm text-brand-blue hover:underline px-2"
+                  >
+                    <ExternalLink className="size-3.5" />
+                    Watch how to use
+                  </a>
+                ) : null}
+              </div>
+              {open ? (
+                <div className="space-y-3 border-t border-(--border-stroke) pt-3">
+                  {embed ? (
+                    <div className="aspect-video w-full overflow-hidden rounded-[8px] bg-black">
+                      <iframe
+                        title={`${guide.title} how-to`}
+                        src={embed}
+                        className="size-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  ) : null}
+                  {guide.tips.length > 0 ? (
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-(--text-secondary) mb-1">
+                        Tips
+                      </p>
+                      <ul className="list-disc pl-4 space-y-1 text-sm text-(--text-primary)">
+                        {guide.tips.map((tip) => (
+                          <li key={tip}>{tip}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-(--text-secondary) mb-1">
+                      Steps
+                    </p>
+                    <ol className="list-decimal pl-4 space-y-1 text-sm text-(--text-primary)">
+                      {guide.steps.map((step) => (
+                        <li key={step}>{step}</li>
+                      ))}
+                    </ol>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          );
+        })
+      )}
+    </div>
+  );
+}
 
 interface DeviceCardProps {
   device: NativeDevice<unknown>;

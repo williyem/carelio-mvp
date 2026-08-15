@@ -12,10 +12,11 @@ export const healthAssistantTempToken = 'healthAssistantTempToken';
 
 export const APPOINTMENT_STATUS = {
   pending: 'PENDING_CONFIRMATION',
-  rejected: 'REJECTED',
-  accepted: 'CONFIRMED',
-  declined: 'DECLINED',
+  confirmed: 'CONFIRMED',
+  inProgress: 'IN_PROGRESS',
   completed: 'COMPLETED',
+  cancelled: 'CANCELLED',
+  missed: 'MISSED',
 };
 
 // export const userTypeHeader = {
@@ -36,4 +37,5 @@ export const USER_TYPE: Record<
 export const USER_TYPE_HEADER = {
   'x-user-type': 'doctor',
 };
-export const DEFAULT_PAGE = 1; export const DEFAULT_LIMIT = 10;
+export const DEFAULT_PAGE = 1;
+export const DEFAULT_LIMIT = 10;

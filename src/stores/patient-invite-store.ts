@@ -19,6 +19,7 @@ interface PatientInviteStore {
     emergencyContactPhone?: string;
     bloodType?: string;
     primaryCarePhysician?: string;
+    password?: string;
   };
   setAgreement: (
     key: string,

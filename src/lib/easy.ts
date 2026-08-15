@@ -16,6 +16,7 @@ type Clinician = {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  avatarUrl?: string;
   name: string;
 };
 import {
@@ -41,6 +42,7 @@ export const mapHealthAssistantToClinician = (
     isActive: true, // Default to true
     createdAt: '', // Not available in API response
     updatedAt: '', // Not available in API response
+    avatarUrl: assistant.avatarUrl || '',
     name: `${assistant.firstName} ${assistant.lastName}`.trim(), // Computed for backward compatibility
   };
 };
@@ -51,8 +53,35 @@ export const mapHealthAssistantsToClinicians = (
   return assistants.map(mapHealthAssistantToClinician);
 };
 
+const GMT_MONTHS = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+] as const;
+
 /**
- * Format appointment date from ISO string (e.g., "2026-01-29T09:00:15.201Z" → "Jan 29, 2026")
+ * Format a clock time in hardcoded GMT (UTC). No local timezone conversion.
+ */
+const formatGmtClock = (date: Date): string => {
+  const hours24 = date.getUTCHours();
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+  const ampm = hours24 >= 12 ? 'PM' : 'AM';
+  const hours12 = hours24 % 12 || 12;
+  return `${hours12}:${minutes} ${ampm}`;
+};
+
+/**
+ * Format appointment date from ISO string in GMT
+ * (e.g., "2026-01-29T09:00:15.201Z" → "Jan 29, 2026")
  */
 export const formatAppointmentDate = (startTime?: string): string => {
   if (!startTime) return '';
@@ -61,7 +90,7 @@ export const formatAppointmentDate = (startTime?: string): string => {
     const date = new Date(startTime);
     if (isNaN(date.getTime())) return '';
 
-    return format(date, 'MMM d, yyyy');
+    return `${GMT_MONTHS[date.getUTCMonth()]} ${date.getUTCDate()}, ${date.getUTCFullYear()}`;
   } catch (error) {
     console.warn('Failed to format appointment date:', error);
     return '';
@@ -69,7 +98,7 @@ export const formatAppointmentDate = (startTime?: string): string => {
 };
 
 /**
- * Format appointment time range (e.g., "9:00 AM - 10:00 AM")
+ * Format appointment time range in GMT (e.g., "9:00 AM - 10:00 AM GMT")
  */
 export const formatAppointmentTimeRange = (
   startTime?: string,
@@ -83,10 +112,7 @@ export const formatAppointmentTimeRange = (
 
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return '';
 
-    const startFormatted = format(startDate, 'h:mm a');
-    const endFormatted = format(endDate, 'h:mm a');
-
-    return `${startFormatted} - ${endFormatted}`;
+    return `${formatGmtClock(startDate)} - ${formatGmtClock(endDate)} GMT`;
   } catch (error) {
     console.warn('Failed to format appointment time range:', error);
     return '';
@@ -107,6 +133,7 @@ export const canStartAppointment = (
   if (
     status?.toLowerCase() === 'completed' ||
     status?.toLowerCase() === 'cancelled' ||
+    status?.toLowerCase() === 'missed' ||
     !patientStatus
   ) {
     return false;
@@ -150,7 +177,8 @@ export function formatTimeFromISO(isoString: string | undefined): string {
   if (!isoString) return '';
   try {
     const date = parseISO(isoString);
-    return format(date, 'h:mm a');
+    if (Number.isNaN(date.getTime())) return '';
+    return `${formatGmtClock(date)} GMT`;
   } catch {
     return '';
   }
@@ -380,6 +408,55 @@ export const formatVitals = (vitals: Vital[]) => {
   };
 };
 
+export function formatVitalValue(vital: Vital): string {
+  const reading = (vital.reading || {}) as unknown as Record<string, unknown>;
+  if (reading.value != null && reading.value !== '') {
+    const note = reading.note ? ` (${reading.note})` : '';
+    return `${reading.value}${note}`;
+  }
+
+  switch (vital.vitalType) {
+    case 'blood-pressure': {
+      const bp = vital.reading as BloodPressureReading;
+      if (bp.systolic && bp.diastolic)
+        return `${bp.systolic}/${bp.diastolic} mmHg`;
+      if (bp.systolic) return `${bp.systolic} mmHg`;
+      break;
+    }
+    case 'thermometer': {
+      const thermo = vital.reading as ThermometerReading;
+      if (thermo.temperatureF)
+        return `${Number(thermo.temperatureF).toFixed(1)}°F`;
+      if (thermo.temperatureC)
+        return `${Number(thermo.temperatureC).toFixed(1)}°C`;
+      break;
+    }
+    case 'pulse-ox': {
+      const ox = vital.reading as PulseOxReading;
+      const parts: string[] = [];
+      if (ox.spo2) parts.push(`SpO₂ ${ox.spo2}%`);
+      if (ox.pulse) parts.push(`${ox.pulse} bpm`);
+      if (parts.length) return parts.join(' · ');
+      break;
+    }
+    case 'weight-scale': {
+      const weight = vital.reading as WeightScaleReading;
+      if (weight.weightLbs) return `${Number(weight.weightLbs).toFixed(1)} lbs`;
+      if (weight.weightKg) return `${Number(weight.weightKg).toFixed(1)} kg`;
+      break;
+    }
+    case 'glucose': {
+      const glucose = vital.reading as GlucoseReading;
+      if (glucose.value) return `${glucose.value} mg/dL`;
+      break;
+    }
+    default:
+      break;
+  }
+
+  return 'Recorded';
+}
+
 /**
  * Get full name from user object with firstName and lastName
  */
@@ -443,16 +520,34 @@ export const mapAssignedPatientToAppointmentRow = (
   identityNumber: patient.patientId,
   age: calculateAge(patient.dob || patient.dateOfBirth),
   contact: { phone: patient.phoneNumber || '', email: patient.email },
-  assignedAssistantId: patient.assignedAssistantId,
-  assignedAssistantName: patient.assignedAssistant
-    ? `${patient.assignedAssistant.firstName} ${patient.assignedAssistant.lastName}`
-    : undefined,
   isRegistrationComplete: patient.isRegistrationComplete,
+  linked: patient.linked,
+  emailVerified: patient.emailVerified,
+  isActive: patient.isActive,
 });
 
 export const mapAssignedPatientsToAppointmentRows = (
   patients: AssignedPatient[]
 ): AppointmentRow[] => patients?.map(mapAssignedPatientToAppointmentRow);
+
+export const toVerificationPatient = (
+  patient: AssignedPatient | AppointmentRow
+) => {
+  if ('fullName' in patient) {
+    return {
+      id: patient.id,
+      fullName: patient.fullName || patient.patientId || '',
+      email: patient.email || '',
+      linked: patient.linked,
+    };
+  }
+  return {
+    id: patient.id,
+    fullName: patient.patientName,
+    email: patient.contact?.email || '',
+    linked: patient.linked,
+  };
+};
 
 export const mapDoctorToClinician = (doctor: {
   id: string;
@@ -464,8 +559,10 @@ export const mapDoctorToClinician = (doctor: {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  avatarUrl?: string;
 }) => ({
   ...doctor,
+  avatarUrl: doctor.avatarUrl || '',
   name: `${doctor.firstName} ${doctor.lastName}`.trim(),
 });
 

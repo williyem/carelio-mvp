@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { format, parseISO, isAfter, isBefore, subMinutes } from 'date-fns';
 import type { Appointment } from '@/integration/appointments/types';
-import { useVideoCallStore } from '@/stores/video-call-store';
+import { useBeginCall } from '@/hooks/page-hooks/video-call/use-begin-call';
 import Link from 'next/link';
 import { Patient } from '@/types/patient.types';
 import {
@@ -32,7 +32,7 @@ export function AppointmentDetailsPopup({
   onReschedule?: (appointment: Appointment) => void;
   onCancel?: (appointment: Appointment) => void;
 }) {
-  const { startCall, setSelectedAppointment } = useVideoCallStore();
+  const beginCall = useBeginCall();
   const patientContact =
     appointment.patient?.email || appointment.patient?.phoneNumber;
 
@@ -59,7 +59,8 @@ export function AppointmentDetailsPopup({
       !startObj ||
       !endObj ||
       appointment.status === 'CANCELLED' ||
-      appointment.status === 'COMPLETED'
+      appointment.status === 'COMPLETED' ||
+      appointment.status === 'MISSED'
     )
       return false;
     const fiveMinsBefore = subMinutes(startObj, 5);
@@ -73,24 +74,26 @@ export function AppointmentDetailsPopup({
     if (
       !endObj ||
       appointment.status === 'CANCELLED' ||
-      appointment.status === 'COMPLETED'
+      appointment.status === 'COMPLETED' ||
+      appointment.status === 'MISSED'
     )
       return false;
     return isBefore(now, endObj);
   })();
 
   const canReschedule =
-    appointment.status !== 'COMPLETED' && appointment.status !== 'CANCELLED';
+    appointment.status !== 'COMPLETED' &&
+    appointment.status !== 'CANCELLED' &&
+    appointment.status !== 'MISSED' &&
+    appointment.status !== 'IN_PROGRESS';
 
   const handleStartCall = () => {
-    if (appointment.patient) {
-      startCall(appointment.patient as unknown as Patient);
-      setSelectedAppointment(
-        appointment,
-        appointment.patient as unknown as Patient
-      );
-      onAction?.();
-    }
+    if (!appointment.patient) return;
+    const started = beginCall(
+      appointment,
+      appointment.patient as unknown as Patient
+    );
+    if (started) onAction?.();
   };
 
   return (
@@ -120,6 +123,16 @@ export function AppointmentDetailsPopup({
             {appointment.status === 'COMPLETED' && (
               <span className="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-bold uppercase">
                 Completed
+              </span>
+            )}
+            {appointment.status === 'IN_PROGRESS' && (
+              <span className="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-bold uppercase">
+                In progress
+              </span>
+            )}
+            {appointment.status === 'MISSED' && (
+              <span className="text-[10px] bg-gray-50 text-gray-500 px-2 py-0.5 rounded-full font-bold uppercase">
+                Missed
               </span>
             )}
             {(appointment.status === 'CONFIRMED' ||
@@ -187,7 +200,7 @@ export function AppointmentDetailsPopup({
             className="w-full"
           >
             <Button
-              className="w-full border-brand-blue text-brand-blue hover:text-white hover:bg-brand-blue rounded-xl h-14 font-semibold text-lg"
+              className="w-full border-brand-blue text-brand-blue hover:text-white hover:bg-brand-blue rounded-xl h-12 font-semibold text-[14px]"
               variant="outline"
             >
               View Summary

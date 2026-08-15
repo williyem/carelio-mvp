@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Plus, ArrowLeft } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useVideoCallStore } from '@/stores/video-call-store';
 import {
@@ -13,20 +12,40 @@ import {
 } from '@/integration/appointments';
 import { toast } from 'sonner';
 import { useSoapDraftStore } from '@/stores/soap-draft-store';
+import { useCallParticipantRole } from '@/hooks/page-hooks/video-call/use-call-participant-role';
+import { cn } from '@/lib/utils';
 
-// Modular components
 import PatientInfoCard from './patient-info-card';
-import LiveVitalsCard from './live-vitals-card';
+import MeasurementRequestPanel from './measurement-request-panel';
+import PatientMeasurementPanel from './patient-measurement-panel';
 import SoapNoteEditor from './soap-note-editor';
 import HealthRecordsList from './health-records-list';
+import VisitReadingsList from './visit-readings-list';
 import { Spinner } from '../ui/spinner';
+
+type DoctorView = 'records' | 'devices' | 'notes';
+
+const DOCTOR_LINKS: { id: DoctorView; label: string }[] = [
+  { id: 'records', label: 'Patient info' },
+  { id: 'devices', label: 'Devices & measurements' },
+  { id: 'notes', label: 'Add notes' },
+];
 
 const VideoCallLiveVitals = () => {
   const { selectedAppointment, selectedPatient } = useVideoCallStore();
+  const appointmentId = selectedAppointment?.id;
+  const { role, isLoading: isRoleLoading } = useCallParticipantRole();
+  const isDoctor = role === 'doctor';
+  const callPatient = {
+    ...(selectedPatient || {}),
+    ...(selectedAppointment?.patient || {}),
+    fullName:
+      selectedAppointment?.patient?.fullName ||
+      selectedPatient?.fullName ||
+      selectedPatient?.name,
+  };
 
-  const [showDevices, setShowDevices] = useState(true);
-  const [showNotes, setShowNotes] = useState(false);
-  const [showHealthRecords, setShowHealthRecords] = useState(false);
+  const [doctorView, setDoctorView] = useState<DoctorView>('records');
 
   const [soapNotes, setSoapNotes] = useState({
     subjective: '',
@@ -42,13 +61,12 @@ const VideoCallLiveVitals = () => {
   const getDraft = useSoapDraftStore((s) => s.getDraft);
   const saveDraft = useSoapDraftStore((s) => s.saveDraft);
 
-  const persistLocal = (status: 'DRAFT' | 'FINAL') => {
-    if (!selectedAppointment?.id) return;
-    saveDraft(selectedAppointment.id, { ...soapNotes, status });
+  const persistLocal = () => {
+    if (!appointmentId) return;
+    saveDraft(appointmentId, { ...soapNotes, status: 'DRAFT' });
   };
 
   useEffect(() => {
-    const appointmentId = selectedAppointment?.id;
     if (!appointmentId) return;
 
     const local = getDraft(appointmentId);
@@ -73,35 +91,31 @@ const VideoCallLiveVitals = () => {
         });
       },
     });
-    // Load once per appointment
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedAppointment?.id]);
+  }, [appointmentId]);
 
   const isLoading =
     submitSoapMutation.isPending ||
     updateConsultationNoteMutation.isPending ||
     getConsultationNoteByAppointmentMutation.isPending;
 
-  const persistNotes = async (action: 'save' | 'approve') => {
-    if (!selectedAppointment?.id) {
+  const handleSaveNotes = async () => {
+    if (!appointmentId) {
       toast.error('No active appointment found');
       return;
     }
 
-    persistLocal(action === 'approve' ? 'FINAL' : 'DRAFT');
+    persistLocal();
 
-    const payload = { ...soapNotes, action };
+    const payload = { ...soapNotes, action: 'save' as const };
 
     try {
-      const existing = await new Promise<{ id?: string } | undefined>(
+      const existing = await new Promise<{ id?: string } | null | undefined>(
         (resolve) => {
-          getConsultationNoteByAppointmentMutation.mutate(
-            selectedAppointment.id,
-            {
-              onSuccess: (data) => resolve(data),
-              onError: () => resolve(undefined),
-            }
-          );
+          getConsultationNoteByAppointmentMutation.mutate(appointmentId, {
+            onSuccess: (data) => resolve(data),
+            onError: () => resolve(undefined),
+          });
         }
       );
 
@@ -112,27 +126,17 @@ const VideoCallLiveVitals = () => {
         });
       } else {
         await submitSoapMutation.mutateAsync({
-          appointmentId: selectedAppointment.id,
+          appointmentId,
           data: payload,
         });
       }
-      toast.success(
-        action === 'approve' ? 'SOAP notes finalized' : 'SOAP notes saved'
-      );
-      setShowNotes(false);
+      toast.success('Draft saved');
+      setDoctorView('records');
     } catch {
-      toast.success(
-        action === 'approve'
-          ? 'SOAP notes finalized locally'
-          : 'SOAP notes saved locally'
-      );
-      setShowNotes(false);
+      toast.success('Draft saved locally');
+      setDoctorView('records');
     }
   };
-
-  const handleSaveNotes = () => persistNotes('save');
-  const handleFinalizeNotes = () => persistNotes('approve');
-
   const handleNoteChange = (key: keyof typeof soapNotes, value: string) => {
     setSoapNotes((prev) => ({
       ...prev,
@@ -140,25 +144,23 @@ const VideoCallLiveVitals = () => {
     }));
   };
 
-  if (!showDevices) {
+  if (isRoleLoading) {
     return (
-      <div className="w-full xl:w-[450px] 2xl:w-[559px] relative min-h-[200px] xl:min-h-0 p-4 sm:p-8 xl:border-l xl:border-(--border-video)">
-        <p className="text-gray-900 text-left text-base sm:text-[18px] font-bold leading-[1.2] mb-2 sm:mb-0">
-          Live Vitals
-        </p>
+      <div className="bg-(--bg-white) py-6 w-full xl:w-[450px] 2xl:w-[559px] flex items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
 
-        <div className="flex flex-col gap-3 sm:gap-[12px] h-full flex-1 items-center justify-center">
-          <p className="text-gray-600 text-sm sm:text-[18px] font-normal leading-[1.2] text-center">
-            No devices connected
-          </p>
-          <button
-            onClick={() => setShowDevices(true)}
-            className="bg-brand-blue border border-brand-blue flex items-center justify-center h-[40px] sm:h-[44px] px-4 sm:px-[20px] py-2 sm:py-[8px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,20,0.03)] hover:bg-brand-blue/90 transition-colors w-full sm:w-auto cursor-pointer"
-          >
-            <p className="text-white text-sm sm:text-[16px] font-bold leading-[1.2] whitespace-nowrap">
-              Configure Devices
-            </p>
-          </button>
+  if (!isDoctor) {
+    return (
+      <div className="bg-(--bg-white) py-6 w-full xl:w-[450px] 2xl:w-[559px] relative flex flex-col h-full overflow-hidden xl:border-l xl:border-(--border-video)">
+        <div className="flex-1 min-h-0 px-4 sm:px-8">
+          <ScrollArea className="h-full">
+            <div className="pb-8">
+              <PatientMeasurementPanel appointmentId={appointmentId} />
+            </div>
+          </ScrollArea>
         </div>
       </div>
     );
@@ -166,130 +168,117 @@ const VideoCallLiveVitals = () => {
 
   return (
     <div className="bg-(--bg-white) py-6 w-full xl:w-[450px] 2xl:w-[559px] relative flex flex-col h-full overflow-hidden xl:border-l xl:border-(--border-video)">
-      <div className="flex-1 min-h-0 px-4 space-y-5 sm:px-8">
-        {showHealthRecords ? (
-          <HealthRecordsList
-            patientId={selectedPatient?.id || ''}
-            onBack={() => setShowHealthRecords(false)}
-          />
-        ) : showNotes ? (
-          <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300">
-            <div className="flex flex-col gap-6 h-full">
-              <button
-                onClick={() => setShowNotes(false)}
-                className="flex items-center gap-2 text-gray-500 font-bold hover:text-gray-900 transition-colors w-fit cursor-pointer"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                <span>Back</span>
-              </button>
+      <div className="flex-1 min-h-0 px-4 sm:px-8 flex flex-col">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pb-4">
+          {DOCTOR_LINKS.map((link) => (
+            <button
+              key={link.id}
+              type="button"
+              onClick={() => setDoctorView(link.id)}
+              className={cn(
+                'text-sm cursor-pointer underline-offset-4',
+                doctorView === link.id
+                  ? 'text-brand-blue font-semibold underline'
+                  : 'text-gray-500 hover:text-gray-900 underline'
+              )}
+            >
+              {link.label}
+            </button>
+          ))}
+        </div>
 
-              <h2 className="text-xl font-bold text-gray-900">
-                Clinical Notes (SOAP)
-              </h2>
-
-              <Tabs
-                defaultValue="subjective"
-                className="w-full h-full flex flex-col"
-              >
-                <TabsList className="bg-[#F9F9F9] p-1 rounded-full flex gap-1 w-full h-auto">
+        {doctorView === 'notes' ? (
+          <div className="flex flex-col h-full min-h-0">
+            <div className="mb-4">
+              <h3 className="font-bold text-gray-900">Clinical notes</h3>
+              <p className="text-sm text-(--text-secondary) mt-1">
+                Record SOAP notes for this visit. Save a draft anytime, or
+                finalize when the consultation is complete.
+              </p>
+            </div>
+            <Tabs
+              defaultValue="subjective"
+              className="w-full flex-1 min-h-0 flex flex-col"
+            >
+              <TabsList className="bg-[#F9F9F9] p-1 rounded-full flex gap-1 w-full h-auto">
+                {(
+                  ['subjective', 'objective', 'assessment', 'plan'] as const
+                ).map((key) => (
                   <TabsTrigger
-                    value="subjective"
-                    className="flex-1 py-3 px-3 rounded-full text-xs md:text-sm font-medium data-[state=active]:bg-white  data-[state=active]:text-gray-900 text-gray-500 hover:text-gray-700"
+                    key={key}
+                    value={key}
+                    className="flex-1 py-3 px-3 rounded-full text-xs md:text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-gray-900 text-gray-500 hover:text-gray-700 capitalize"
                   >
-                    Subjective
+                    {key}
                   </TabsTrigger>
-                  <TabsTrigger
-                    value="objective"
-                    className="flex-1 py-3 px-3 rounded-full text-xs md:text-sm font-medium data-[state=active]:bg-white  data-[state=active]:text-gray-900 text-gray-500 hover:text-gray-700"
-                  >
-                    Objective
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="assessment"
-                    className="flex-1 py-3 px-3 rounded-full text-xs md:text-sm font-medium data-[state=active]:bg-white  data-[state=active]:text-gray-900 text-gray-500 hover:text-gray-700"
-                  >
-                    Assessment
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="plan"
-                    className="flex-1 py-3 px-3 rounded-full text-xs md:text-sm font-medium data-[state=active]:bg-white  data-[state=active]:text-gray-900 text-gray-500 hover:text-gray-700"
-                  >
-                    Plan
-                  </TabsTrigger>
-                </TabsList>
-
-                <div className="flex-1 min-h-0 mt-4">
-                  {(
-                    ['subjective', 'objective', 'assessment', 'plan'] as const
-                  ).map((key) => {
-                    return (
-                      <TabsContent
-                        key={key}
-                        value={key}
-                        className="h-full mt-0"
-                      >
-                        <SoapNoteEditor
-                          placeholder={`Enter ${key} notes...`}
-                          value={soapNotes[key]}
-                          onChange={(val) => handleNoteChange(key, val)}
-                          type={key}
-                        />
-                      </TabsContent>
-                    );
-                  })}
-                </div>
-              </Tabs>
-
-              <div className="mt-auto pt-8 border-t border-gray-100 flex flex-col sm:flex-row gap-4 underline-offset-4">
-                <Button
-                  className="flex-1 bg-[#2E90FA] hover:bg-[#2E90FA]/90 text-white rounded-full h-14 font-bold text-base  cursor-pointer"
-                  onClick={handleSaveNotes}
-                  disabled={isLoading}
-                >
-                  {isLoading ? <Spinner /> : 'Save Note'}
-                </Button>
-                <Button
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full h-14 font-bold text-base cursor-pointer"
-                  onClick={handleFinalizeNotes}
-                  disabled={isLoading}
-                >
-                  Finalize
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1 border-[#EBEBEB] text-gray-700 rounded-full h-14 font-bold text-base cursor-pointer"
-                  onClick={() => setShowNotes(false)}
-                >
-                  Cancel
-                </Button>
+                ))}
+              </TabsList>
+              <div className="flex-1 min-h-0 mt-4">
+                {(
+                  ['subjective', 'objective', 'assessment', 'plan'] as const
+                ).map((key) => (
+                  <TabsContent key={key} value={key} className="h-full mt-0">
+                    <SoapNoteEditor
+                      placeholder={`Enter ${key} notes...`}
+                      value={soapNotes[key]}
+                      onChange={(val) => handleNoteChange(key, val)}
+                      type={key}
+                    />
+                  </TabsContent>
+                ))}
               </div>
+            </Tabs>
+            <div className="mt-auto pt-6 border-t border-gray-100 flex flex-col sm:flex-row gap-3">
+              <Button
+                className="flex-1 bg-[#2E90FA] hover:bg-[#2E90FA]/90 text-white rounded-full h-12 font-bold cursor-pointer"
+                onClick={handleSaveNotes}
+                disabled={isLoading}
+              >
+                {isLoading ? <Spinner /> : 'Save'}
+              </Button>
             </div>
           </div>
         ) : (
-          <>
-            <div className="flex  max-lg:mt-4  items-center justify-between gap-4">
-              <button
-                onClick={() => setShowHealthRecords(true)}
-                className="text-brand-blue  max-sm:text-sm cursor-pointer hover:text-brand-blue/90 font-normal text-base underline underline-offset-4"
-              >
-                View previous health records
-              </button>
-              <Button
-                onClick={() => setShowNotes(true)}
-                variant="outline"
-                className="rounded-full border-[#939596] text-xs font-normal h-[38px] px-4 gap-2 hover:bg-gray-50 bg-white cursor-pointer"
-              >
-                <Plus className="w-4 h-4" />
-                Add Notes
-              </Button>
+          <ScrollArea className="flex-1 min-h-0">
+            <div className="grid grid-cols-1 gap-6 pb-8">
+              {doctorView === 'records' && (
+                <>
+                  <div>
+                    <h3 className="font-bold text-gray-900">Patient info</h3>
+                    <p className="text-sm text-(--text-secondary) mt-1">
+                      Profile details for the patient on this call.
+                    </p>
+                  </div>
+                  <PatientInfoCard patient={callPatient} />
+                  <HealthRecordsList
+                    patientId={
+                      selectedPatient?.id ||
+                      selectedAppointment?.patient?.id ||
+                      selectedAppointment?.patientId ||
+                      ''
+                    }
+                  />
+                </>
+              )}
+              {doctorView === 'devices' && (
+                <>
+                  <MeasurementRequestPanel appointmentId={appointmentId} />
+                  <div className="space-y-3">
+                    <div>
+                      <h3 className="font-bold text-gray-900">This visit</h3>
+                      <p className="text-sm text-(--text-secondary) mt-1">
+                        Readings come in confirmed. Reject any that look wrong.
+                      </p>
+                    </div>
+                    <VisitReadingsList
+                      appointmentId={appointmentId}
+                      canReject
+                    />
+                  </div>
+                </>
+              )}
             </div>
-            <ScrollArea className="h-full">
-              <div className="grid grid-cols-1  gap-6 pb-8">
-                <PatientInfoCard patient={selectedPatient} />
-                <LiveVitalsCard />
-              </div>
-            </ScrollArea>
-          </>
+          </ScrollArea>
         )}
       </div>
     </div>

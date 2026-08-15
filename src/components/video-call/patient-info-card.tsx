@@ -3,19 +3,19 @@
 
 import * as React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  formatClinicalList,
+  formatEmergencyContact,
+} from '@/lib/patient-clinical';
 
 interface PatientInfoCardProps {
   patient: any; // Using any for now to handle both types flexibly
 }
 
 const PatientInfoCard = ({ patient }: PatientInfoCardProps) => {
-  // Default values for allergies and conditions if they don't exist
-  const allergies =
-    patient?.allergies && patient.allergies.length > 0
-      ? patient.allergies.join(', ')
-      : 'None';
-
-  const conditions = patient?.chiefComplaint || 'None';
+  const allergies = formatClinicalList(patient?.allergies);
+  const conditions = formatClinicalList(patient?.conditions);
+  const emergencyContact = formatEmergencyContact(patient?.emergencyContact);
 
   const formattedDob = React.useMemo(() => {
     const dob = patient?.dob || patient?.dateOfBirth;
@@ -37,27 +37,37 @@ const PatientInfoCard = ({ patient }: PatientInfoCardProps) => {
         <div className="space-y-4">
           <div className="space-y-1">
             <p className="font-normal text-(--text-secondary)">Name</p>
-            <p className="font-bold text-gray-900">
+            <p className="font-bold text-gray-900 text-sm">
               {patient?.fullName || patient?.name || 'N/A'}
             </p>
           </div>
           <div className="space-y-1">
             <p className="font-normal text-(--text-secondary)">Date of Birth</p>
-            <p className="font-bold text-gray-900">{formattedDob}</p>
+            <p className="font-bold text-gray-900 text-sm">{formattedDob}</p>
           </div>
           <div className="space-y-1">
             <p className="font-normal text-(--text-secondary)">Blood Type</p>
-            <p className="font-bold text-gray-900">
+            <p className="font-bold text-gray-900 text-sm">
               {patient?.bloodType || 'N/A'}
             </p>
           </div>
           <div className="space-y-1">
             <p className="font-normal text-(--text-secondary)">Allergies</p>
-            <p className="font-bold text-gray-900">{allergies}</p>
+            <p className="font-bold text-gray-900 text-sm">{allergies}</p>
           </div>
           <div className="space-y-1">
-            <p className="font-normal text-(--text-secondary)">Conditions</p>
-            <p className="font-bold text-gray-900">{conditions}</p>
+            <p className="font-normal text-(--text-secondary)">
+              Medical conditions
+            </p>
+            <p className="font-bold text-gray-900 text-sm">{conditions}</p>
+          </div>
+          <div className="space-y-1">
+            <p className="font-normal text-(--text-secondary)">
+              Emergency contact
+            </p>
+            <p className="font-bold text-sm text-gray-900">
+              {emergencyContact}
+            </p>
           </div>
         </div>
       </CardContent>

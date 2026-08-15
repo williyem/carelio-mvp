@@ -16,12 +16,9 @@ import {
 } from '@/integration/settings/api';
 import { useUploadFile } from '@/integration/files/mutations';
 import { getErrorMessage } from '@/integration';
+import { EmptyState } from '@/components/ui/empty-state';
 
-export default function PatientInsuranceSettings({
-  patientId: _patientId,
-}: {
-  patientId: string;
-}) {
+export default function PatientInsuranceSettings() {
   const [policies, setPolicies] = useState<InsurancePolicy[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -58,8 +55,8 @@ export default function PatientInsuranceSettings({
   return (
     <div>
       <SettingsPageHeader
-        title="Insurance"
-        description="Keep your coverage details on file for billing and eligibility."
+        title="NHIS / Health coverage"
+        description="Keep your NHIS or private health scheme details on file for billing and eligibility."
       />
 
       <div className="flex justify-end mb-4">
@@ -68,7 +65,7 @@ export default function PatientInsuranceSettings({
           className="rounded-full"
           onClick={() => setOpen((v) => !v)}
         >
-          {open ? 'Close' : 'Add insurance'}
+          {open ? 'Close' : 'Add coverage'}
         </Button>
       </div>
 
@@ -83,35 +80,36 @@ export default function PatientInsuranceSettings({
                 cardImageUrl,
               });
               setPolicies(next);
-              toast.success('Insurance added');
+              toast.success('Coverage added');
               reset();
               setCardImageUrl('');
               setOpen(false);
             } catch (error) {
-              toast.error(getErrorMessage(error, 'Could not add insurance'));
+              toast.error(getErrorMessage(error, 'Could not add coverage'));
             }
           })}
         >
           <div className="space-y-1.5">
-            <Label>Provider</Label>
+            <Label>NHIS / scheme name</Label>
             <Input
               className="h-11"
+              placeholder="e.g. NHIS"
               {...register('provider', { required: true })}
             />
           </div>
           <div className="space-y-1.5">
-            <Label>Member ID</Label>
+            <Label>NHIS / membership number</Label>
             <Input
               className="h-11"
               {...register('memberId', { required: true })}
             />
           </div>
           <div className="space-y-1.5">
-            <Label>Group ID</Label>
+            <Label>Employer / group (optional)</Label>
             <Input className="h-11" {...register('groupId')} />
           </div>
           <div className="space-y-1.5">
-            <Label>Cardholder name</Label>
+            <Label>Name on card</Label>
             <Input className="h-11" {...register('holderName')} />
           </div>
           <div className="space-y-1.5">
@@ -131,7 +129,7 @@ export default function PatientInsuranceSettings({
             />
           </div>
           <div className="sm:col-span-2 space-y-1.5">
-            <Label>Insurance card image</Label>
+            <Label>NHIS / membership card image</Label>
             <Input
               type="file"
               accept="image/*"
@@ -150,18 +148,19 @@ export default function PatientInsuranceSettings({
           </div>
           <div className="sm:col-span-2">
             <Button type="submit" variant="brand" className="rounded-full">
-              Save policy
+              Save coverage
             </Button>
           </div>
         </form>
       )}
 
       <div className="grid gap-4">
-        {policies.length === 0 && (
-          <p className="text-sm text-(--text-secondary)">
-            No insurance on file yet.
-          </p>
-        )}
+        {policies.length === 0 ? (
+          <EmptyState
+            title="No coverage on file"
+            description="Add an NHIS or health scheme so it is ready for visits."
+          />
+        ) : null}
         {policies.map((policy) => (
           <div
             key={policy.id}
@@ -170,7 +169,7 @@ export default function PatientInsuranceSettings({
             <div>
               <p className="font-semibold">{policy.provider}</p>
               <p className="text-sm text-(--text-secondary)">
-                Member {policy.memberId}
+                Membership {policy.memberId}
                 {policy.groupId ? ` · Group ${policy.groupId}` : ''}
               </p>
               {policy.isDefault && (
@@ -186,7 +185,7 @@ export default function PatientInsuranceSettings({
                 try {
                   const next = await removePatientInsurance(policy.id);
                   setPolicies(next);
-                  toast.success('Insurance removed');
+                  toast.success('Coverage removed');
                 } catch (error) {
                   toast.error(getErrorMessage(error, 'Could not remove'));
                 }

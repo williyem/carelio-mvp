@@ -18,8 +18,13 @@ vi.mock('@/hooks/page-hooks/use-doctor-login', () => ({
   useDoctorLoginForm: () => ({
     register: () => ({}),
     handleSubmit: (fn: (e: unknown) => void) => (e: unknown) => {
-      e && typeof (e as { preventDefault?: () => void }).preventDefault === 'function' &&
+      if (
+        e &&
+        typeof (e as { preventDefault?: () => void }).preventDefault ===
+          'function'
+      ) {
         (e as { preventDefault: () => void }).preventDefault();
+      }
       return fn;
     },
     formState: { errors: {}, isValid: false },
@@ -33,12 +38,32 @@ vi.mock('@/hooks/page-hooks/use-patient-login', () => ({
   usePatientLoginForm: () => ({
     register: () => ({}),
     handleSubmit: (fn: (e: unknown) => void) => (e: unknown) => {
-      e && typeof (e as { preventDefault?: () => void }).preventDefault === 'function' &&
+      if (
+        e &&
+        typeof (e as { preventDefault?: () => void }).preventDefault ===
+          'function'
+      ) {
         (e as { preventDefault: () => void }).preventDefault();
+      }
       return fn;
     },
     formState: { errors: {}, isValid: false },
+    showPassword: false,
+    setShowPassword: vi.fn(),
     isPending: false,
+    pendingPatientId: null,
+    otpRegister: () => ({}),
+    handleOtpSubmit: (fn: (e: unknown) => void) => (e: unknown) => {
+      if (
+        e &&
+        typeof (e as { preventDefault?: () => void }).preventDefault ===
+          'function'
+      ) {
+        (e as { preventDefault: () => void }).preventDefault();
+      }
+      return fn;
+    },
+    otpFormState: { errors: {}, isValid: false },
   }),
 }));
 
@@ -46,8 +71,13 @@ vi.mock('@/hooks/page-hooks/use-health-assistant-login', () => ({
   useHealthAssistantLoginForm: () => ({
     register: () => ({}),
     handleSubmit: (fn: (e: unknown) => void) => (e: unknown) => {
-      e && typeof (e as { preventDefault?: () => void }).preventDefault === 'function' &&
+      if (
+        e &&
+        typeof (e as { preventDefault?: () => void }).preventDefault ===
+          'function'
+      ) {
         (e as { preventDefault: () => void }).preventDefault();
+      }
       return fn;
     },
     formState: { errors: {}, isValid: false },

@@ -282,6 +282,7 @@ export interface DoctorUser {
   twoFactorEnabled: boolean;
   twoFactorMethod?: TwoFactorMethod;
   isActive: boolean;
+  isAdmin?: boolean;
   createdAt: string;
   updatedAt: string;
   avatarUrl?: string;
@@ -337,7 +338,6 @@ export interface InvitedPatient {
   gender: string | null; // or specific type if needed
   address: string | null;
   bloodType: string | null;
-  assignedAssistantId: string | null;
 }
 
 /**

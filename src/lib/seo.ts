@@ -7,23 +7,20 @@ export const seoConfig = {
 
   // Main description
   description:
-    'Carelio — Smart Appointments. Better Care. A unified healthcare platform for scheduling, telehealth consultations, and patient management.',
+    'Carelio — Smart Appointments. Better Care. A Ghana-based healthcare platform for scheduling, telehealth consultations, and patient management.',
 
   // Keywords for SEO
   keywords: [
-    'healthcare',
-    'telemedicine',
+    'healthcare Ghana',
+    'telemedicine Ghana',
     'digital health',
-    'HIPAA compliant',
+    'NHIS',
     'patient care',
     'healthcare technology',
     'medical consultation',
     'telehealth',
-    'behavioral health',
-    'mental health services',
-    'clinical psychology',
-    'therapy services',
-    'counseling',
+    'Accra telehealth',
+    'clinical care',
     'wellness programs',
     'healthcare innovation',
     'digital medical platform',
@@ -31,6 +28,7 @@ export const seoConfig = {
     'telehealth services',
     'smart appointments',
     'carelio',
+    'Data Protection Act 843',
   ],
 
   // Author and publisher information

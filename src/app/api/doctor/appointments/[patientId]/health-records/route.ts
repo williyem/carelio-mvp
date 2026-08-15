@@ -4,8 +4,6 @@ import { cookies } from 'next/headers';
 import { doctorAccessToken, USER_TYPE_HEADER } from '@/lib/constants';
 import { APPOINTMENT_ENDPOINTS } from '@/integration/appointments/endpoints';
 import type { PatientAppointmentsResponse } from '@/integration/appointments/types';
-import { isDummyDataEnabled } from '@/lib/dummy-data/config';
-import { getPatientHealthRecords } from '@/lib/dummy-data/loader';
 
 export async function GET(
   request: NextRequest,
@@ -29,18 +27,6 @@ export async function GET(
       );
     }
 
-    if (isDummyDataEnabled()) {
-      return NextResponse.json(
-        getPatientHealthRecords(patientId, {
-          page: searchParams.get('page') ? Number(searchParams.get('page')) : 1,
-          limit: searchParams.get('limit')
-            ? Number(searchParams.get('limit'))
-            : 10,
-          search: searchParams.get('search') ?? undefined,
-        })
-      );
-    }
-
     const endpoint = APPOINTMENT_ENDPOINTS.GET_PATIENT_NOTES.replace(
       ':patientId',
       patientId
@@ -49,6 +35,11 @@ export async function GET(
     const response = await backendApiClient.get<PatientAppointmentsResponse>(
       endpoint,
       {
+        params: {
+          page: searchParams.get('page') ?? undefined,
+          limit: searchParams.get('limit') ?? undefined,
+          search: searchParams.get('search') ?? undefined,
+        },
         headers: {
           Authorization: `Bearer ${accessToken}`,
           ...USER_TYPE_HEADER,

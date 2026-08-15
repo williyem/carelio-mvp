@@ -45,36 +45,46 @@ export default function PrivacyPracticesStep() {
     >
       <div className="space-y-6 text-left">
         <div className="space-y-4 text-[14px] leading-relaxed text-text-strong-950">
-          <p className="font-semibold">How CAREX protects your information.</p>
-          <p>Your rights under HIPAA and Ohio law include:</p>
+          <p className="font-semibold">
+            How Carelio protects your information.
+          </p>
+          <p>
+            Your rights under Ghana’s Data Protection Act, 2012 (Act 843)
+            include:
+          </p>
           <ul className="list-disc pl-5 space-y-1">
-            <li>Requesting records or corrections</li>
-            <li>Requesting restrictions on sharing</li>
-            <li>Confidential communication options</li>
-            <li>
-              Protection for substance use information under 42 CFR Part 2
-            </li>
-            <li>Additional protections for minors under Ohio law</li>
+            <li>Requesting access to or correction of your records</li>
+            <li>Requesting restrictions on how your data is shared</li>
+            <li>Choosing confidential communication options where available</li>
+            <li>Knowing who on your Carelio care team can access your chart</li>
+            <li>Additional protections for minors where required by law</li>
           </ul>
 
           <p className="font-semibold pt-2">Our Responsibilities</p>
           <p>We are required to:</p>
           <ul className="list-disc pl-5 space-y-1">
             <li>
-              Maintain the privacy of your protected health information (PHI)
+              Maintain the privacy and security of your personal and health
+              information
             </li>
             <li>Provide you with this Notice upon request</li>
-            <li>Notify you in case of a breach of unsecured PHI</li>
+            <li>
+              Notify you of a significant breach affecting your personal data
+              where required by law
+            </li>
             <li>Follow the terms of this Notice</li>
           </ul>
 
           <p className="font-semibold pt-2">
             How We May Use and Disclose Your Information
           </p>
-          <p>We may use/disclose PHI for:</p>
+          <p>We may use or disclose your information for:</p>
           <ul className="list-disc pl-5 space-y-1">
-            <li>Treatment, Payment, Healthcare operations</li>
-            <li>When required by law (Public health, Court orders, etc.)</li>
+            <li>Treatment, payment, and healthcare operations</li>
+            <li>NHIS or private health-scheme claims and care coordination</li>
+            <li>
+              When required by Ghanaian law (public health, court orders, etc.)
+            </li>
           </ul>
         </div>
 

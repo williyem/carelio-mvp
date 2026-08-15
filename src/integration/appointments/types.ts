@@ -51,6 +51,7 @@ export interface AppointmentDoctor {
 export type AppointmentStatus =
   | 'PENDING_CONFIRMATION'
   | 'CONFIRMED'
+  | 'IN_PROGRESS'
   | 'COMPLETED'
   | 'CANCELLED'
   | 'MISSED';
@@ -59,6 +60,7 @@ export interface Appointment {
   id: string;
   patientId: string;
   doctorId: string;
+  bookedByAssistantId?: string | null;
   date?: string;
   startTime?: string;
   endTime?: string;
@@ -84,6 +86,7 @@ export interface GetDoctorAppointmentsParams {
   page?: number;
   limit?: number;
   status?: AppointmentStatus;
+  upcoming?: boolean;
   startDate?: string;
   endDate?: string;
 }
@@ -111,6 +114,13 @@ export interface RescheduleAppointmentRequest {
   startTime: string;
   endTime: string;
   reschedulingReason?: string;
+}
+
+export type PlanShareRecipient = 'patient' | 'healthAssistant';
+
+export interface ShareConsultationPlanRequest {
+  recipients: PlanShareRecipient[];
+  fields: Array<'subjective' | 'objective' | 'assessment' | 'plan'>;
 }
 
 export interface SubmitSoapNotesRequest {
@@ -168,6 +178,16 @@ export interface AppointmentNote {
   summary?: string | null;
   generatedNote?: string | null;
   status: 'DRAFT' | 'FINAL';
+  planSharedAt?: string | null;
+  planSharedWithPatientAt?: string | null;
+  planSharedWithHealthAssistantAt?: string | null;
+  sharedSoapFieldsPatient?: Array<
+    'subjective' | 'objective' | 'assessment' | 'plan'
+  >;
+  sharedSoapFieldsHealthAssistant?: Array<
+    'subjective' | 'objective' | 'assessment' | 'plan'
+  >;
+  sharedSoapFields?: Array<'subjective' | 'objective' | 'assessment' | 'plan'>;
   soapNote?: SoapNote;
   deletedAt?: string | null;
   createdAt: string;

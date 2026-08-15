@@ -13,6 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useGetRecentAppointments } from '@/integration/appointments';
 import { format, parseISO, differenceInMinutes } from 'date-fns';
+import AppointmentsEmptyState from '@/components/dashboard/appointments-empty-state';
 
 const formatDuration = (
   startTime: string | undefined,
@@ -102,11 +103,10 @@ export function RecentConsultation() {
           </Card>
         </Link>
       ) : (
-        <Card className="border border-gray-100 border-dashed rounded-2xl overflow-hidden bg-white shadow-none">
-          <CardContent className="p-4 sm:p-5 flex items-center justify-center h-20 text-gray-500 text-sm">
-            No recent consultations
-          </CardContent>
-        </Card>
+        <AppointmentsEmptyState
+          title="No recent consultations"
+          description="Completed consultations will appear here after your first visit."
+        />
       )}
     </div>
   );

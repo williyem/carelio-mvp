@@ -2,9 +2,10 @@
 
 import { HIERecord } from '@/types/patient.types';
 import { cn } from '@/lib/utils';
-import CalendarSvg from '@/assets/icons/calendar-svg';
 import HospitalSvg from '@/assets/icons/hospital-svg';
+import CalendarSvg from '@/assets/icons/calendar-svg';
 import HIERecordsListSkeleton from './hie-records-list-skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface HIERecordsListProps {
   records: HIERecord[];
@@ -24,20 +25,11 @@ const HIERecordsList = ({
   if (records.length === 0) {
     return (
       <div className={cn('flex flex-col gap-5 items-start w-full', className)}>
-        <div className="flex flex-col items-center justify-center w-full py-12 gap-4">
-          <div className="bg-(--bg-light-gray) rounded-full w-16 h-16 flex items-center justify-center">
-            <HospitalSvg />
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="font-medium leading-[1.2] text-(--text-primary) text-[16px]">
-              No HIE records available
-            </p>
-            <p className="font-normal leading-[1.2] text-(--text-muted) text-[14px] text-center">
-              This patient doesn&apos;t have any Health Information Exchange
-              records yet.
-            </p>
-          </div>
-        </div>
+        <EmptyState
+          icon={<HospitalSvg />}
+          title="No HIE records available"
+          description="This patient doesn't have any Health Information Exchange records yet."
+        />
       </div>
     );
   }

@@ -247,11 +247,11 @@ const PatientFormContent = ({
             control={control}
             render={({ field }) => (
               <PhoneInput
-                defaultCountry="US"
+                defaultCountry="GH"
                 value={field.value || ''}
                 disabled={isPending || disabledFields?.phoneNumber}
                 onChange={field.onChange}
-                placeholder="+1 (555) 000-0000"
+                placeholder="+233 24 000 0000"
                 className="w-full"
                 inputClassName="bg-transparent border-(--border-light) h-[44px] rounded-[8px] shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]"
                 countryButtonClassName="bg-transparent border-(--border-light) hover:bg-transparent"

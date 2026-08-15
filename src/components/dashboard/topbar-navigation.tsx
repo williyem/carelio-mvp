@@ -38,7 +38,7 @@ const TopbarNavigation = ({
   );
 
   const logout = useLogout();
-  const { fullName, isLoading, isFetching, email } = useUser();
+  const { fullName, isLoading, isFetching, email, user } = useUser();
 
   const handleLogout = () => {
     if (onLogoutClick) {
@@ -133,7 +133,10 @@ const TopbarNavigation = ({
               ) : (
                 <div className="flex items-center gap-3">
                   <Avatar className="h-9 w-9 border border-(--border-stroke)">
-                    <AvatarImage src="" alt={fullName || 'User'} />
+                    <AvatarImage
+                      src={user?.avatarUrl || ''}
+                      alt={fullName || 'User'}
+                    />
                     <AvatarFallback className="bg-brand-blue/5 text-brand-blue text-xs font-medium">
                       {initials}
                     </AvatarFallback>
@@ -143,7 +146,7 @@ const TopbarNavigation = ({
                       {fullName || 'User'}
                     </p>
                     <p className="text-[11px] truncate text-(--text-secondary) mt-1">
-                      {email || 'Clinician'}
+                      Health assistant
                     </p>
                   </div>
                   <svg
@@ -162,6 +165,7 @@ const TopbarNavigation = ({
           <DropdownMenuContent align="end" className="w-[200px] mt-2">
             <div className="px-2 py-1.5 md:hidden">
               <p className="text-sm font-semibold">{fullName || 'User'}</p>
+              <p className="text-xs text-gray-500">Health assistant</p>
               <p className="text-xs text-gray-500 truncate">{email}</p>
             </div>
             <DropdownMenuSeparator className="md:hidden" />

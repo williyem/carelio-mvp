@@ -13,15 +13,30 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useGetDoctorAppointments } from '@/integration/appointments';
-import { format, parseISO, isToday, isTomorrow } from 'date-fns';
+import { parseISO } from 'date-fns';
 import type { Appointment } from '@/integration/appointments/types';
+import AppointmentsEmptyState from '@/components/dashboard/appointments-empty-state';
+import { isUpcomingAppointment } from '@/lib/appointment-status';
 
 const formatAppointmentDate = (dateString: string): string => {
   try {
     const date = parseISO(dateString);
-    if (isToday(date)) return 'Today';
-    if (isTomorrow(date)) return 'Tomorrow';
-    return format(date, 'MMM d, yyyy');
+    if (Number.isNaN(date.getTime())) return 'N/A';
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return `${months[date.getUTCMonth()]} ${date.getUTCDate()}, ${date.getUTCFullYear()}`;
   } catch {
     return 'N/A';
   }
@@ -29,7 +44,13 @@ const formatAppointmentDate = (dateString: string): string => {
 
 const formatAppointmentTime = (dateString: string): string => {
   try {
-    return format(parseISO(dateString), 'h:mm a');
+    const date = parseISO(dateString);
+    if (Number.isNaN(date.getTime())) return 'N/A';
+    const hours24 = date.getUTCHours();
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    const ampm = hours24 >= 12 ? 'PM' : 'AM';
+    const hours12 = hours24 % 12 || 12;
+    return `${hours12}:${minutes} ${ampm} GMT`;
   } catch {
     return 'N/A';
   }
@@ -85,7 +106,8 @@ function AppointmentCard({ appointment }: AppointmentCardProps) {
 
 export function UpcomingAppointments() {
   const { data, isLoading } = useGetDoctorAppointments({
-    limit: 3,
+    limit: 10,
+    upcoming: true,
   });
 
   const upcomingAppointments = React.useMemo(() => {
@@ -93,21 +115,14 @@ export function UpcomingAppointments() {
     if (!docs || docs.length === 0) return [];
 
     return docs
-      .filter((apt) => {
-        if (!apt.startTime) return false;
-        try {
-          return new Date(apt.startTime) > new Date();
-        } catch {
-          return false;
-        }
-      })
+      .filter((apt) => isUpcomingAppointment(apt))
       .sort((a, b) => {
         if (!a.startTime || !b.startTime) return 0;
         return (
           new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
         );
       })
-      .slice(0, 5); // Limit to 5 appointments
+      .slice(0, 5);
   }, [data]);
 
   return (
@@ -142,11 +157,10 @@ export function UpcomingAppointments() {
           ))}
         </div>
       ) : (
-        <Card className="border border-gray-100 border-dashed rounded-2xl overflow-hidden bg-white shadow-none">
-          <CardContent className="p-4 sm:p-5 flex items-center justify-center h-20 text-gray-500 text-sm">
-            No upcoming appointments scheduled
-          </CardContent>
-        </Card>
+        <AppointmentsEmptyState
+          title="No upcoming appointments"
+          description="You don't have any upcoming appointments scheduled yet."
+        />
       )}
     </div>
   );

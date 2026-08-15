@@ -35,17 +35,15 @@ export function AppointmentSummarySkeleton() {
         <Skeleton className="h-5 w-5 rounded" />
       </div>
 
-      {/* Tabs bar – 5 pill tabs */}
+      {/* Tabs bar */}
       <div className="bg-[#F9F9F9] p-1 rounded-full flex gap-1 overflow-x-auto no-scrollbar">
-        {['SOAP notes', 'Lab Results', 'Forms', 'HIE Records', 'Vitals'].map(
-          (label) => (
-            <Skeleton
-              key={label}
-              className="flex-1 h-10 rounded-full"
-              style={{ minWidth: 72 }}
-            />
-          )
-        )}
+        {['SOAP notes', 'Vitals'].map((label) => (
+          <Skeleton
+            key={label}
+            className="flex-1 h-10 rounded-full"
+            style={{ minWidth: 72 }}
+          />
+        ))}
       </div>
 
       {/* Content area – mirrors the SOAP notes default tab */}

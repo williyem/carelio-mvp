@@ -1,34 +1,65 @@
+import { useState } from 'react';
 import { useRouter } from 'nextjs-toploader/app';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { API_ENDPOINTS, ROUTES } from '@/lib/routes';
-import { useLoginPatient } from '@/integration/auth/patient';
+import {
+  useLoginPatient,
+  useVerifyPatientLoginEmail,
+} from '@/integration/auth/patient';
 import { getErrorMessage } from '@/integration';
-import { PatientId } from '@/integration/auth/patient/types';
+import { isPatientRegistrationIncomplete } from '@/components/onboarding/patient-onboarding-gate';
 import axios from 'axios';
 
 const patientLoginSchema = z.object({
-  patientId: z
+  identifier: z.string().min(1, 'Patient ID or email is required'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+const otpSchema = z.object({
+  otp: z
     .string()
-    .min(1, 'Patient ID is required')
-    .min(3, 'Patient ID must be at least 3 characters')
-    .max(50, 'Patient ID must be less than 50 characters'),
+    .min(6, 'Enter the 6-digit code')
+    .max(6)
+    .regex(/^\d+$/, 'Code must be numbers'),
 });
 
 export type PatientLoginFormData = z.infer<typeof patientLoginSchema>;
 
+function goToPatientHome(
+  router: ReturnType<typeof useRouter>,
+  user: { isRegistrationComplete?: boolean } | undefined
+) {
+  router.push(
+    isPatientRegistrationIncomplete(user)
+      ? ROUTES.PATIENT.ONBOARDING
+      : ROUTES.PATIENT.ROOT
+  );
+}
+
 export function usePatientLoginForm() {
   const router = useRouter();
-  const { mutate: loginPatient, isPending } = useLoginPatient();
+  const { mutate: loginPatient, isPending: isLoginPending } = useLoginPatient();
+  const { mutate: verifyEmail, isPending: isVerifyPending } =
+    useVerifyPatientLoginEmail();
+  const [showPassword, setShowPassword] = useState(false);
+  const [pendingPatientId, setPendingPatientId] = useState<string | null>(null);
 
   const form = useForm<PatientLoginFormData>({
     resolver: zodResolver(patientLoginSchema),
     mode: 'onChange',
     defaultValues: {
-      patientId: '',
+      identifier: '',
+      password: '',
     },
+  });
+
+  const otpForm = useForm<z.infer<typeof otpSchema>>({
+    resolver: zodResolver(otpSchema),
+    mode: 'onChange',
+    defaultValues: { otp: '' },
   });
 
   const onSubmitForm = async (data: PatientLoginFormData) => {
@@ -39,36 +70,40 @@ export function usePatientLoginForm() {
     }
 
     loginPatient(
-      { patientId: data.patientId as PatientId },
+      { identifier: data.identifier, password: data.password },
       {
-        onSuccess: async (response) => {
-          try {
-            // Cookie-only second call when backend returned tokens but BFF did not set cookies yet
-            if (response?.tokenData?.access?.token && response?.user?.id) {
-              // Dummy login already set cookies; calling again is idempotent
-              await axios.post(
-                API_ENDPOINTS.login,
-                {
-                  accessToken: response.tokenData.access.token,
-                  refreshToken: response.tokenData.refresh.token,
-                  id: response.user.id,
-                },
-                {
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                }
-              );
-            }
+        onSuccess: (response) => {
+          if (
+            'requiresEmailVerification' in response &&
+            response.requiresEmailVerification
+          ) {
+            setPendingPatientId(response.patientId);
+            toast.success('Enter the code sent to your email');
+            return;
+          }
+          toast.success('Login successful');
+          goToPatientHome(router, response.user);
+        },
+        onError: (error) => {
+          toast.error(getErrorMessage(error, 'Invalid credentials'));
+        },
+      }
+    );
+  };
+
+  const onSubmitOtp = (data: z.infer<typeof otpSchema>) => {
+    if (!pendingPatientId) return;
+    verifyEmail(
+      { patientId: pendingPatientId, otp: data.otp },
+      {
+        onSuccess: (response) => {
+          if ('user' in response && response.user) {
             toast.success('Login successful');
-            router.push(ROUTES.PATIENT.ROOT);
-          } catch (error) {
-            toast.error('Failed to login. Please try again.');
-            console.error('Login error:', error);
+            goToPatientHome(router, response.user);
           }
         },
         onError: (error) => {
-          toast.error(getErrorMessage(error, 'Invalid patient ID'));
+          toast.error(getErrorMessage(error, 'Invalid or expired code'));
         },
       }
     );
@@ -78,6 +113,12 @@ export function usePatientLoginForm() {
     register: form.register,
     handleSubmit: form.handleSubmit(onSubmitForm),
     formState: form.formState,
-    isPending,
+    showPassword,
+    setShowPassword,
+    isPending: isLoginPending || isVerifyPending,
+    pendingPatientId,
+    otpRegister: otpForm.register,
+    handleOtpSubmit: otpForm.handleSubmit(onSubmitOtp),
+    otpFormState: otpForm.formState,
   };
 }

@@ -36,3 +36,14 @@ export const confirmVitals = async (
   );
   return extractResponseData(response);
 };
+
+export const rejectVitals = async (
+  appointmentId: string,
+  data: ConfirmVitalsRequest
+): Promise<void> => {
+  const response = await apiClient.post<ApiResponse<void>>(
+    VITALS_API_ENDPOINTS.REJECT.replace(':appointmentId', appointmentId),
+    data
+  );
+  return extractResponseData(response);
+};

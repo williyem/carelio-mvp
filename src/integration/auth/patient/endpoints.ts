@@ -8,6 +8,9 @@ const PATIENT_AUTH_BASE = '/auth/patient' as const;
 
 export const PATIENT_ENDPOINTS = {
   LOGIN: `${PATIENT_AUTH_BASE}/login`,
+  VERIFY_LOGIN_EMAIL: `${PATIENT_AUTH_BASE}/verify-login-email`,
+  FORGOT_PASSWORD: `${PATIENT_AUTH_BASE}/forgot-password`,
+  RESET_PASSWORD: `${PATIENT_AUTH_BASE}/reset-password`,
   REFRESH_TOKEN: `${PATIENT_AUTH_BASE}/refresh`,
   LOGOUT: `${PATIENT_AUTH_BASE}/logout`,
   SESSION: `${PATIENT_AUTH_BASE}/session`,

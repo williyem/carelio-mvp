@@ -46,9 +46,11 @@ export default function ReleaseOfInformationStep() {
       <div className="space-y-6 text-left">
         <div className="space-y-4 text-[14px] leading-relaxed text-text-strong-950">
           <p>
-            I authorize CAREX to release information for treatment, billing, and
-            healthcare operations and care coordination. Substance-use treatment
-            information (42 CFR Part 2) requires separate written consent.
+            I authorize Carelio to release information for treatment, billing,
+            NHIS or private scheme claims, and care coordination to my treating
+            clinician and assigned health assistants on the Carelio care team.
+            Especially sensitive information may require separate written
+            consent where required by law.
           </p>
         </div>
 

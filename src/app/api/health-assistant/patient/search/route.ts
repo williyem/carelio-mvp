@@ -20,23 +20,18 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search') || '';
     const page = searchParams.get('page') || '1';
     const limit = searchParams.get('limit') || '10';
-    const assistantId = searchParams.get('assistantId') || '';
 
-    const response = await backendApiClient.get(
-      `${API_BASE_URL}/patients/assigned`,
-      {
-        params: {
-          search,
-          page,
-          limit,
-          assistantId,
-        },
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          ...USER_TYPE_HEADER,
-        },
-      }
-    );
+    const response = await backendApiClient.get(`${API_BASE_URL}/patients`, {
+      params: {
+        search,
+        page,
+        limit,
+      },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        ...USER_TYPE_HEADER,
+      },
+    });
 
     return NextResponse.json(response.data);
   } catch (error: unknown) {

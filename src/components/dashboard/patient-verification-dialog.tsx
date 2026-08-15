@@ -1,54 +1,63 @@
 'use client';
 
 import { toast } from 'sonner';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertDialog, AlertDialogContent } from '@/components/ui/alert-dialog';
 import { VerificationStepData } from '@/types/verification.types';
 import { useMultiStep } from '@/hooks/use-multi-step';
 import VerificationDialogHeader from './verification/verification-dialog-header';
 import VerificationDialogCloseButton from './verification/verification-dialog-close-button';
 import VerificationSteps from './verification/verification-steps';
-import useHealthAssistantMutations from '@/integration/health-assistant/mutations';
 import { usePatientVerificationStore } from '@/stores/patient-verifcation-store';
+import {
+  staffVerifyPatientCode,
+  staffVerifyPatientEmail,
+  type StaffPortal,
+} from '@/integration/patient/api-function';
 
 interface PatientVerificationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  portal?: StaffPortal;
+  onLinked?: () => void;
 }
 
 const PatientVerificationDialog = ({
   open,
   onOpenChange,
+  portal = 'health-assistant',
+  onLinked,
 }: PatientVerificationDialogProps) => {
   const { currentStep, stepData, next, goToStep, updateStepData, reset } =
     useMultiStep<VerificationStepData>({
       initialStep: 0,
-      totalSteps: 3,
+      totalSteps: 2,
       initialData: {
         method: 'email',
         contactValue: '',
       },
     });
 
+  const queryClient = useQueryClient();
   const { selectedPatient: patient } = usePatientVerificationStore();
 
-  const {
-    verifyPatientEmailMutation,
-    verifyPatientCodeMutation,
-    assignHealthAssistantMutation,
-  } = useHealthAssistantMutations();
+  const sendCodeMutation = useMutation({
+    mutationFn: (patientId: string) =>
+      staffVerifyPatientEmail(patientId, portal),
+  });
+  const verifyCodeMutation = useMutation({
+    mutationFn: ({ patientId, code }: { patientId: string; code: string }) =>
+      staffVerifyPatientCode(patientId, code, portal),
+  });
 
   const handleEmailSendCode = async () => {
     if (!patient) return;
-    if (patient.emailVerified) {
-      toast.error('Patient already verified');
-      return;
-    }
-    verifyPatientEmailMutation.mutate(patient.id, {
+    sendCodeMutation.mutate(patient.id, {
       onSuccess: () => {
         toast.success('Verification code sent successfully');
         updateStepData({
           method: 'email',
-          contactValue: patient?.email,
+          contactValue: patient.email || 'the email on file',
         });
         next();
       },
@@ -60,17 +69,16 @@ const PatientVerificationDialog = ({
 
   const handleVerifyCode = async (code: string) => {
     if (!patient) return;
-    if (patient.emailVerified) {
-      toast.error('Patient already verified');
-      return;
-    }
-    verifyPatientCodeMutation.mutate(
-      { patientId: patient.id, code, type: 'email' },
+    verifyCodeMutation.mutate(
+      { patientId: patient.id, code },
       {
         onSuccess: () => {
-          toast.success('Verification code verified successfully');
+          toast.success('Access granted for 24 hours');
           updateStepData({ verificationCode: code });
-          next();
+          queryClient.invalidateQueries();
+          onOpenChange(false);
+          reset();
+          onLinked?.();
         },
         onError: () => {
           toast.error('Failed to verify code');
@@ -79,35 +87,8 @@ const PatientVerificationDialog = ({
     );
   };
 
-  const handleAssignClinician = async (clinicianId: string) => {
-    if (!patient) return;
-
-    assignHealthAssistantMutation.mutate(
-      { patientId: patient.id, assistantId: clinicianId },
-      {
-        onSuccess: () => {
-          toast.success('Medical assistant assigned successfully');
-          onOpenChange(false);
-          reset();
-        },
-        onError: () => {
-          toast.error('Failed to assign medical assistant', {
-            description:
-              'Please try again or contact support if the issue persists.',
-          });
-        },
-      }
-    );
-  };
-
   const isSubmitting =
-    verifyPatientEmailMutation.isPending ||
-    verifyPatientCodeMutation.isPending ||
-    assignHealthAssistantMutation.isPending;
-
-  const handleUseDifferentMethod = () => {
-    goToStep(0);
-  };
+    sendCodeMutation.isPending || verifyCodeMutation.isPending;
 
   const handleClose = () => {
     onOpenChange(false);
@@ -133,8 +114,7 @@ const PatientVerificationDialog = ({
             stepData={stepData}
             onEmailSendCode={handleEmailSendCode}
             onVerifyCode={handleVerifyCode}
-            onAssignClinician={handleAssignClinician}
-            onUseDifferentMethod={handleUseDifferentMethod}
+            onUseDifferentMethod={() => goToStep(0)}
             isSubmitting={isSubmitting}
           />
         </div>

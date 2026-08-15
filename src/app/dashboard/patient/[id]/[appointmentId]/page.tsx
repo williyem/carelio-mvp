@@ -3,26 +3,22 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { use, useState } from 'react';
-import { ArrowLeft, Search, History, Database, Info } from 'lucide-react';
+import { ArrowLeft, Search } from 'lucide-react';
 import { AppointmentSummarySkeleton } from '@/components/skeletons/appointment-summary-skeleton';
 import { useGetPatientById } from '@/integration/patient';
-import {
-  AppointmentNote,
-  useGetAppointmentById,
-} from '@/integration/appointments';
+import { SoapNote, useGetAppointmentById } from '@/integration/appointments';
 import { cn } from '@/lib/utils';
-import HealthRecordRow from '@/components/video-call/health-record-row';
+import AppointmentSummaryHeader from '@/components/video-call/appointment-summary-header';
 import PostConsultationPageDetails from '@/components/video-call/post-consultation-page-details';
 import VitalsTab from '@/components/video-call/vitals-tab';
+import ConsultationNoteActions from '@/components/video-call/consultation-note-actions';
+import { soapFieldsFromNote } from '@/components/video-call/post-consultation-details';
 import { useGetConsultationNoteByAppointment } from '@/integration/appointments/queries/useGetConsultationNoteByAppointment';
 import { EmptyState } from '@/components/ui/empty-state';
+import { useSoapDraftStore } from '@/stores/soap-draft-store';
+import useUser from '@/hooks/useUser';
 
-type TabType =
-  | 'SOAP notes'
-  | 'Lab Results'
-  | 'Forms'
-  | 'HIE Records'
-  | 'Vitals';
+type TabType = 'SOAP notes' | 'Vitals';
 
 export default function AppointmentSummaryPage({
   params,
@@ -32,15 +28,33 @@ export default function AppointmentSummaryPage({
   const resolvedParams = use(params);
   const { id, appointmentId } = resolvedParams;
   const [activeTab, setActiveTab] = useState<TabType>('SOAP notes');
+  const { userId } = useUser();
 
   const { data: patient, isLoading: isLoadingPatient } = useGetPatientById(id);
   const { data: appointment } = useGetAppointmentById(appointmentId);
   const { data: currentNote, isLoading: isLoadingNotes } =
     useGetConsultationNoteByAppointment(appointmentId);
+  const draft = useSoapDraftStore((s) => s.byAppointmentId[appointmentId]);
+
+  const [soapFields, setSoapFields] = React.useState<Required<SoapNote>>(
+    soapFieldsFromNote(currentNote, draft)
+  );
+
+  React.useEffect(() => {
+    setSoapFields(soapFieldsFromNote(currentNote, draft));
+  }, [currentNote, draft]);
 
   if (isLoadingPatient || isLoadingNotes) {
     return <AppointmentSummarySkeleton />;
   }
+
+  const appointmentDoctorId =
+    appointment?.doctorId || appointment?.doctor?.id || '';
+  const canManageNote = Boolean(
+    userId && appointmentDoctorId && userId === appointmentDoctorId
+  );
+  const isDraft = currentNote?.status !== 'FINAL';
+  const canEdit = canManageNote && isDraft;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -53,33 +67,18 @@ export default function AppointmentSummaryPage({
           <span className="text-sm font-medium">Back</span>
         </Link>
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h1 className="text-2xl sm:text-2xl font-bold  text-gray-900">
-            Post-Consultation Summary{' '}
-          </h1>
-        </div>
+        <h1 className="text-2xl font-bold text-gray-900">
+          Post-Consultation Summary
+        </h1>
       </div>
 
-      <HealthRecordRow
-        key={currentNote?.id}
-        note={{ ...currentNote, appointment } as AppointmentNote}
-        selectedNote={null}
-        onSelect={() => {}}
-        viewOnly={true}
-        patient={patient}
+      <AppointmentSummaryHeader
+        appointment={appointment}
+        patientName={patient?.fullName}
       />
 
-      {/* Tabs Selector */}
       <div className="bg-[#F9F9F9] p-1 rounded-full flex overflow-x-auto no-scrollbar">
-        {(
-          [
-            'SOAP notes',
-            'Lab Results',
-            'Forms',
-            'HIE Records',
-            'Vitals',
-          ] as TabType[]
-        ).map((tab) => (
+        {(['SOAP notes', 'Vitals'] as TabType[]).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -95,69 +94,40 @@ export default function AppointmentSummaryPage({
         ))}
       </div>
 
-      {/* Tab Content */}
-      <div className="min-h-[400px]">
+      <div className="min-h-[400px] space-y-6">
         {activeTab === 'SOAP notes' && (
-          <div className=" border-none bg-white shadow-none">
-            {currentNote ? (
-              <PostConsultationPageDetails
-                note={currentNote}
-                hideVitals={true}
-              />
+          <div className="space-y-6">
+            {currentNote || canEdit ? (
+              <>
+                <PostConsultationPageDetails
+                  note={currentNote ?? null}
+                  hideVitals={true}
+                  editable={canEdit}
+                  soapFields={soapFields}
+                  onSoapChange={(key, value) =>
+                    setSoapFields((prev) => ({ ...prev, [key]: value }))
+                  }
+                />
+                {canManageNote ? (
+                  <ConsultationNoteActions
+                    appointmentId={appointmentId}
+                    note={currentNote ?? null}
+                    soapFields={soapFields}
+                  />
+                ) : null}
+              </>
             ) : (
               <EmptyState
-                icon={<Search className="h-8 w-8 text-gray-300" />}
-                message="No session summary available for this appointment"
+                icon={<Search className="h-6 w-6 text-(--text-muted)" />}
+                title="No session summary available"
+                description="A summary will appear here after the visit notes are saved."
               />
             )}
           </div>
         )}
 
         {activeTab === 'Vitals' && (
-          <div className="max-w-full">
-            <VitalsTab appointmentId={appointmentId} hideTitle={true} />
-          </div>
-        )}
-
-        {activeTab === 'Lab Results' && (
-          <EmptyState
-            icon={<Search className="h-8 w-8 text-gray-300" />}
-            message="No lab results available for this appointment"
-          />
-        )}
-
-        {activeTab === 'Forms' && (
-          <div className="space-y-6">
-            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center gap-3 text-brand-blue font-medium">
-              <Info className="h-5 w-5 shrink-0" />
-              <p className="text-[15px]">
-                Forms are synced with EPIC via API integration
-              </p>
-            </div>
-            <EmptyState
-              icon={<Search className="h-8 w-8 text-gray-300" />}
-              message="No forms available for this appointment"
-            />
-          </div>
-        )}
-
-        {activeTab === 'HIE Records' && (
-          <div className="space-y-6">
-            <div className="bg-[#EEF2FF] border border-blue-100/50 rounded-xl p-4 flex items-center gap-3 text-[#6366F1] font-medium">
-              <Database className="h-5 w-5 shrink-0" />
-              <p className="text-[15px]">
-                Records aggregated from Health Information Exchange
-              </p>
-            </div>
-            <EmptyState
-              icon={
-                <div className="p-4 border-2 border-dashed border-gray-100 rounded-xl">
-                  <History className="h-8 w-8 text-gray-300" />
-                </div>
-              }
-              message="No HIE records available for this appointment"
-            />
-          </div>
+          <VitalsTab appointmentId={appointmentId} hideTitle={true} />
         )}
       </div>
     </div>

@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server';
 import { API_BASE_URL, backendApiClient } from '@/integration/config';
 import { cookies } from 'next/headers';
 import { USER_TYPE_HEADER, doctorAccessToken } from '@/lib/constants';
-import { isDummyDataEnabled } from '@/lib/dummy-data/config';
-import { getStats } from '@/lib/dummy-data/loader';
 
 export async function GET() {
   try {
@@ -12,10 +10,6 @@ export async function GET() {
 
     if (!accessToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    if (isDummyDataEnabled()) {
-      return NextResponse.json(getStats());
     }
 
     const response = await backendApiClient.get(`${API_BASE_URL}/stats`, {

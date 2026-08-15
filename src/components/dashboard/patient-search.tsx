@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import Link from 'next/link';
+import { useRouter } from 'nextjs-toploader/app';
 import {
   Search,
   ChevronRight,
@@ -14,9 +14,19 @@ import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useSearchPatients } from '@/integration/patient';
 import { useDebounce } from '@/hooks/use-debounce';
+import PatientVerificationDialog from '@/components/dashboard/patient-verification-dialog';
+import { toVerificationPatient } from '@/lib/easy';
+import { ROUTES } from '@/lib/routes';
+import { usePatientVerificationStore } from '@/stores/patient-verifcation-store';
+import type { Patient } from '@/integration/patient/type';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export function PatientSearch() {
   const [query, setQuery] = React.useState('');
+  const [showVerificationDialog, setShowVerificationDialog] =
+    React.useState(false);
+  const { setSelectedPatient } = usePatientVerificationStore();
+  const router = useRouter();
 
   const debouncedQuery = useDebounce(query, 300);
 
@@ -26,6 +36,19 @@ export function PatientSearch() {
   );
 
   const results = debouncedQuery ? data?.docs || [] : [];
+
+  const openDetails = (patientId: string) => {
+    router.push(ROUTES.DASHBOARD.PATIENT.DETAILS(patientId));
+  };
+
+  const handleSelect = (patient: Patient) => {
+    if (patient.linked) {
+      openDetails(patient.id);
+      return;
+    }
+    setSelectedPatient(toVerificationPatient(patient));
+    setShowVerificationDialog(true);
+  };
 
   return (
     <div className="relative w-full space-y-4">
@@ -58,10 +81,11 @@ export function PatientSearch() {
             ) : results.length > 0 ? (
               <div className="divide-y divide-gray-50">
                 {results.map((patient) => (
-                  <Link
+                  <button
+                    type="button"
                     key={patient.id}
-                    href={`/dashboard/patient/${patient.id}`}
-                    className="flex items-center justify-between p-4 hover:bg-gray-50 cursor-pointer transition-colors group"
+                    onClick={() => handleSelect(patient)}
+                    className="flex items-center justify-between p-4 hover:bg-gray-50 cursor-pointer transition-colors group w-full text-left"
                   >
                     <div className="flex items-center gap-4">
                       <div className="relative">
@@ -86,20 +110,30 @@ export function PatientSearch() {
                       </div>
                     </div>
                     <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-0.5 transition-all" />
-                  </Link>
+                  </button>
                 ))}
               </div>
             ) : (
-              <div className="p-12 flex flex-col items-center justify-center text-center space-y-3">
-                <div className="h-12 w-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
-                  <Search className="h-6 w-6" />
-                </div>
-                <p className="text-gray-900 font-medium">No patients found</p>
-              </div>
+              <EmptyState
+                className="py-8"
+                icon={<Search className="h-6 w-6 text-(--text-muted)" />}
+                title="No patients found"
+                description="Try another name or patient ID."
+              />
             )}
           </div>
         </Card>
       )}
+      <PatientVerificationDialog
+        open={showVerificationDialog}
+        onOpenChange={setShowVerificationDialog}
+        portal="doctor"
+        onLinked={() => {
+          const patient =
+            usePatientVerificationStore.getState().selectedPatient;
+          if (patient?.id) openDetails(patient.id);
+        }}
+      />
     </div>
   );
 }

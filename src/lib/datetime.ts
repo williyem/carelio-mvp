@@ -3,10 +3,14 @@ import { formatInTimeZone, toZonedTime, fromZonedTime } from 'date-fns-tz';
 
 export function combineDateAndTime(date: string, time: string): string {
   if (!date || !time) return date;
-  const d = new Date(date);
+  const datePart = date.slice(0, 10);
   const [hours, minutes] = time.split(':').map(Number);
-  d.setHours(hours, minutes, 0, 0);
-  return d.toISOString();
+  const year = Number(datePart.slice(0, 4));
+  const month = Number(datePart.slice(5, 7)) - 1;
+  const day = Number(datePart.slice(8, 10));
+  return new Date(
+    Date.UTC(year, month, day, hours || 0, minutes || 0, 0, 0)
+  ).toISOString();
 }
 
 export function extractTimeFromDate(date: string): string {

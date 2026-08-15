@@ -15,18 +15,18 @@ const nextConfig: NextConfig = {
     ],
   },
   env: {
-    // Exposed to the client so auth can reach the backend / honor dummy mode
     API_BASE_URL: process.env.API_BASE_URL || process.env.BASE_URL,
-    USE_DUMMY_DATA: process.env.USE_DUMMY_DATA ?? 'true',
   },
   async headers() {
     return [
       {
+        // credentialless (not require-corp) so third-party images (e.g. Cloudinary
+        // avatars) can load without Cross-Origin-Resource-Policy headers.
         source: '/(.*)',
         headers: [
           {
             key: 'Cross-Origin-Embedder-Policy',
-            value: 'require-corp',
+            value: 'credentialless',
           },
           {
             key: 'Cross-Origin-Opener-Policy',

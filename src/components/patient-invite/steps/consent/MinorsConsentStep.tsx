@@ -62,8 +62,9 @@ export default function MinorsConsentStep() {
       <div className="space-y-6 text-left">
         <div className="space-y-4 text-[14px] leading-relaxed text-text-strong-950">
           <p>
-            For minors, the parent/guardian provides consent unless limited by
-            law. Some services may be confidential for minors under Ohio law.
+            For minors, a parent or legal guardian provides consent unless
+            limited by Ghanaian law. Some services may remain confidential for
+            minors where the law permits.
           </p>
         </div>
 

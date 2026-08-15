@@ -4,13 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/use-debounce';
-import {
-  Search,
-  Loader2,
-  UserPlus,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
+import { Search, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import PatientSearchResultItem from './patient-search-result-item';
 import PatientVerificationDialog from './patient-verification-dialog';
 import SearchSvg from '@/assets/icons/search-svg';
@@ -26,8 +20,8 @@ import useGetUpcomingAppointments from '@/integration/appointments/queries/useGe
 import RecentConsultationRow from './recent-consultation-row';
 import { UpcomingAppointment } from '@/integration/appointments/types';
 import RecentConsultationsSkeleton from '../skeletons/recent-consultations-skeleton';
-import EmptyState from './verification/empty-state';
-import CalendarSvg from '@/assets/icons/calendar-svg';
+import AppointmentsEmptyState from '@/components/dashboard/appointments-empty-state';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface PatientSearchProps {
   placeholder?: string;
@@ -35,7 +29,7 @@ interface PatientSearchProps {
 }
 
 const PatientSearch = ({
-  placeholder = 'Search assigned patients by name or ID',
+  placeholder = 'Search patients by name or ID',
   className,
 }: PatientSearchProps) => {
   const [searchValue, setSearchValue] = useState('');
@@ -85,12 +79,17 @@ const PatientSearch = ({
     setSearchValue(patient.fullName);
     setShowResults(false);
 
-    if (patient.emailVerified === false) {
-      setSelectedPatient(patient);
-      setShowVerificationDialog(true);
-    } else {
+    if (patient.linked) {
       router.push(ROUTES.HEALTH_ASSISTANT.PATIENT.DETAILS(patient.id));
+      return;
     }
+    setSelectedPatient({
+      id: patient.id,
+      fullName: patient.fullName || patient.patientId,
+      email: patient.email || '',
+      linked: patient.linked,
+    });
+    setShowVerificationDialog(true);
   };
 
   const handleRecentConsultationSelect = (appointment: UpcomingAppointment) => {
@@ -121,11 +120,16 @@ const PatientSearch = ({
         className
       )}
     >
-      <div className="flex items-center justify-between w-full">
-        <h1 className="font-bold leading-[1.2] text-(--text-primary) max-md:text-[20px] text-[24px] w-full">
-          Welcome back
-        </h1>
-        <div className="flex items-center justify-end w-full">
+      <div className="flex items-center justify-between w-full gap-4">
+        <div className="min-w-0">
+          <h1 className="font-bold leading-[1.2] text-(--text-primary) max-md:text-[20px] text-[24px]">
+            Welcome back
+          </h1>
+          <p className="mt-1 text-sm text-(--text-secondary)">
+            Search patients and book visits with a doctor.
+          </p>
+        </div>
+        <div className="flex items-center justify-end shrink-0">
           <Button
             onClick={handleAddNewPatient}
             className="text-white cursor-pointer h-[44px] border border-brand-blue bg-brand-blue w-[168px] hover:text-gray-50 rounded-full px-6 py-3 font-normal text-sm flex items-center gap-2 transition-colors"
@@ -176,14 +180,12 @@ const PatientSearch = ({
                 />
               ))
             ) : (
-              <div className="p-12 flex flex-col  w-full items-center justify-center text-center space-y-3">
-                <div className="h-12 w-12 rounded-full  flex items-center  justify-center text-gray-400">
-                  <Search className="h-6 w-6" />
-                </div>
-                <p className="text-(--text-primary) text-sm">
-                  No patients found
-                </p>
-              </div>
+              <EmptyState
+                className="py-8"
+                icon={<Search className="h-6 w-6 text-(--text-muted)" />}
+                title="No patients found"
+                description="Try another name or patient ID."
+              />
             )}
           </div>
         )}
@@ -192,11 +194,19 @@ const PatientSearch = ({
       <PatientVerificationDialog
         open={showVerificationDialog}
         onOpenChange={setShowVerificationDialog}
+        portal="health-assistant"
+        onLinked={() => {
+          const patient =
+            usePatientVerificationStore.getState().selectedPatient;
+          if (patient?.id) {
+            router.push(ROUTES.HEALTH_ASSISTANT.PATIENT.DETAILS(patient.id));
+          }
+        }}
       />
       {!shouldShowResults && (
         <div className="w-full flex flex-col gap-4 mt-8">
           <h2 className="text-base font-normal text-gray-900">
-            Upcoming Consultation
+            Visits you booked
           </h2>
           <div className="flex flex-col gap-3">
             {isLoadingUpcoming ? (
@@ -213,9 +223,9 @@ const PatientSearch = ({
                 )
               )
             ) : (
-              <EmptyState
-                icon={<CalendarSvg />}
-                message="No upcoming appointments found."
+              <AppointmentsEmptyState
+                title="No visits booked yet"
+                description="Open a patient to schedule with a doctor."
               />
             )}
           </div>

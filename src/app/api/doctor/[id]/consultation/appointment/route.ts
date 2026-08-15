@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { backendApiClient } from '@/integration/config';
 import { cookies } from 'next/headers';
-import { doctorAccessToken, USER_TYPE_HEADER } from '@/lib/constants';
+import {
+  doctorAccessToken,
+  healthAssistantAccessToken,
+  USER_TYPE,
+} from '@/lib/constants';
 import { APPOINTMENT_ENDPOINTS } from '@/integration/appointments/endpoints';
-import { isDummyDataEnabled } from '@/lib/dummy-data/config';
-import { getAppointmentById } from '@/lib/dummy-data/loader';
 
 export async function GET(
   _request: NextRequest,
@@ -12,7 +14,9 @@ export async function GET(
 ) {
   try {
     const cookieStore = await cookies();
-    const accessToken = cookieStore.get(doctorAccessToken)?.value;
+    const doctorToken = cookieStore.get(doctorAccessToken)?.value;
+    const assistantToken = cookieStore.get(healthAssistantAccessToken)?.value;
+    const accessToken = doctorToken || assistantToken;
 
     if (!accessToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -27,17 +31,6 @@ export async function GET(
       );
     }
 
-    if (isDummyDataEnabled()) {
-      const appointment = getAppointmentById(id);
-      if (!appointment) {
-        return NextResponse.json(
-          { error: 'Appointment not found' },
-          { status: 404 }
-        );
-      }
-      return NextResponse.json(appointment);
-    }
-
     const endpoint = APPOINTMENT_ENDPOINTS.GET_APPOINTMENT_BY_ID.replace(
       ':id',
       id
@@ -46,7 +39,9 @@ export async function GET(
     const response = await backendApiClient.get(endpoint, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        ...USER_TYPE_HEADER,
+        'x-user-type': doctorToken
+          ? USER_TYPE.doctor
+          : USER_TYPE.healthAssistant,
       },
     });
 

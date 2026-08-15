@@ -5,14 +5,12 @@ import {
   RegisterPatientData,
   RegisteredPatient,
   HealthAssistantResponse,
-  AssignHealthAssistantRequest,
   VerifyPatientResponse,
   DoctorsResponse,
   HealthAssistantStats,
   HealthAssistantProfile,
 } from './types';
 import { Clinician } from '@/types/clinician.types';
-import { AssignedPatient } from '../patient/type';
 import { mapHealthAssistantsToClinicians } from '@/lib/easy';
 
 export const registerPatient = async (
@@ -31,16 +29,6 @@ export const getHealthAssistants = async (): Promise<Clinician[]> => {
   );
   const assistants = extractResponseData(response);
   return mapHealthAssistantsToClinicians(assistants);
-};
-
-export const assignHealthAssistant = async (
-  data: AssignHealthAssistantRequest
-): Promise<AssignedPatient> => {
-  const response = await apiClient.post<ApiResponse<AssignedPatient>>(
-    HEALTH_ASSISTANT_API_ENDPOINTS.ASSIGN_HEALTH_ASSISTANT,
-    data
-  );
-  return extractResponseData(response);
 };
 
 export const verifyPatientPhone = async (

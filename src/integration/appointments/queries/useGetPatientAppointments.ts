@@ -13,13 +13,14 @@ const useGetPatientAppointments = (
   enabled: boolean = true,
   page: number = 1,
   limit: number = 10,
-  portal: AppointmentsPortal = 'doctor'
+  portal: AppointmentsPortal = 'doctor',
+  upcoming?: boolean
 ) => {
   const { data, isLoading, error } = useQuery({
     queryKey: [
       ...APPOINTMENT_QUERY_KEYS.GET_PATIENT_APPOINTMENTS(
         patientId,
-        status,
+        upcoming ? 'UPCOMING' : status,
         page,
         limit
       ),
@@ -27,8 +28,14 @@ const useGetPatientAppointments = (
     ],
     queryFn: () =>
       portal === 'health-assistant'
-        ? getHealthAssistantPatientAppointments(patientId, status, page, limit)
-        : getPatientAppointments(patientId, status, page, limit),
+        ? getHealthAssistantPatientAppointments(
+            patientId,
+            status,
+            page,
+            limit,
+            upcoming
+          )
+        : getPatientAppointments(patientId, status, page, limit, upcoming),
     enabled: !!patientId && enabled,
   });
 

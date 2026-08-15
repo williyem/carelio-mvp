@@ -17,7 +17,7 @@ const AppointmentsStatsSkeleton = ({
         className
       )}
     >
-      {Array.from({ length: 3 }).map((_, idx) => (
+      {Array.from({ length: 2 }).map((_, idx) => (
         <div
           key={idx}
           className="border border-(--border-stroke) flex flex-col items-start px-5 py-[23px] rounded-[10px] w-full"

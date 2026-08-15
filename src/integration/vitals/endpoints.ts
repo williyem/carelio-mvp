@@ -8,4 +8,5 @@ export const VITALS_API_ENDPOINTS = {
   CREATE: '/vitals/create',
   GET_BY_APPOINTMENT: '/vitals/appointment/:appointmentId/get',
   CONFIRM: '/vitals/appointment/:appointmentId/confirm',
+  REJECT: '/vitals/appointment/:appointmentId/reject',
 } as const;

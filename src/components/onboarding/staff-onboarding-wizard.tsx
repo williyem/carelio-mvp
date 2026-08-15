@@ -13,6 +13,7 @@ import OnboardingTopbar from '@/components/onboarding/onboarding-topbar';
 import { OnboardingStepCard } from '@/components/onboarding/onboarding-step-card';
 import { generateSignatureImage } from '@/lib/signatureGenerator';
 import { buildProviderAgreementPdf } from '@/lib/provider-agreement-pdf';
+import { getStaffAgreements } from '@/lib/legal/carelio-agreements';
 import {
   emptyStaffProfile,
   type StaffProfile,
@@ -34,9 +35,16 @@ const LABEL_CLASS =
 const FIELD_CLASS =
   'bg-transparent border-(--border-light) h-[44px] rounded-[8px] shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]';
 
+const COMMON_TIMEZONES = [
+  'Africa/Accra',
+  'Africa/Lagos',
+  'Africa/Abidjan',
+  'Africa/Lome',
+  'UTC',
+];
+
 export default function StaffOnboardingWizard({
   role,
-  userId: _userId,
   defaults,
   homeHref,
 }: {
@@ -53,13 +61,28 @@ export default function StaffOnboardingWizard({
   const [signedName, setSignedName] = useState('');
   const [signature, setSignature] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const agreements = getStaffAgreements(role);
 
   const { register, handleSubmit, reset, getValues } = useForm<StaffProfile>({
-    defaultValues: { ...emptyStaffProfile(), ...defaults },
+    defaultValues: {
+      ...emptyStaffProfile(),
+      timezone:
+        defaults?.timezone ||
+        Intl.DateTimeFormat().resolvedOptions().timeZone ||
+        'Africa/Accra',
+      ...defaults,
+    },
   });
 
   useEffect(() => {
-    reset({ ...emptyStaffProfile(), ...defaults });
+    reset({
+      ...emptyStaffProfile(),
+      timezone:
+        defaults?.timezone ||
+        Intl.DateTimeFormat().resolvedOptions().timeZone ||
+        'Africa/Accra',
+      ...defaults,
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaults?.firstName, defaults?.lastName, defaults?.phone, reset]);
 
@@ -134,7 +157,9 @@ export default function StaffOnboardingWizard({
           <div className="space-y-3 mb-6">
             <h2 className="text-[24px] font-bold">1. Set up your profile</h2>
             <p className="font-normal text-text-secondary">
-              Tell us about your practice before you start seeing patients.
+              {role === 'doctor'
+                ? 'Tell us about your practice before you start seeing patients.'
+                : 'Tell us how to identify you before you support patients and clinicians.'}
             </p>
           </div>
           <form
@@ -149,7 +174,7 @@ export default function StaffOnboardingWizard({
                 <Input
                   id="firstName"
                   className={FIELD_CLASS}
-                  {...register('firstName')}
+                  {...register('firstName', { required: true })}
                 />
               </div>
               <div className="flex flex-col gap-2 items-start w-full">
@@ -159,75 +184,86 @@ export default function StaffOnboardingWizard({
                 <Input
                   id="lastName"
                   className={FIELD_CLASS}
-                  {...register('lastName')}
+                  {...register('lastName', { required: true })}
                 />
               </div>
             </div>
             <div className="flex flex-col gap-2 items-start w-full">
               <Label htmlFor="title" className={LABEL_CLASS}>
-                Title
+                Professional title
               </Label>
               <Input
                 id="title"
+                placeholder={
+                  role === 'doctor'
+                    ? 'e.g. MD, Consultant'
+                    : 'e.g. Health Assistant'
+                }
                 className={FIELD_CLASS}
                 {...register('title')}
               />
             </div>
             {role === 'doctor' && (
-              <>
-                <div className="flex flex-col gap-2 items-start w-full">
-                  <Label htmlFor="specialty" className={LABEL_CLASS}>
-                    Specialty
-                  </Label>
-                  <Input
-                    id="specialty"
-                    className={FIELD_CLASS}
-                    {...register('specialty')}
-                  />
-                </div>
-                <div className="flex flex-col gap-2 items-start w-full">
-                  <Label htmlFor="clinicName" className={LABEL_CLASS}>
-                    Clinic name
-                  </Label>
-                  <Input
-                    id="clinicName"
-                    className={FIELD_CLASS}
-                    {...register('clinicName')}
-                  />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-                  <div className="flex flex-col gap-2 items-start w-full">
-                    <Label htmlFor="npi" className={LABEL_CLASS}>
-                      NPI
-                    </Label>
-                    <Input
-                      id="npi"
-                      className={FIELD_CLASS}
-                      {...register('npi')}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2 items-start w-full">
-                    <Label htmlFor="licenseNumber" className={LABEL_CLASS}>
-                      License number
-                    </Label>
-                    <Input
-                      id="licenseNumber"
-                      className={FIELD_CLASS}
-                      {...register('licenseNumber')}
-                    />
-                  </div>
-                </div>
-              </>
+              <div className="flex flex-col gap-2 items-start w-full">
+                <Label htmlFor="specialty" className={LABEL_CLASS}>
+                  Specialty
+                </Label>
+                <Input
+                  id="specialty"
+                  className={FIELD_CLASS}
+                  {...register('specialty')}
+                />
+              </div>
             )}
             <div className="flex flex-col gap-2 items-start w-full">
-              <Label htmlFor="phone" className={LABEL_CLASS}>
-                Phone
+              <Label htmlFor="clinicName" className={LABEL_CLASS}>
+                {role === 'doctor' ? 'Clinic / practice name' : 'Facility name'}
               </Label>
               <Input
-                id="phone"
+                id="clinicName"
                 className={FIELD_CLASS}
-                {...register('phone')}
+                {...register('clinicName')}
               />
+            </div>
+            {role === 'doctor' && (
+              <div className="flex flex-col gap-2 items-start w-full">
+                <Label htmlFor="licenseNumber" className={LABEL_CLASS}>
+                  Professional licence number
+                </Label>
+                <Input
+                  id="licenseNumber"
+                  className={FIELD_CLASS}
+                  {...register('licenseNumber')}
+                />
+              </div>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+              <div className="flex flex-col gap-2 items-start w-full">
+                <Label htmlFor="phone" className={LABEL_CLASS}>
+                  Phone
+                </Label>
+                <Input
+                  id="phone"
+                  className={FIELD_CLASS}
+                  {...register('phone', { required: true })}
+                />
+              </div>
+              <div className="flex flex-col gap-2 items-start w-full">
+                <Label htmlFor="timezone" className={LABEL_CLASS}>
+                  Timezone
+                </Label>
+                <select
+                  id="timezone"
+                  className={`${FIELD_CLASS} w-full px-3`}
+                  {...register('timezone', { required: true })}
+                >
+                  {COMMON_TIMEZONES.map((tz) => (
+                    <option key={tz} value={tz}>
+                      {tz}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
             <Button
               type="submit"
@@ -241,24 +277,26 @@ export default function StaffOnboardingWizard({
       ) : (
         <OnboardingStepCard
           title="2. Review and sign"
-          description="Sign the Business Associate Agreement and telehealth provider terms."
+          description={
+            role === 'doctor'
+              ? 'Review Carelio provider terms, then sign electronically.'
+              : 'Review Carelio health-assistant terms, then sign electronically.'
+          }
           onNext={onSign}
           isSubmitting={isSubmitting}
           nextDisabled={!agreed || !signedName.trim()}
           secondaryAction={{ label: 'Back', onClick: () => setStep(1) }}
         >
           <div className="space-y-6 text-left">
-            <div className="space-y-4 text-[14px] leading-relaxed text-text-strong-950">
-              <p className="font-semibold">Provider agreement</p>
-              <p>
-                I agree to Carelio&apos;s Business Associate Agreement,
-                telehealth practice standards, and privacy obligations. I
-                confirm the information I provided is accurate.
-              </p>
-              <p>
-                I will obtain informed consent before treating patients via
-                telehealth and will keep clinical documentation in the chart.
-              </p>
+            <div className="max-h-[320px] overflow-y-auto rounded-[8px] border border-gray-100 p-4 space-y-5 text-[14px] leading-relaxed text-text-strong-950">
+              {agreements.map((section) => (
+                <div key={section.title} className="space-y-2">
+                  <p className="font-semibold">{section.title}</p>
+                  {section.paragraphs.map((paragraph) => (
+                    <p key={paragraph.slice(0, 48)}>{paragraph}</p>
+                  ))}
+                </div>
+              ))}
             </div>
 
             <div className="pt-4 space-y-4 border-t border-gray-100">
@@ -286,14 +324,14 @@ export default function StaffOnboardingWizard({
                   htmlFor="provider-agreement"
                   className="typography-paragraph-small text-text-strong-950 leading-normal cursor-pointer"
                 >
-                  I agree to electronically sign this document using my printed
-                  name above
+                  I have read and agree to the Carelio terms above, and I
+                  electronically sign using my printed name
                 </label>
               </div>
 
               <div>
                 <div className="typography-paragraph-medium font-normal mb-1">
-                  Provider Signature:
+                  Signature:
                 </div>
                 <div className="border-b-2 border-dotted border-gray-400 w-full max-w-[300px] h-[60px] relative mb-2 min-w-[200px] flex items-center">
                   {signature ? (

@@ -18,6 +18,7 @@ import {
 import type { Appointment } from '@/integration/appointments/types';
 import { formatTimeFromISO } from '@/lib/easy';
 import { AppointmentDetailsPopup } from './appointment-details-popup';
+import { APPOINTMENT_STATUS_PRIORITY } from '@/lib/appointment-status';
 
 export function MonthView({
   appointments,
@@ -76,16 +77,11 @@ export function MonthView({
                     }
                   })
                   .sort((a, b) => {
-                    const statusPriority: Record<string, number> = {
-                      CANCELLED: 0,
-                      MISSED: 1,
-                      PENDING_CONFIRMATION: 2,
-                      COMPLETED: 3,
-                      CONFIRMED: 4,
-                    };
-                    const priorityA = statusPriority[a.status] ?? 0;
-                    const priorityB = statusPriority[b.status] ?? 0;
-                    return priorityB - priorityA; // Descending for Month list to show most important first
+                    const priorityA =
+                      APPOINTMENT_STATUS_PRIORITY[a.status] ?? 0;
+                    const priorityB =
+                      APPOINTMENT_STATUS_PRIORITY[b.status] ?? 0;
+                    return priorityB - priorityA;
                   })
               : [];
 

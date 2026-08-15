@@ -133,9 +133,10 @@ export default function FinalAcknowledgmentStep({
       <div className="space-y-6 text-left">
         <div className="space-y-4 text-[14px] leading-relaxed text-text-strong-950">
           <p>
-            I acknowledge that I have read and understand this Patient Consent
-            Packet and agree to the terms. I understand this consent applies to
-            all CAREX providers, including those located in other states.
+            I acknowledge that I have read and agree to Carelio’s privacy
+            practices, telehealth consent, and related terms for care delivered
+            in Ghana, and that care may be delivered by Carelio-affiliated
+            providers.
           </p>
         </div>
 

@@ -12,6 +12,7 @@ import {
 import type { Appointment } from '@/integration/appointments/types';
 import { calculateDuration, getDynamicWorkingHours } from '@/lib/easy';
 import { EventCard } from './event-card';
+import { APPOINTMENT_STATUS_PRIORITY } from '@/lib/appointment-status';
 
 export function WeekView({
   appointments,
@@ -88,14 +89,6 @@ export function WeekView({
 
           {/* Day columns */}
           {days.map((day, j) => {
-            const statusPriority: Record<string, number> = {
-              CANCELLED: 0,
-              MISSED: 1,
-              PENDING_CONFIRMATION: 2,
-              COMPLETED: 3,
-              CONFIRMED: 4,
-            };
-
             const dayAppointments = appointments
               .filter((apt) => {
                 if (!apt.startTime || !apt.endTime) return false;
@@ -106,8 +99,8 @@ export function WeekView({
                 }
               })
               .sort((a, b) => {
-                const priorityA = statusPriority[a.status] ?? 0;
-                const priorityB = statusPriority[b.status] ?? 0;
+                const priorityA = APPOINTMENT_STATUS_PRIORITY[a.status] ?? 0;
+                const priorityB = APPOINTMENT_STATUS_PRIORITY[b.status] ?? 0;
                 return priorityA - priorityB;
               });
 

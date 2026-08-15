@@ -40,6 +40,7 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
         value,
         inputClassName,
         countryButtonClassName,
+        defaultCountry = 'GH',
         ...props
       },
       ref
@@ -82,6 +83,7 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
           countrySelectComponent={CustomCountrySelect}
           inputComponent={CustomInputComponent}
           smartCaret={false}
+          defaultCountry={defaultCountry}
           value={value || undefined}
           /**
            * Handles the onChange event.
@@ -149,7 +151,7 @@ const CountrySelect = ({
           type="button"
           variant="outline"
           className={cn(
-            'flex gap-1 rounded-e-none rounded-s-[8px] border-r-0 px-3 h-[44px] focus:z-10 focus-visible:outline-none disabled:opacity-15 focus-visible:ring-2 focus-visible:ring-carex-blue-600 focus-visible:ring-offset-2',
+            'flex gap-1 rounded-e-none rounded-s-[8px] border-r-0 px-3 h-[44px] focus:z-10 focus-visible:outline-none disabled:opacity-15 focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2',
             buttonClassName ||
               'bg-(--bg-input) border-(--border-stroke) hover:bg-(--bg-input)'
           )}

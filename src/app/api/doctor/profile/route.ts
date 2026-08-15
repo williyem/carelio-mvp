@@ -4,8 +4,6 @@ import { API_BASE_URL } from '@/integration/config';
 import { DOCTOR_ENDPOINTS } from '@/integration/doctor/endpoint';
 import { cookies } from 'next/headers';
 import { doctorAccessToken } from '@/lib/constants';
-import { isDummyDataEnabled } from '@/lib/dummy-data/config';
-import { getDoctorProfile } from '@/lib/dummy-data/loader';
 
 export async function GET() {
   try {
@@ -14,10 +12,6 @@ export async function GET() {
 
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    if (isDummyDataEnabled()) {
-      return NextResponse.json(getDoctorProfile());
     }
 
     const response = await axios.get(
