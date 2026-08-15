@@ -10,8 +10,8 @@ const BloodTypeSvg = ({ className }: BloodTypeSvgProps = {}) => {
       className={className}
       width={13}
       height={13}
-      fill="#020F17"
-      stroke="#020F17"
+      fill="currentColor"
+      stroke="currentColor"
     />
   );
 };

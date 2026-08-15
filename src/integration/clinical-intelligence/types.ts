@@ -32,3 +32,18 @@ export type ExtractMeasurementsResponse = MeasurementState & {
   strategy: 'ai' | 'rules';
   degraded: boolean;
 };
+
+export type PatientAiSummary = {
+  summary: string;
+  noteCount: number;
+  generatedAt: string;
+  generatedByDoctorId?: string | null;
+  cached?: boolean;
+};
+
+export type VisitAiSummary = {
+  summary: string;
+  generatedAt: string;
+  generatedByDoctorId?: string | null;
+  cached?: boolean;
+};

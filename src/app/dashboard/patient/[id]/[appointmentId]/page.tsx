@@ -13,12 +13,13 @@ import PostConsultationPageDetails from '@/components/video-call/post-consultati
 import VitalsTab from '@/components/video-call/vitals-tab';
 import ConsultationNoteActions from '@/components/video-call/consultation-note-actions';
 import { soapFieldsFromNote } from '@/components/video-call/post-consultation-details';
+import VisitAiSummaryTab from '@/components/video-call/visit-ai-summary-tab';
 import { useGetConsultationNoteByAppointment } from '@/integration/appointments/queries/useGetConsultationNoteByAppointment';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useSoapDraftStore } from '@/stores/soap-draft-store';
 import useUser from '@/hooks/useUser';
 
-type TabType = 'SOAP notes' | 'Vitals';
+type TabType = 'SOAP notes' | 'Vitals' | 'AI summary';
 
 export default function AppointmentSummaryPage({
   params,
@@ -78,7 +79,7 @@ export default function AppointmentSummaryPage({
       />
 
       <div className="bg-(--bg-primary) p-1 rounded-full flex overflow-x-auto no-scrollbar">
-        {(['SOAP notes', 'Vitals'] as TabType[]).map((tab) => (
+        {(['SOAP notes', 'Vitals', 'AI summary'] as TabType[]).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -128,6 +129,14 @@ export default function AppointmentSummaryPage({
 
         {activeTab === 'Vitals' && (
           <VitalsTab appointmentId={appointmentId} hideTitle={true} />
+        )}
+
+        {activeTab === 'AI summary' && (
+          <VisitAiSummaryTab
+            appointmentId={appointmentId}
+            note={currentNote ?? null}
+            soapFields={soapFields}
+          />
         )}
       </div>
     </div>

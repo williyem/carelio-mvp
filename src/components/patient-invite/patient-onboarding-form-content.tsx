@@ -103,7 +103,7 @@ const PatientOnboardingFormContent = ({
         <div className="flex flex-col gap-2 items-start w-full">
           <Label
             htmlFor="fullName"
-            className="text-[12px] leading-[16px] font-medium text-sm flex items-center gap-2"
+            className="flex items-center gap-2 text-[12px] text-sm font-medium leading-[16px] text-(--text-secondary)"
           >
             <FullNameSvg />
             Full Name
@@ -125,7 +125,7 @@ const PatientOnboardingFormContent = ({
         <div className="flex flex-col gap-2 items-start w-full">
           <Label
             htmlFor="dateOfBirth"
-            className="text-[12px] leading-[16px] font-medium text-sm flex items-center gap-2"
+            className="flex items-center gap-2 text-[12px] text-sm font-medium leading-[16px] text-(--text-secondary)"
           >
             <DateOfBirthSvg />
             Date of Birth
@@ -178,7 +178,7 @@ const PatientOnboardingFormContent = ({
         <div className="flex flex-col gap-2 items-start w-full">
           <Label
             htmlFor="gender"
-            className="text-[12px] leading-[16px] font-medium text-sm flex items-center gap-2"
+            className="flex items-center gap-2 text-[12px] text-sm font-medium leading-[16px] text-(--text-secondary)"
           >
             <GenderIconSvg />
             Gender
@@ -216,7 +216,7 @@ const PatientOnboardingFormContent = ({
         <div className="flex flex-col gap-2 items-start w-full">
           <Label
             htmlFor="email"
-            className="text-[12px] leading-[16px] font-medium text-sm flex items-center gap-2"
+            className="flex items-center gap-2 text-[12px] text-sm font-medium leading-[16px] text-(--text-secondary)"
           >
             <EmailIconSvg />
             Email
@@ -238,7 +238,7 @@ const PatientOnboardingFormContent = ({
         <div className="flex flex-col gap-2 items-start w-full">
           <Label
             htmlFor="phoneNumber"
-            className="text-[12px] leading-[16px] font-medium text-sm flex items-center gap-2"
+            className="flex items-center gap-2 text-[12px] text-sm font-medium leading-[16px] text-(--text-secondary)"
           >
             <PhoneNumberSvg />
             Phone Number
@@ -290,7 +290,7 @@ const PatientOnboardingFormContent = ({
         <div className="flex flex-col gap-2 items-start w-full">
           <Label
             htmlFor="emergencyContact"
-            className="text-[12px] leading-[16px] font-medium text-sm flex items-center gap-2"
+            className="flex items-center gap-2 text-[12px] text-sm font-medium leading-[16px] text-(--text-secondary)"
           >
             Emergency Contact
           </Label>
@@ -310,7 +310,7 @@ const PatientOnboardingFormContent = ({
         <div className="flex flex-col gap-2 items-start w-full">
           <Label
             htmlFor="emergencyContactPhone"
-            className="text-[12px] leading-[16px] font-medium text-sm flex items-center gap-2"
+            className="flex items-center gap-2 text-[12px] text-sm font-medium leading-[16px] text-(--text-secondary)"
           >
             Phone of Emergency Contact
           </Label>

@@ -58,13 +58,13 @@ export function RecentConsultation() {
       ) : recentConsultation ? (
         <Link
           href={`/dashboard/patient/${recentConsultation.patientId}/${recentConsultation?.id}`}
-          className="block"
+          className="group block"
         >
-          <Card className="border border-(--border-stroke) rounded-2xl overflow-hidden cursor-pointer bg-(--bg-white) transition-colors hover:bg-(--bg-primary)/50 shadow-none">
+          <Card className="border border-(--border-stroke) rounded-2xl overflow-hidden cursor-pointer bg-(--bg-white) transition-colors hover:bg-(--bg-primary)/50 shadow-none dark:hover:border-brand-blue/25">
             <CardContent className="p-4 sm:p-5 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <Avatar className="h-12 w-12 border border-blue-50">
-                  <AvatarFallback className="bg-blue-50 text-brand-blue">
+                <Avatar className="h-12 w-12 border border-brand-blue/15 bg-brand-blue/5 dark:border-brand-blue/25 dark:bg-brand-blue/10">
+                  <AvatarFallback className="bg-brand-blue/10 text-brand-blue dark:bg-brand-blue/15 dark:text-sky-300">
                     <User className="h-6 w-6" strokeWidth={1.5} />
                   </AvatarFallback>
                 </Avatar>

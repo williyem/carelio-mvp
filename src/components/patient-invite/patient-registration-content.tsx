@@ -53,7 +53,7 @@ const PatientRegistrationContent = ({
           <div className="flex flex-col gap-2 items-start w-full">
             <Label
               htmlFor="fullName"
-              className="text-[12px] leading-[16px] font-medium text-sm flex items-center gap-2"
+              className="flex items-center gap-2 text-[12px] text-sm font-medium leading-[16px] text-(--text-secondary)"
             >
               <FullNameSvg />
               Full Name
@@ -75,7 +75,7 @@ const PatientRegistrationContent = ({
           <div className="flex flex-col gap-2 items-start w-full">
             <Label
               htmlFor="dateOfBirth"
-              className="text-[12px] leading-[16px] font-medium text-sm flex items-center gap-2"
+              className="flex items-center gap-2 text-[12px] text-sm font-medium leading-[16px] text-(--text-secondary)"
             >
               <DateOfBirthSvg />
               Date of Birth
@@ -91,7 +91,7 @@ const PatientRegistrationContent = ({
                 {...register('dateOfBirth')}
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                <DateOfBirthSvg stroke="#80898E" />
+                <DateOfBirthSvg className="text-(--text-secondary)" />
               </div>
             </div>
             <ErrorMessage message={errors.dateOfBirth?.message} />
@@ -103,7 +103,7 @@ const PatientRegistrationContent = ({
           <div className="flex flex-col gap-2 items-start w-full">
             <Label
               htmlFor="gender"
-              className="text-[12px] leading-[16px] font-medium text-sm flex items-center gap-2"
+              className="flex items-center gap-2 text-[12px] text-sm font-medium leading-[16px] text-(--text-secondary)"
             >
               <GenderIconSvg />
               Gender
@@ -141,7 +141,7 @@ const PatientRegistrationContent = ({
           <div className="flex flex-col gap-2 items-start w-full">
             <Label
               htmlFor="email"
-              className="text-[12px] leading-[16px] font-medium text-sm flex items-center gap-2"
+              className="flex items-center gap-2 text-[12px] text-sm font-medium leading-[16px] text-(--text-secondary)"
             >
               <EmailIconSvg />
               Email
@@ -164,7 +164,7 @@ const PatientRegistrationContent = ({
           <div className="flex flex-col gap-2 items-start w-full">
             <Label
               htmlFor="phoneNumber"
-              className="text-[12px] leading-[16px] font-medium text-sm flex items-center gap-2"
+              className="flex items-center gap-2 text-[12px] text-sm font-medium leading-[16px] text-(--text-secondary)"
             >
               <PhoneNumberSvg />
               Phone Number
@@ -209,7 +209,7 @@ const PatientRegistrationContent = ({
           <div className="flex flex-col gap-2 items-start w-full">
             <Label
               htmlFor="bloodType"
-              className="text-[12px] leading-[16px] font-medium text-sm flex items-center gap-2"
+              className="flex items-center gap-2 text-[12px] text-sm font-medium leading-[16px] text-(--text-secondary)"
             >
               <BloodTypeSvg />
               Blood Type (Optional)

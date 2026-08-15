@@ -1,4 +1,4 @@
-const CalendarSvg = ({ color = '#656060' }: { color?: string }) => {
+const CalendarSvg = ({ color = 'currentColor' }: { color?: string }) => {
   return (
     <>
       <svg

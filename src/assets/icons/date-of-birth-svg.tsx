@@ -5,7 +5,7 @@ interface DateOfBirthSvgProps {
 
 const DateOfBirthSvg = ({
   className,
-  stroke = '#020F17',
+  stroke = 'currentColor',
 }: DateOfBirthSvgProps = {}) => {
   return (
     <svg
