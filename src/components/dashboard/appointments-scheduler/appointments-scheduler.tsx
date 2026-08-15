@@ -96,7 +96,7 @@ export function AppointmentsScheduler() {
             Appointments
           </h2>
           <p className="text-xs text-(--text-muted) mt-1">
-            All times are displayed in Eastern Standard Time (EST)
+            All times are displayed in GMT
           </p>
         </div>
 

@@ -67,7 +67,7 @@ const PostConsultationDetails = ({
 
   if (isShared && !hasSharedNotes) {
     return (
-      <div className="flex flex-col gap-6 h-full">
+      <div className="flex flex-col gap-6 h-full w-full">
         {!hideVitals && appointmentId && (
           <VitalsTab appointmentId={appointmentId} />
         )}
@@ -82,7 +82,7 @@ const PostConsultationDetails = ({
 
   if (!note && !editable) {
     return (
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 w-full">
         {!hideVitals && appointmentId && (
           <VitalsTab appointmentId={appointmentId} />
         )}

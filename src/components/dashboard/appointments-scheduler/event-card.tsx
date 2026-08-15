@@ -66,15 +66,9 @@ export function EventCard({
         {...props}
       >
         <div className="flex items-start justify-between gap-1 mb-1">
-          <div
-            className={cn(
-              'flex flex-wrap items-center gap-x-1 text-[10px] font-semibold ',
-              isCancelled ? 'text-red-600 line-through' : 'text-brand-blue/80'
-            )}
-          >
-            <span>{timeRange}</span>
-            {durationStr && <span>({durationStr})</span>}
-          </div>
+          <span className="text-[11px] sm:text-xs font-bold text-brand-blue line-clamp-2 leading-tight">
+            {patientName}
+          </span>
           <Video
             className={cn(
               'h-3 w-3 text-brand-blue shrink-0 mt-0.5',
@@ -82,9 +76,15 @@ export function EventCard({
             )}
           />
         </div>
-        <span className="text-[11px] sm:text-xs font-bold text-brand-blue line-clamp-2 leading-tight">
-          {patientName}
-        </span>
+        <div
+          className={cn(
+            'flex flex-wrap items-center gap-x-1 text-[10px] font-semibold ',
+            isCancelled ? 'text-red-600 line-through' : 'text-brand-blue/80'
+          )}
+        >
+          <span>{timeRange}</span>
+          {durationStr && <span>({durationStr})</span>}
+        </div>
       </div>
     ) : (
       <div
@@ -97,7 +97,16 @@ export function EventCard({
         )}
         {...props}
       >
-        <div className="flex items-center gap-2 mb-0.5">
+        <span
+          className={cn(
+            'text-sm font-semibold mb-0.5',
+            isCancelled ? 'text-brand-blue' : 'text-brand-blue'
+          )}
+        >
+          {patientName}
+        </span>
+
+        <div className="flex items-center gap-2">
           <span
             className={cn(
               'text-xs font-bold text-brand-blue',
@@ -113,15 +122,6 @@ export function EventCard({
             )}
           />
         </div>
-
-        <span
-          className={cn(
-            'text-sm font-semibold ',
-            isCancelled ? 'text-brand-blue' : 'text-brand-blue'
-          )}
-        >
-          {patientName}
-        </span>
         {isCancelled ? (
           <span className="text-xs font-normal py-[6px] bg-(--bg-white) text-brand-blue">
             {cancellationReason}

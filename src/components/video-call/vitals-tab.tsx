@@ -37,10 +37,10 @@ const VitalsTab = ({
     { label: 'Blood Glucose', value: formattedVitals.glucose },
   ];
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       <div
         className={cn(
-          'overflow-hidden space-y-6',
+          'overflow-hidden space-y-6 w-full',
           hideTitle
             ? 'pt-0'
             : 'px-4 py-[15px] border border-(--border-stroke) rounded-[10px]'

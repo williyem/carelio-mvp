@@ -38,7 +38,7 @@ const HealthRecordDetailsPage = () => {
   };
 
   return (
-    <div className="flex flex-col gap-[15px] items-start pt-4 sm:pt-10 px-4 sm:px-0 w-full max-w-[900px] mx-auto">
+    <div className="flex flex-col gap-[15px] items-start pt-4 sm:pt-10 px-4 sm:px-0  max-w-[900px] mx-auto">
       <BackButton onClick={handleBack} />
 
       <div className="flex flex-col gap-5 items-start w-full">
