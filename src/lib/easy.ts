@@ -16,6 +16,7 @@ type Clinician = {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  avatarUrl?: string;
   name: string;
 };
 import {
@@ -41,6 +42,7 @@ export const mapHealthAssistantToClinician = (
     isActive: true, // Default to true
     createdAt: '', // Not available in API response
     updatedAt: '', // Not available in API response
+    avatarUrl: assistant.avatarUrl || '',
     name: `${assistant.firstName} ${assistant.lastName}`.trim(), // Computed for backward compatibility
   };
 };
@@ -557,8 +559,10 @@ export const mapDoctorToClinician = (doctor: {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  avatarUrl?: string;
 }) => ({
   ...doctor,
+  avatarUrl: doctor.avatarUrl || '',
   name: `${doctor.firstName} ${doctor.lastName}`.trim(),
 });
 

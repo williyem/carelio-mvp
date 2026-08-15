@@ -46,7 +46,6 @@ const emptyStaffForm = {
   lastName: '',
   email: '',
   phoneNumber: '',
-  password: '',
 };
 
 function staffDisplayName(firstName: string, lastName: string) {
@@ -302,7 +301,9 @@ function StatusBadge({ isActive }: { isActive: boolean }) {
   return isActive ? (
     <Badge>Active</Badge>
   ) : (
-    <Badge variant="destructive">Revoked</Badge>
+    <Badge variant="destructive" className="text-white">
+      Revoked
+    </Badge>
   );
 }
 
@@ -350,33 +351,36 @@ function AddStaffDialog({
       lastName: form.lastName.trim(),
       email: form.email.trim(),
       phoneNumber: form.phoneNumber.trim(),
-      password: form.password,
     };
     if (
       !payload.firstName ||
       !payload.lastName ||
       !payload.email ||
-      !payload.phoneNumber ||
-      payload.password.length < 8
+      !payload.phoneNumber
     ) {
-      toast.error('Fill all fields. Password must be at least 8 characters.');
+      toast.error('Fill all fields before sending the invite.');
       return;
     }
 
-    const mutation = kind === 'doctor' ? createDoctor : createHa;
-    mutation.mutate(payload, {
+    const options = {
       onSuccess: () => {
         toast.success(
           kind === 'doctor'
-            ? 'Doctor added. They must reset this password on first login.'
-            : 'Health assistant added. They must reset this password on first login.'
+            ? 'Doctor invite email sent.'
+            : 'Health assistant invite email sent.'
         );
         reset();
         onOpenChange(false);
       },
-      onError: (error) =>
-        toast.error(getErrorMessage(error, 'Could not add staff member')),
-    });
+      onError: (error: Error) =>
+        toast.error(getErrorMessage(error, 'Could not send invite')),
+    };
+
+    if (kind === 'doctor') {
+      createDoctor.mutate(payload, options);
+    } else {
+      createHa.mutate(payload, options);
+    }
   };
 
   return (
@@ -391,8 +395,8 @@ function AddStaffDialog({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            They will sign in with this temporary password, then create a new
-            one on first login.
+            We will email them an invite link to set a password and complete
+            onboarding.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3">
@@ -450,21 +454,7 @@ function AddStaffDialog({
                 }))
               }
               placeholder="+233 24 000 0000"
-              className="w-full"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor={`${kind}-password`}>Temporary password</Label>
-            <Input
-              id={`${kind}-password`}
-              type="password"
-              value={form.password}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  password: event.target.value,
-                }))
-              }
+              inputClassName="  h-[44px] "
             />
           </div>
         </div>
@@ -473,7 +463,7 @@ function AddStaffDialog({
             Cancel
           </Button>
           <Button variant="brand" onClick={submit} disabled={pending}>
-            {pending ? 'Saving...' : 'Create'}
+            {pending ? 'Sending...' : 'Send invite'}
           </Button>
         </DialogFooter>
       </DialogContent>

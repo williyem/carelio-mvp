@@ -38,7 +38,7 @@ const TopbarNavigation = ({
   );
 
   const logout = useLogout();
-  const { fullName, isLoading, isFetching, email } = useUser();
+  const { fullName, isLoading, isFetching, email, user } = useUser();
 
   const handleLogout = () => {
     if (onLogoutClick) {
@@ -133,7 +133,10 @@ const TopbarNavigation = ({
               ) : (
                 <div className="flex items-center gap-3">
                   <Avatar className="h-9 w-9 border border-(--border-stroke)">
-                    <AvatarImage src="" alt={fullName || 'User'} />
+                    <AvatarImage
+                      src={user?.avatarUrl || ''}
+                      alt={fullName || 'User'}
+                    />
                     <AvatarFallback className="bg-brand-blue/5 text-brand-blue text-xs font-medium">
                       {initials}
                     </AvatarFallback>

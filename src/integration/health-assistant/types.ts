@@ -32,6 +32,7 @@ export interface HealthAssistantResponse {
   firstName: string;
   lastName: string;
   email: string;
+  avatarUrl?: string;
 }
 
 export interface VerifyPatientRequest {
@@ -76,6 +77,9 @@ export interface Doctor {
   twoFactorEnabled: boolean;
   twoFactorSecret: string | null;
   isActive: boolean;
+  avatarUrl?: string;
+  title?: string;
+  specialty?: string;
   createdAt: string;
   updatedAt: string;
 }

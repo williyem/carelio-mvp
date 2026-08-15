@@ -7,6 +7,8 @@ import { useInvitePatient } from '@/integration/auth/doctor';
 import { useCreateAppointment } from '@/integration/appointments';
 import { getErrorMessage } from '@/integration/utils';
 import type { InvitePatientRequest } from '@/integration/auth/doctor/types';
+import { combineDateAndTime } from '@/lib/datetime';
+import { format } from 'date-fns';
 
 const isNotPastDate = (d: Date) => {
   const today = new Date();
@@ -44,7 +46,7 @@ const addPatientSchema = z
       if (!data.includeAppointment) return true;
       return !!data.startTime && data.startTime.length > 0;
     },
-    { message: 'Start time is required', path: ['startTime'] }
+    { message: 'Select an available time slot', path: ['startTime'] }
   )
   .refine(
     (data) => {
@@ -70,7 +72,7 @@ const addPatientSchema = z
       if (!data.includeAppointment) return true;
       return !!data.endTime && data.endTime.length > 0;
     },
-    { message: 'End time is required', path: ['endTime'] }
+    { message: 'Select an available time slot', path: ['endTime'] }
   )
   .refine(
     (data) => {
@@ -112,6 +114,7 @@ export function useAddPatientForm() {
     name: 'includeAppointment',
   });
   const startTime = useWatch({ control: form.control, name: 'startTime' });
+  const endTime = useWatch({ control: form.control, name: 'endTime' });
   const date = useWatch({ control: form.control, name: 'date' });
 
   const onSubmit = (data: AddPatientFormData) => {
@@ -125,34 +128,19 @@ export function useAddPatientForm() {
         setInviteLink(response.inviteLink);
         toast.success('Invitation email sent');
 
-        if (data.includeAppointment && data.date && data.startTime) {
-          const parseTime = (timeStr: string) => {
-            const [timePart, period] = timeStr.split(' ');
-            const [hours, minutes] = timePart.split(':').map(Number);
-            let hour24 = hours;
-            if (period === 'PM' && hours !== 12) hour24 += 12;
-            if (period === 'AM' && hours === 12) hour24 = 0;
-            return { hour24, minutes };
-          };
-
-          const startParsed = parseTime(data.startTime);
-          const startDate = new Date(data.date);
-          startDate.setHours(startParsed.hour24, startParsed.minutes, 0, 0);
-
-          let endTimeStr: string | undefined;
-          if (data.endTime) {
-            const endParsed = parseTime(data.endTime);
-            const endDate = new Date(data.date);
-            endDate.setHours(endParsed.hour24, endParsed.minutes, 0, 0);
-            endTimeStr = endDate.toISOString();
-          }
-
+        if (
+          data.includeAppointment &&
+          data.date &&
+          data.startTime &&
+          data.endTime
+        ) {
+          const dateStr = format(data.date, 'yyyy-MM-dd');
           createAppointment(
             {
               patientId: response.patient?.id || '',
               isImmediate: false,
-              startTime: startDate.toISOString(),
-              endTime: endTimeStr,
+              startTime: combineDateAndTime(dateStr, data.startTime),
+              endTime: combineDateAndTime(dateStr, data.endTime),
             },
             {
               onSuccess: () => {
@@ -203,17 +191,19 @@ export function useAddPatientForm() {
     form,
     register: form.register,
     control: form.control,
+    setValue: form.setValue,
     handleSubmit: form.handleSubmit(onSubmit),
     formState: form.formState,
     errors: form.formState.errors,
     includeAppointment,
     date,
+    startTime,
+    endTime,
     isSuccessOpen,
     submittedEmail,
     inviteLink,
     isPending,
     handleAddAnother,
     handleCloseSuccess,
-    startTime,
   };
 }

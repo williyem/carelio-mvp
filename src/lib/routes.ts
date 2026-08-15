@@ -39,6 +39,8 @@ export const ROUTES = {
     HEALTH_ASSISTANT: '/onboarding/health-assistant',
   },
 
+  STAFF_INVITE: '/staff-invite',
+
   // Health Assistant routes
   HEALTH_ASSISTANT: {
     PATIENT: {

@@ -4,6 +4,7 @@ export interface AdminDoctor {
   lastName: string;
   email: string;
   phoneNumber: string;
+  avatarUrl?: string;
   isActive: boolean;
   isAdmin: boolean;
   createdAt: string;
@@ -15,6 +16,7 @@ export interface AdminHealthAssistant {
   lastName: string;
   email: string;
   phoneNumber: string;
+  avatarUrl?: string;
   staffCode: string;
   isActive: boolean;
   createdAt: string;
@@ -33,7 +35,6 @@ export interface AdminPatient {
 
 export interface CreateStaffRequest {
   email: string;
-  password: string;
   firstName: string;
   lastName: string;
   phoneNumber: string;

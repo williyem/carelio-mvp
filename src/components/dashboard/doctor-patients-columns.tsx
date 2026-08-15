@@ -96,7 +96,7 @@ const useDoctorPatientsCols = ({
                   className={`px-3 py-1 rounded-full text-[12px] font-medium ${
                     isActive
                       ? 'bg-(--bg-success-light) text-(--text-green-dark)'
-                      : 'bg-red-50 text-[#E42826]'
+                      : 'bg-red-50 text-[#E42826] '
                   }`}
                 >
                   {isActive ? 'Active' : 'Revoked'}

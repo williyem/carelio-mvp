@@ -8,6 +8,7 @@ export interface Clinician {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  avatarUrl?: string;
   // Computed field for backward compatibility
   name?: string;
   specialization?: string;

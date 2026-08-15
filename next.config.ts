@@ -20,11 +20,13 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        // credentialless (not require-corp) so third-party images (e.g. Cloudinary
+        // avatars) can load without Cross-Origin-Resource-Policy headers.
         source: '/(.*)',
         headers: [
           {
             key: 'Cross-Origin-Embedder-Policy',
-            value: 'require-corp',
+            value: 'credentialless',
           },
           {
             key: 'Cross-Origin-Opener-Policy',
