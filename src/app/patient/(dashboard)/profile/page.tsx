@@ -249,7 +249,7 @@ export default function PatientProfilePage() {
             disabled={isSubmitting}
             className="w-full h-[50px] rounded-[100px] px-4 py-[10px] text-[14px] font-normal leading-[1.2]"
           >
-            {isSubmitting ? 'Saving...' : 'Save'}
+            {isSubmitting ? <Spinner /> : 'Save'}
           </Button>
         </form>
       </div>
