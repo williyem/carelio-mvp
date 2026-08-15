@@ -1,70 +1,100 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Carelio (Frontend)
 
-## Code Formatting
+**Carelio** is a multi-role telehealth MVP for remote clinical care: doctors/admins, health assistants, and patients collaborate on invites, appointments, LiveKit video consultations, vitals capture, device guides, and AI-assisted clinical summaries.
 
-This project uses **Prettier** and **ESLint** to ensure consistent code formatting across all developers.
+|                  |                                            |
+| ---------------- | ------------------------------------------ |
+| **Live app**     | https://carelio.vercel.app/                |
+| **API**          | https://carelio-server-gsh5.onrender.com   |
+| **Backend repo** | https://github.com/williyem/carelio-server |
+| **This repo**    | https://github.com/williyem/carelio-mvp    |
 
-### Automatic Formatting
+> CSCD602 Advanced Software Engineering — Henneh Kusi William (22427958). Development assisted with [Cursor](https://cursor.com).
 
-- **Format on Save**: Prettier automatically formats your code when you save files in VS Code
-- **Pre-commit Hooks**: Code is automatically formatted and linted before commits using Husky and lint-staged
+## Roles
 
-### Manual Formatting
+| Role                 | What they do                                                                                                          |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **Admin / Doctor**   | Manage patients & team, schedule appointments, run live consults, configure device guides, view AI clinical summaries |
+| **Health Assistant** | Support assigned patients, capture vitals, follow device guides during visits                                         |
+| **Patient**          | Accept invites, view appointments, join video consults, review health records                                         |
+
+## Demo accounts
+
+| Role             | Identifier             | Password       |
+| ---------------- | ---------------------- | -------------- |
+| Admin (doctor)   | `admin@carelio.app`    | `Password123!` |
+| Doctor           | `dr.smith@carelio.app` | `Password123!` |
+| Health Assistant | `ha.jones@carelio.app` | `Password123!` |
+| Patient          | `PAT-1001`             | `Password123!` |
+
+No 2FA is required for these demo accounts. The Render free tier may cold-start (wait 30–60s on first API call).
+
+## Stack
+
+- **Next.js** (App Router) + TypeScript + React
+- **Tailwind CSS** + shadcn/ui
+- **TanStack Query** for server state
+- **BFF** routes under `src/app/api/*` (proxy to Express API; cookies / auth)
+- **LiveKit** for video consultations
+- Deployed on **Vercel**
+
+## Local setup
 
 ```bash
-# Format all files
-npm run format
-
-# Check formatting without making changes
-npm run format:check
-
-# Fix ESLint issues
-npm run lint:fix
-```
-
-### VS Code Setup
-
-1. Install the [Prettier VS Code extension](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
-2. The project includes `.vscode/settings.json` which configures format on save automatically
-3. If you're using a different editor, ensure Prettier is configured to use the `.prettierrc` file
-
-### What Gets Formatted
-
-- All TypeScript/JavaScript files (`.ts`, `.tsx`, `.js`, `.jsx`)
-- JSON, Markdown, CSS, and YAML files
-- Code is automatically formatted on commit via pre-commit hooks
-
-## Getting Started
-
-First, run the development server:
-
-```bash
+npm install
+# create .env.local (see Environment below)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create `.env.local` in the project root:
 
-## Learn More
+```bash
+API_BASE_URL=http://localhost:4000
+USE_DUMMY_DATA=false
+```
 
-To learn more about Next.js, take a look at the following resources:
+| Variable         | Purpose                                                             |
+| ---------------- | ------------------------------------------------------------------- |
+| `API_BASE_URL`   | Backend base URL (local: `http://localhost:4000`, prod: Render URL) |
+| `USE_DUMMY_DATA` | Set `false` to call the real API                                    |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Ensure the [carelio-server](https://github.com/williyem/carelio-server) backend is running (or pointed at production) with MongoDB and optional LiveKit / Resend / OpenRouter keys.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project layout (high level)
 
-## Deploy on Vercel
+```
+src/
+  app/                 # App Router pages + BFF API routes
+    (auth)/            # Login, password reset, 2FA flows
+    dashboard/         # Doctor / admin
+    health-assistant/  # HA workspace
+    patient/           # Patient portal
+    live-consultation/ # Video room
+    api/               # Next.js BFF → Express
+  components/          # UI + domain components
+  integration/         # API client config & endpoints
+  stores/              # Client state where used
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run dev          # development server
+npm run build        # production build
+npm run lint         # ESLint
+npm run format       # Prettier
+npm test             # Vitest
+```
+
+## Related docs
+
+Exam submission artefacts (SRS, testing report, user manual, etc.) live in the course submission folder, not this repository root.
+
+## Licence / academic use
+
+Submitted for CSCD602. Demo credentials are for examiner access only — rotate after the exam if the deployment remains public.
