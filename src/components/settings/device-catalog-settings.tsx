@@ -454,8 +454,8 @@ export default function DeviceCatalogSettings() {
                 <h3 className="text-sm font-semibold text-(--text-primary)">
                   Basics
                 </h3>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5 sm:col-span-2">
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
                     <Label htmlFor="device-title">Title</Label>
                     <Input
                       id="device-title"
@@ -469,14 +469,10 @@ export default function DeviceCatalogSettings() {
                           if (current.mode !== 'create') {
                             return { ...current, title };
                           }
-                          const autoSlug = slugifyDeviceTitle(title);
-                          const keepManualSlug =
-                            current.slug &&
-                            current.slug !== slugifyDeviceTitle(current.title);
                           return {
                             ...current,
                             title,
-                            slug: keepManualSlug ? current.slug : autoSlug,
+                            slug: slugifyDeviceTitle(title),
                           };
                         });
                       }}
@@ -498,30 +494,6 @@ export default function DeviceCatalogSettings() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="device-slug">Slug</Label>
-                    {editing.mode === 'create' ? (
-                      <Input
-                        id="device-slug"
-                        className={FIELD_CLASS}
-                        value={editing.slug}
-                        placeholder="ear-thermometer"
-                        onChange={(event) =>
-                          setEditing({
-                            ...editing,
-                            slug: slugifyDeviceTitle(event.target.value),
-                          })
-                        }
-                      />
-                    ) : (
-                      <div
-                        id="device-slug"
-                        className="flex h-11 items-center rounded-[8px] border border-(--border-stroke) bg-(--bg-primary) px-3 text-sm text-(--text-secondary)"
-                      >
-                        {editing.slug}
-                      </div>
-                    )}
-                  </div>
-                  <div className="space-y-1.5 sm:col-span-2">
                     <Label htmlFor="device-description">Description</Label>
                     <textarea
                       id="device-description"
@@ -560,36 +532,34 @@ export default function DeviceCatalogSettings() {
                       placeholder="https://www.youtube.com/watch?v=…"
                     />
                   </div>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="device-tips">Tips</Label>
-                      <textarea
-                        id="device-tips"
-                        value={editing.tips}
-                        placeholder={'One tip per line'}
-                        onChange={(event) =>
-                          setEditing({ ...editing, tips: event.target.value })
-                        }
-                        rows={4}
-                        className={TEXTAREA_CLASS}
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="device-steps">Steps</Label>
-                      <textarea
-                        id="device-steps"
-                        value={editing.steps}
-                        placeholder={'One step per line'}
-                        onChange={(event) =>
-                          setEditing({
-                            ...editing,
-                            steps: event.target.value,
-                          })
-                        }
-                        rows={4}
-                        className={TEXTAREA_CLASS}
-                      />
-                    </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="device-tips">Tips</Label>
+                    <textarea
+                      id="device-tips"
+                      value={editing.tips}
+                      placeholder="One tip per line"
+                      onChange={(event) =>
+                        setEditing({ ...editing, tips: event.target.value })
+                      }
+                      rows={4}
+                      className={TEXTAREA_CLASS}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="device-steps">Steps</Label>
+                    <textarea
+                      id="device-steps"
+                      value={editing.steps}
+                      placeholder="One step per line"
+                      onChange={(event) =>
+                        setEditing({
+                          ...editing,
+                          steps: event.target.value,
+                        })
+                      }
+                      rows={4}
+                      className={TEXTAREA_CLASS}
+                    />
                   </div>
                 </div>
               </section>
