@@ -35,7 +35,7 @@ const SoapSection = ({
 
   return (
     <>
-      <div className="space-y-3 bg-white border border-(--border-stroke) rounded-[10px] p-4">
+      <div className="space-y-3 bg-(--bg-white) border border-(--border-stroke) rounded-[10px] p-4">
         <div className="flex items-center gap-3">
           <div
             style={{ backgroundColor: config.bg, color: config.text }}
@@ -44,7 +44,7 @@ const SoapSection = ({
             {type.charAt(0).toUpperCase()}
           </div>
           <div className="flex flex-col">
-            <p className="capitalize font-bold text-gray-900 leading-none mb-1">
+            <p className="capitalize font-bold text-(--text-primary) leading-none mb-1">
               {type}
             </p>
           </div>
@@ -53,11 +53,11 @@ const SoapSection = ({
           {config.label}
         </p>
 
-        <div className="w-full bg-[#F9F9FB] border border-[#ECEDEE] rounded-[8px] p-4 text-gray-700 text-[15px] font-normal leading-relaxed">
+        <div className="w-full bg-(--bg-input) border border-(--border-input) rounded-[8px] p-4 text-(--text-gray) text-[15px] font-normal leading-relaxed">
           {content ? (
             <div dangerouslySetInnerHTML={{ __html: content }} />
           ) : (
-            <p className="text-gray-400 text-sm font-normal">
+            <p className="text-(--text-muted) text-sm font-normal">
               No {type} notes recorded
             </p>
           )}

@@ -121,7 +121,9 @@ export function RescheduleAppointmentDialog({
           <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
             {/* Date row */}
             <div className="flex flex-col space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Date</Label>
+              <Label className="text-sm font-medium text-(--text-gray)">
+                Date
+              </Label>
               <Controller
                 name="date"
                 control={control}
@@ -132,7 +134,7 @@ export function RescheduleAppointmentDialog({
                         type="button"
                         variant="outline"
                         className={cn(
-                          'h-11 w-full justify-between rounded-lg border-(--border-light) input-shadow font-normal hover:bg-gray-50',
+                          'h-11 w-full justify-between rounded-lg border-(--border-light) input-shadow font-normal hover:bg-(--bg-primary)',
                           !field.value && 'text-muted-foreground'
                         )}
                       >
@@ -164,7 +166,7 @@ export function RescheduleAppointmentDialog({
             {/* Start time + End time */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="flex flex-col space-y-2">
-                <Label className="text-sm font-medium text-gray-700">
+                <Label className="text-sm font-medium text-(--text-gray)">
                   Start time
                 </Label>
                 <TimePicker
@@ -178,7 +180,7 @@ export function RescheduleAppointmentDialog({
                 <ErrorMessage message={errors.startTime?.message} />
               </div>
               <div className="flex flex-col space-y-2">
-                <Label className="text-sm font-medium text-gray-700">
+                <Label className="text-sm font-medium text-(--text-gray)">
                   End time
                 </Label>
                 <TimePicker
@@ -194,7 +196,7 @@ export function RescheduleAppointmentDialog({
             </div>
 
             <div className="flex flex-col space-y-2">
-              <Label className="text-sm font-medium text-gray-700">
+              <Label className="text-sm font-medium text-(--text-gray)">
                 Reason for Rescheduling
               </Label>
               <Controller

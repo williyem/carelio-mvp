@@ -95,7 +95,7 @@ export default function PatientAgreementsStep({
       nextDisabled={!agreed || !printedName.trim()}
       nextLabel="Agree and continue"
     >
-      <div className="max-h-[360px] overflow-y-auto rounded-[8px] border border-gray-100 p-4 space-y-5 text-[14px] leading-relaxed text-text-strong-950 text-left">
+      <div className="max-h-[360px] overflow-y-auto rounded-[8px] border border-(--border-stroke) p-4 space-y-5 text-[14px] leading-relaxed text-text-strong-950 text-left">
         {SECTIONS.map((section) => (
           <div key={section.title} className="space-y-2">
             <p className="font-semibold">{section.title}</p>
@@ -140,7 +140,7 @@ export default function PatientAgreementsStep({
       {signaturePreview ? (
         <div className="text-left space-y-1">
           <p className="text-sm text-text-sub-600">Signature preview</p>
-          <div className="border-b-2 border-dotted border-gray-400 max-w-[300px] h-[60px] flex items-center">
+          <div className="border-b-2 border-dotted border-(--border-gray) max-w-[300px] h-[60px] flex items-center">
             <Image
               src={signaturePreview}
               alt="Signature preview"

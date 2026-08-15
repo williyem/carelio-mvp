@@ -106,7 +106,9 @@ export default function PatientMeasurementPanel({
   return (
     <div className="space-y-5">
       <div>
-        <h3 className="font-bold text-gray-900">Requested measurements</h3>
+        <h3 className="font-bold text-(--text-primary)">
+          Requested measurements
+        </h3>
         <p className="text-sm text-(--text-secondary) mt-1">
           When the doctor asks for a reading, it appears here with a photo and
           steps for the device.
@@ -132,7 +134,7 @@ export default function PatientMeasurementPanel({
                 'text-left rounded-[10px] border px-3 py-2 text-sm',
                 item.id === active?.id
                   ? 'border-brand-blue bg-blue-50/50'
-                  : 'border-[#EBEBEB] bg-white'
+                  : 'border-(--border-stroke) bg-(--bg-white)'
               )}
             >
               {item.label}
@@ -142,12 +144,12 @@ export default function PatientMeasurementPanel({
       )}
 
       {active && (
-        <div className="rounded-[14px] border border-brand-blue/30 bg-white p-4 space-y-4">
+        <div className="rounded-[14px] border border-brand-blue/30 bg-(--bg-white) p-4 space-y-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-blue">
               Record now
             </p>
-            <h4 className="font-bold text-gray-900 mt-1">
+            <h4 className="font-bold text-(--text-primary) mt-1">
               {guide?.title || active.label}
             </h4>
           </div>
@@ -170,9 +172,11 @@ export default function PatientMeasurementPanel({
         </div>
       )}
 
-      <div className="space-y-3 border-t border-gray-100 pt-4">
+      <div className="space-y-3 border-t border-(--border-stroke) pt-4">
         <div>
-          <h3 className="font-bold text-gray-900">Recorded this visit</h3>
+          <h3 className="font-bold text-(--text-primary)">
+            Recorded this visit
+          </h3>
           <p className="text-sm text-(--text-secondary) mt-1">
             Readings are confirmed when you save them. The doctor can reject a
             reading if it looks wrong.

@@ -89,7 +89,7 @@ export default function MinorsConsentStep() {
           </div>
         </div>
 
-        {/* <div className="pt-4 space-y-4 border-t border-gray-100">
+        {/* <div className="pt-4 space-y-4 border-t border-(--border-stroke)">
           <div className="flex items-start gap-3">
             <Checkbox
               id="minors-agreement"

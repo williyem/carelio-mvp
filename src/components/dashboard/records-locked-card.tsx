@@ -8,12 +8,12 @@ interface RecordsLockedCardProps {
 
 const RecordsLockedCard = ({ onVerify }: RecordsLockedCardProps) => {
   return (
-    <div className="bg-[#EBF5FF] w-full border border-[#D6E9F8] rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+    <div className="bg-state-info-lighter w-full border border-state-info-base/35 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4">
       <div className="space-y-1 flex-1">
-        <h4 className="text-[15px] font-bold text-gray-900">
+        <h4 className="text-[15px] font-bold text-(--text-primary)">
           Records are locked
         </h4>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-(--text-secondary)">
           Verify the patient&apos;s email to view their chart. Access lasts 24
           hours.
         </p>

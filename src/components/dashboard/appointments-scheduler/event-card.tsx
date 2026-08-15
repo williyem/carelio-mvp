@@ -18,7 +18,7 @@ import { AppointmentDetailsPopup } from './appointment-details-popup';
 
 export function TimeLabel({ time }: { time: string }) {
   return (
-    <div className="w-24 shrink-0 flex justify-center pt-3 text-xs font-medium text-gray-500 bg-gray-50/30">
+    <div className="w-24 shrink-0 flex justify-center pt-3 text-xs font-medium text-(--text-muted) bg-(--bg-primary)/30">
       {time}
     </div>
   );
@@ -59,8 +59,8 @@ export function EventCard({
         className={cn(
           ' border-t-2  p-2 sm:p-2 py-1 flex flex-col justify-start cursor-pointer  transition-colors rounded-sm overflow-hidden h-full',
           isCancelled
-            ? 'bg-[#FCE8E8] border-[#FB2C2A]'
-            : 'border-brand-blue/20 bg-[#E0F2FE] hover:bg-[#BAE6FD]',
+            ? 'bg-state-error-lighter border-state-error-base'
+            : 'border-brand-blue/20 bg-state-info-lighter hover:bg-state-info-lighter',
           className
         )}
         {...props}
@@ -90,8 +90,8 @@ export function EventCard({
       <div
         className={cn(
           isCancelled
-            ? 'bg-[#FCE8E8] border-[#FB2C2A]'
-            : 'bg-[#E8F4FD] hover:bg-brand-blue/15 border-brand-blue ',
+            ? 'bg-state-error-lighter border-state-error-base'
+            : 'bg-state-info-lighter hover:bg-brand-blue/15 border-brand-blue ',
           ' border-l-4 rounded-r-md p-3 flex flex-col justify-center cursor-pointer  transition-colors z-10 w-full h-full',
           className
         )}
@@ -123,7 +123,7 @@ export function EventCard({
           {patientName}
         </span>
         {isCancelled ? (
-          <span className="text-xs font-normal py-[6px] bg-white text-brand-blue">
+          <span className="text-xs font-normal py-[6px] bg-(--bg-white) text-brand-blue">
             {cancellationReason}
           </span>
         ) : null}

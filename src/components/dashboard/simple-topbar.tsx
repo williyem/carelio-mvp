@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/routes';
 import { PortalChip } from './portal-identity';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 
 interface SimpleTopbarProps {
   className?: string;
@@ -32,14 +33,14 @@ const SimpleTopbar = ({
   return (
     <div
       className={cn(
-        'bg-white border-b border-(--border-stroke) flex items-center justify-between max-h-[84px] px-4 md:px-[44px] py-[20px] w-full sticky top-0 z-50',
+        'bg-(--bg-white) border-b border-(--border-stroke) flex items-center justify-between max-h-[84px] px-4 md:px-[44px] py-[20px] w-full sticky top-0 z-50',
         className
       )}
     >
       <div className="flex items-center gap-3">
         <Link
           href={ROUTES.PATIENT.ROOT}
-          className="relative h-9 md:h-11 w-[120px] md:w-[140px]"
+          className="theme-logo-plate relative h-9 md:h-11 w-[120px] md:w-[140px]"
         >
           <Image
             src="/images/carelio-logo.png"
@@ -88,10 +89,12 @@ const SimpleTopbar = ({
           <p className="text-[11px] text-(--text-secondary) mt-1">Patient</p>
         </div>
 
+        <ThemeToggle className="hidden sm:inline-flex" />
+
         <Button
           variant="outline"
           onClick={onLogoutClick}
-          className="bg-white border border-(--border-stroke) h-[44px] px-5 py-2 shadow-[0px_1px_2px_0px_rgba(10,13,20,0.03)] text-[14px] font-medium leading-[20px] tracking-[-0.084px]"
+          className="bg-(--bg-white) border border-(--border-stroke) h-[44px] px-5 py-2 shadow-[0px_1px_2px_0px_rgba(10,13,20,0.03)] text-[14px] font-medium leading-[20px] tracking-[-0.084px]"
         >
           <LogOut className="w-4 h-4 mr-1" />
           Logout

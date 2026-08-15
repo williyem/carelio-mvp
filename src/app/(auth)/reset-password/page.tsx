@@ -24,7 +24,7 @@ function ResetPasswordForm() {
   } = useResetPasswordForm();
 
   return (
-    <div className="w-full flex flex-col items-center justify-center sm:p-6 bg-white dark:bg-background h-full">
+    <div className="w-full flex flex-col items-center justify-center sm:p-6 bg-(--bg-white) dark:bg-background h-full">
       <div className="w-full max-w-[400px] flex flex-col items-center gap-6">
         {/* Logo */}
         <div className="flex items-center justify-center mb-6">
@@ -48,22 +48,25 @@ function ResetPasswordForm() {
 
         <form onSubmit={handleSubmit} className="w-full grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="password" className="text-gray-500 font-normal">
+            <Label
+              htmlFor="password"
+              className="text-(--text-muted) font-normal"
+            >
               Enter New Password
             </Label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-(--text-muted)" />
               <Input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Password"
-                className="pl-9 pr-9 placeholder:text-gray-400"
+                className="pl-9 pr-9 placeholder:text-(--text-muted)"
                 {...register('password')}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-(--text-muted) hover:text-(--text-secondary) focus:outline-none"
                 tabIndex={-1}
               >
                 {showPassword ? (
@@ -78,23 +81,23 @@ function ResetPasswordForm() {
           <div className="grid gap-2">
             <Label
               htmlFor="confirmPassword"
-              className="text-gray-500 font-normal"
+              className="text-(--text-muted) font-normal"
             >
               Confirm New Password
             </Label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-(--text-muted)" />
               <Input
                 id="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="Password"
-                className="pl-9 pr-9 placeholder:text-gray-400"
+                className="pl-9 pr-9 placeholder:text-(--text-muted)"
                 {...register('confirmPassword')}
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-(--text-muted) hover:text-(--text-secondary) focus:outline-none"
                 tabIndex={-1}
               >
                 {showConfirmPassword ? (
@@ -122,11 +125,13 @@ function ResetPasswordForm() {
           {requirements.map((req, index) => (
             <div
               key={index}
-              className="flex items-center gap-2 text-sm text-gray-500"
+              className="flex items-center gap-2 text-sm text-(--text-muted)"
             >
               <CheckCircle2
                 className={`h-4 w-4 ${
-                  req.valid ? 'text-brand-blue' : 'text-gray-300'
+                  req.valid
+                    ? 'text-brand-blue'
+                    : 'text-(--text-gray-placeholder)'
                 }`}
               />
               <span className={req.valid ? 'text-foreground font-medium' : ''}>
@@ -144,7 +149,7 @@ export default function ResetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <div className="w-full flex flex-col items-center justify-center sm:p-6 bg-white dark:bg-background h-full">
+        <div className="w-full flex flex-col items-center justify-center sm:p-6 bg-(--bg-white) dark:bg-background h-full">
           <div className="w-full max-w-[400px] flex flex-col items-center gap-6">
             <div className="flex items-center justify-center mb-6">
               <Image

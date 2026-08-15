@@ -43,11 +43,11 @@ const VitalsTab = ({
           'overflow-hidden space-y-6',
           hideTitle
             ? 'pt-0'
-            : 'px-4 py-[15px] border border-[#EBEBEB] rounded-[10px]'
+            : 'px-4 py-[15px] border border-(--border-stroke) rounded-[10px]'
         )}
       >
         {!hideTitle && (
-          <h3 className="font-bold text-gray-900">Vitals Summary</h3>
+          <h3 className="font-bold text-(--text-primary)">Vitals Summary</h3>
         )}
 
         {hasAnyVitals ? (
@@ -58,7 +58,7 @@ const VitalsTab = ({
                   {vital.label}
                 </span>
                 <span
-                  className={`font-bold ${vital.value ? 'text-gray-900' : 'text-gray-400'}`}
+                  className={`font-bold ${vital.value ? 'text-(--text-primary)' : 'text-(--text-muted)'}`}
                 >
                   {vital.value || 'N/A'}
                 </span>
@@ -74,7 +74,7 @@ const VitalsTab = ({
         )}
 
         {formattedVitals.lastUpdated && (
-          <div className="pt-4 border-t border-gray-100 flex justify-center">
+          <div className="pt-4 border-t border-(--border-stroke) flex justify-center">
             <p className="text-sm font-normal text-(--text-secondary)">
               Last updated: {formattedVitals.lastUpdated}
             </p>

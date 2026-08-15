@@ -71,7 +71,7 @@ export function DayView({
       {hours.map((time, index) => (
         <div key={`${time}-${index}`} className="flex h-20">
           <TimeLabel time={time} />
-          <div className="flex-1 bg-[#F9FBFC] relative" />
+          <div className="flex-1 bg-(--bg-primary) relative" />
         </div>
       ))}
       {/* Overlay for appointments */}
@@ -85,7 +85,7 @@ export function DayView({
                 className="absolute left-0 right-0 flex items-center pointer-events-none"
                 style={{ top: `${timeLineTop}px` }}
               >
-                <div className="flex-1 h-[5px] bg-[#10B121]" />
+                <div className="flex-1 h-[5px] bg-state-success-base" />
               </div>
             )}
 

@@ -294,7 +294,7 @@ const ScheduleAppointmentDialog = ({
       <DialogContent
         showCloseButton={false}
         className={cn(
-          'bg-white rounded-[30px] p-6 w-full',
+          'bg-(--bg-white) rounded-[30px] p-6 w-full',
           mode === 'later' ? 'max-w-[640px]' : 'max-w-[443px]'
         )}
         onPointerDownOutside={(event) => {
@@ -411,7 +411,7 @@ const ScheduleAppointmentDialog = ({
                         <button
                           type="button"
                           className={cn(
-                            'bg-(--bg-white) border border-(--border-light) flex gap-2 items-center justify-between px-[14px] py-[10px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] w-full h-[44px] text-left hover:bg-gray-50 transition-colors'
+                            'bg-(--bg-white) border border-(--border-light) flex gap-2 items-center justify-between px-[14px] py-[10px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] w-full h-[44px] text-left hover:bg-(--bg-primary) transition-colors'
                           )}
                         >
                           <span

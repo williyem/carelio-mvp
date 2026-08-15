@@ -22,6 +22,7 @@ import {
   PortalChip,
   doctorRoleLabel,
 } from '@/components/dashboard/portal-identity';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 
 export default function DashboardLayout({
   children,
@@ -65,11 +66,11 @@ export default function DashboardLayout({
         completed={user?.onboardingCompleted}
       />
       {/* Header */}
-      <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-[#EBEBEB] bg-white px-6">
+      <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-(--border-stroke) bg-(--bg-white) px-6">
         <div className="flex items-center gap-3">
           <Link
             href={ROUTES.DASHBOARD.ROOT}
-            className="flex items-center hover:opacity-90 transition-opacity"
+            className="theme-logo-plate flex items-center hover:opacity-90 transition-opacity"
           >
             <Image
               src="/images/carelio-logo.png"
@@ -157,8 +158,9 @@ export default function DashboardLayout({
                       height="5"
                       viewBox="0 0 9 5"
                       fill="none"
+                      className="text-(--text-gray-dark)"
                     >
-                      <path d="M4.5 4.5L0 0H9L4.5 4.5Z" fill="#5C5C5C" />
+                      <path d="M4.5 4.5L0 0H9L4.5 4.5Z" fill="currentColor" />
                     </svg>
                   </div>
                 </button>
@@ -166,10 +168,12 @@ export default function DashboardLayout({
               <DropdownMenuContent align="end" className="w-[200px] mt-2">
                 <div className="px-2 py-1.5 md:hidden">
                   <p className="text-sm font-semibold">{fullName || 'User'}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-(--text-secondary)">
                     {doctorRoleLabel(user?.isAdmin)}
                   </p>
-                  <p className="text-xs text-gray-500 truncate">{email}</p>
+                  <p className="text-xs text-(--text-secondary) truncate">
+                    {email}
+                  </p>
                 </div>
                 <DropdownMenuSeparator className="md:hidden" />
                 <DropdownMenuItem asChild className="md:hidden">
@@ -192,6 +196,7 @@ export default function DashboardLayout({
               </DropdownMenuContent>
             </DropdownMenu>
           )}
+          <ThemeToggle />
         </div>
       </header>
 

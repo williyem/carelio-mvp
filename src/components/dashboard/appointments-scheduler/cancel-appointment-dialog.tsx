@@ -47,7 +47,7 @@ export function CancelAppointmentDialog({
           <DialogTitle>Cancel Appointment</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-(--text-muted)">
             Please provide a reason for cancellation.
           </p>
           <textarea

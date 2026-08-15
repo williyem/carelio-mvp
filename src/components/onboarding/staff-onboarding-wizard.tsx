@@ -288,7 +288,7 @@ export default function StaffOnboardingWizard({
           secondaryAction={{ label: 'Back', onClick: () => setStep(1) }}
         >
           <div className="space-y-6 text-left">
-            <div className="max-h-[320px] overflow-y-auto rounded-[8px] border border-gray-100 p-4 space-y-5 text-[14px] leading-relaxed text-text-strong-950">
+            <div className="max-h-[320px] overflow-y-auto rounded-[8px] border border-(--border-stroke) p-4 space-y-5 text-[14px] leading-relaxed text-text-strong-950">
               {agreements.map((section) => (
                 <div key={section.title} className="space-y-2">
                   <p className="font-semibold">{section.title}</p>
@@ -299,7 +299,7 @@ export default function StaffOnboardingWizard({
               ))}
             </div>
 
-            <div className="pt-4 space-y-4 border-t border-gray-100">
+            <div className="pt-4 space-y-4 border-t border-(--border-stroke)">
               <div className="space-y-2">
                 <Label htmlFor="signedName" className="block">
                   Printed Name:
@@ -309,7 +309,7 @@ export default function StaffOnboardingWizard({
                   value={signedName}
                   onChange={(e) => setSignedName(e.target.value)}
                   placeholder="Enter your full name"
-                  className="border-0 border-b-2 border-dotted border-gray-400 w-full max-w-[300px] outline-none bg-transparent text-base mb-2"
+                  className="border-0 border-b-2 border-dotted border-(--border-gray) w-full max-w-[300px] outline-none bg-transparent text-base mb-2"
                 />
               </div>
 
@@ -333,7 +333,7 @@ export default function StaffOnboardingWizard({
                 <div className="typography-paragraph-medium font-normal mb-1">
                   Signature:
                 </div>
-                <div className="border-b-2 border-dotted border-gray-400 w-full max-w-[300px] h-[60px] relative mb-2 min-w-[200px] flex items-center">
+                <div className="border-b-2 border-dotted border-(--border-gray) w-full max-w-[300px] h-[60px] relative mb-2 min-w-[200px] flex items-center">
                   {signature ? (
                     <Image
                       src={signature}
@@ -343,7 +343,7 @@ export default function StaffOnboardingWizard({
                       className="w-full h-[60px] object-contain rounded-[4px]"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-start text-gray-400 text-sm italic">
+                    <div className="w-full h-full flex items-center justify-start text-(--text-muted) text-sm italic">
                       Signature will appear here
                     </div>
                   )}

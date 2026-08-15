@@ -59,7 +59,7 @@ const useAppointmentsCols = ({ onView }: UseAppointmentsColsProps = {}) => {
             className={`px-3 py-1 rounded-full text-[12px] font-medium ${
               isComplete
                 ? 'bg-(--bg-success-light) text-(--text-green-dark)'
-                : 'bg-red-50 text-[#E42826]'
+                : 'bg-state-error-lighter text-state-error-base'
             }`}
           >
             {isComplete ? 'Complete' : 'Incomplete'}
@@ -78,7 +78,7 @@ const useAppointmentsCols = ({ onView }: UseAppointmentsColsProps = {}) => {
               variant="outline"
               onClick={() => onView?.(patient)}
               className={cn(
-                'h-[38px] px-[15px] border-[#D4D5D6] bg-[#F6F6F6] flex-1 w-full max-w-[76px] rounded-[8px]'
+                'h-[38px] px-[15px] border-(--border-gray) bg-(--bg-light-gray) flex-1 w-full max-w-[76px] rounded-[8px]'
               )}
             >
               <span className="font-normal text-[14px] leading-[1.2]">

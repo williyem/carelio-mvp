@@ -15,7 +15,7 @@ function PasswordResetSuccessContent() {
   const ctaLabel = next ? 'Continue to 2FA Setup' : 'Go to login';
 
   return (
-    <div className="w-full flex flex-col items-center justify-center sm:p-6 bg-white dark:bg-background h-full">
+    <div className="w-full flex flex-col items-center justify-center sm:p-6 bg-(--bg-white) dark:bg-background h-full">
       <div className="w-full max-w-[400px] flex flex-col items-center gap-8">
         {/* Logo */}
         <div className="flex items-center justify-center">
@@ -68,7 +68,7 @@ export default function PasswordResetSuccessPage() {
   return (
     <Suspense
       fallback={
-        <div className="w-full flex flex-col items-center justify-center sm:p-6 bg-white dark:bg-background h-full">
+        <div className="w-full flex flex-col items-center justify-center sm:p-6 bg-(--bg-white) dark:bg-background h-full">
           <div className="w-full max-w-[400px] flex flex-col items-center gap-8">
             <div className="flex items-center justify-center">
               <Image

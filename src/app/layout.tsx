@@ -86,7 +86,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${eudoxusSans.variable}`}>
+    <html
+      lang="en"
+      className={`${eudoxusSans.variable}`}
+      suppressHydrationWarning
+    >
       <body className={`${eudoxusSans.variable}`}>
         <Providers>{children}</Providers>
       </body>

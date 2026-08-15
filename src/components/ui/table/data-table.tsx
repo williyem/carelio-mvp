@@ -180,7 +180,7 @@ export function DataTable({
               placeholder="Search..."
               value={globalFilter ?? ''}
               onChange={(event) => setGlobalFilter(event.target.value)}
-              className="w-full sm:w-[400px] placeholder:text-sm border-[var(--outline-border)] ps-7 py-2.5 h-[44px]  bg-white ring-offset-background focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2"
+              className="w-full sm:w-[400px] placeholder:text-sm border-(--border-input) ps-7 py-2.5 h-[44px] bg-(--bg-input) ring-offset-background focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2"
             />
           </div>
           <DropdownMenu>
@@ -267,13 +267,13 @@ export function DataTable({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className="bg-white text-xs h-[56px] px-4 font-medium border-b border-gray-200"
+                  className="bg-(--bg-white) text-xs h-[56px] px-4 font-medium border-b border-(--border-stroke)"
                   data-state={row.getIsSelected() && 'selected'}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className="border-0 px-4 h-[56px] max-md:text-xs text-sm text-gray-900"
+                      className="border-0 px-4 h-[56px] max-md:text-xs text-sm text-(--text-primary)"
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -320,7 +320,7 @@ export function DataTable({
               <select
                 value={table.getState().pagination.pageSize}
                 onChange={(e) => table.setPageSize(Number(e.target.value))}
-                className="-md py-1 px-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+                className="rounded-md border border-(--border-stroke) bg-(--bg-white) py-1 px-2 text-xs text-(--text-primary) focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 {[10, 25, 50, 100].map((pageSize) => (
                   <option key={pageSize} value={pageSize}>
@@ -332,7 +332,7 @@ export function DataTable({
             <div className="flex items-center space-x-3">
               <Button
                 variant="outline"
-                className="w-[30px] h-[30px] disabled:bg-(--bg-disabled) bg-(--bg-button-primary) hover:bg-(--bg-button-primary)/90 hover:text-white disabled:text-black text-white rounded-full disabled:border-gray-300 disabled:opacity-50"
+                className="w-[30px] h-[30px] disabled:bg-(--bg-disabled) bg-(--bg-button-primary) hover:bg-(--bg-button-primary)/90 hover:text-white disabled:text-(--text-muted) text-white rounded-full disabled:border-(--border-gray) disabled:opacity-50"
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
               >
@@ -351,7 +351,7 @@ export function DataTable({
                   />
                 </svg>
               </Button>
-              <span className="text-xs text-gray-700">
+              <span className="text-xs text-(--text-secondary)">
                 {table.getState().pagination.pageIndex *
                   table.getState().pagination.pageSize +
                   1}
@@ -365,7 +365,7 @@ export function DataTable({
               </span>
               <Button
                 variant="outline"
-                className="w-[30px] h-[30px] disabled:bg-(--bg-disabled) bg-(--bg-button-primary) hover:bg-(--bg-button-primary)/90 hover:text-white disabled:text-black text-white rounded-full disabled:border-gray-300 disabled:opacity-50"
+                className="w-[30px] h-[30px] disabled:bg-(--bg-disabled) bg-(--bg-button-primary) hover:bg-(--bg-button-primary)/90 hover:text-white disabled:text-(--text-muted) text-white rounded-full disabled:border-(--border-gray) disabled:opacity-50"
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
               >

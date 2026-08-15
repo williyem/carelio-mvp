@@ -99,7 +99,7 @@ const PatientVerificationDialog = ({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="bg-white rounded-[30px] p-6 max-w-[443px] w-full">
+      <AlertDialogContent className="bg-(--bg-white) rounded-[30px] p-6 max-w-[443px] w-full">
         <VerificationDialogCloseButton onClose={handleClose} />
 
         <div className="flex flex-col gap-[36px] items-start w-full">

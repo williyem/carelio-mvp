@@ -28,13 +28,13 @@ const RecentConsultationRow = ({
   return (
     <div
       className={cn(
-        'flex cursor-pointer items-center justify-between w-full p-4 rounded-xl border transition-all border-gray-200 hover:border-gray-300 bg-white'
+        'flex cursor-pointer items-center justify-between w-full p-4 rounded-xl border transition-all border-(--border-stroke) hover:border-(--border-gray) bg-(--bg-white)'
       )}
       onClick={() => handlePatientSelect(appointment)}
     >
       <div className={cn('flex items-center w-full gap-4')}>
-        <Avatar className="h-10 w-10 bg-gray-100">
-          <AvatarFallback className="text-gray-500">
+        <Avatar className="h-10 w-10 bg-(--bg-light-gray)">
+          <AvatarFallback className="text-(--text-muted)">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -50,7 +50,7 @@ const RecentConsultationRow = ({
           </AvatarFallback>
         </Avatar>
         <div className="flex gap-y-1 flex-col">
-          <h3 className="font-semibold text-gray-900 leading-tight">
+          <h3 className="font-semibold text-(--text-primary) leading-tight">
             {fullName || patient.patientId}
           </h3>
           {doctorName ? (
@@ -58,7 +58,7 @@ const RecentConsultationRow = ({
               Dr. {doctorName}
             </p>
           ) : null}
-          <div className="flex gap-x-2 items-end text-sm text-gray-500">
+          <div className="flex gap-x-2 items-end text-sm text-(--text-muted)">
             <div className="flex items-center gap-x-1">
               <CalendarSvg />
               <span className="text-sm font-normal text-(--text-secondary)">
@@ -75,7 +75,7 @@ const RecentConsultationRow = ({
               </span>
             </div>
           </div>
-          {/* <p className="text-sm text-gray-500">
+          {/* <p className="text-sm text-(--text-muted)">
             {patient.email || patient.phoneNumber}
           </p> */}
           {!patient.isRegistrationComplete && (

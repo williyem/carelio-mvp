@@ -93,8 +93,8 @@ const PatientDetailsPage = () => {
             portal="health-assistant"
           />
           {!isPatientLoading && !patient?.isRegistrationComplete && (
-            <div className="bg-[#FDFAE7] w-full my-2 border border-[#FFE0A3] rounded-2xl p-5 flex items-center gap-4 text-gray-900 animate-in fade-in slide-in-from-top-4 duration-500">
-              <div className="h-10 w-10 rounded-full bg-white border border-[#FFE0A3] flex items-center justify-center shrink-0 ">
+            <div className="theme-alert-warning w-full my-2 rounded-2xl p-5 flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+              <div className="h-10 w-10 rounded-full bg-(--bg-white) border border-state-warning-base/35 flex items-center justify-center shrink-0 ">
                 <Info className="h-5 w-5 text-amber-600" />
               </div>
               <div className="space-y-0.5">

@@ -14,7 +14,7 @@ const VideoPreview = forwardRef<HTMLDivElement, VideoPreviewProps>(
     return (
       <div
         ref={ref}
-        className="relative aspect-video w-full h-full mx-auto overflow-hidden bg-(--bg-lighter-gray) border border-[#EBEBEB] rounded-[30px]"
+        className="relative aspect-video w-full h-full mx-auto overflow-hidden bg-(--bg-lighter-gray) border border-(--border-stroke) rounded-[30px]"
       >
         {/* Video element for regular preview */}
         <video
@@ -43,7 +43,7 @@ const VideoPreview = forwardRef<HTMLDivElement, VideoPreviewProps>(
         {/* Placeholder when video is off */}
         {!isStartedVideo && (
           <div className="absolute inset-0 z-10 flex flex-col items-center max-sm:mt-3 sm:justify-center bg-(--bg-lighter-gray) rounded-[30px]">
-            <div className=" size-[62px] sm:size-[112px] rounded-full bg-white flex items-center justify-center mb-3">
+            <div className=" size-[62px] sm:size-[112px] rounded-full bg-(--bg-white) flex items-center justify-center mb-3">
               <VideoSlashSvg size={30} />
             </div>
             <p className=" text-sm max-sm:text-xs font-normal">

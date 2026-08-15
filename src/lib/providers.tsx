@@ -4,6 +4,7 @@ import VideoCallOverlayComponent from '@/components/video-call/video-call-overla
 import { Toaster } from '@/ui/sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { ThemeProvider } from 'next-themes';
 import NextTopLoader from 'nextjs-toploader';
 import { ReactNode, useState, useEffect } from 'react';
 
@@ -30,7 +31,12 @@ const Providers = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
       <QueryClientProvider client={queryClient}>
         <ReactQueryDevtools initialIsOpen={false} />
         <Toaster richColors position={position} />
@@ -46,7 +52,7 @@ const Providers = ({ children }: { children: ReactNode }) => {
         <VideoCallOverlayComponent />
         <PostConsultationSummary />
       </QueryClientProvider>
-    </>
+    </ThemeProvider>
   );
 };
 

@@ -21,7 +21,7 @@ export default function Verify2FAPage() {
   const router = useRouter();
 
   return (
-    <div className="w-full flex flex-col items-center justify-center sm:p-6 bg-white dark:bg-background h-full">
+    <div className="w-full flex flex-col items-center justify-center sm:p-6 bg-(--bg-white) dark:bg-background h-full">
       <div className="w-full max-w-[500px] flex flex-col items-center gap-6">
         {/* Logo */}
         <div className="flex items-center justify-center mb-6">
@@ -59,33 +59,33 @@ export default function Verify2FAPage() {
               <InputOTPGroup className="gap-3">
                 <InputOTPSlot
                   index={0}
-                  className="w-12 h-14 border border-gray-200 bg-gray-50 rounded-md text-lg"
+                  className="w-12 h-14 border border-(--border-stroke) bg-(--bg-primary) rounded-md text-lg"
                 />
                 <InputOTPSlot
                   index={1}
-                  className="w-12 h-14 border border-gray-200 bg-gray-50 rounded-md text-lg"
+                  className="w-12 h-14 border border-(--border-stroke) bg-(--bg-primary) rounded-md text-lg"
                 />
                 <InputOTPSlot
                   index={2}
-                  className="w-12 h-14 border border-gray-200 bg-gray-50 rounded-md text-lg"
+                  className="w-12 h-14 border border-(--border-stroke) bg-(--bg-primary) rounded-md text-lg"
                 />
                 <InputOTPSlot
                   index={3}
-                  className="w-12 h-14 border border-gray-200 bg-gray-50 rounded-md text-lg"
+                  className="w-12 h-14 border border-(--border-stroke) bg-(--bg-primary) rounded-md text-lg"
                 />
                 <InputOTPSlot
                   index={4}
-                  className="w-12 h-14 border border-gray-200 bg-gray-50 rounded-md text-lg"
+                  className="w-12 h-14 border border-(--border-stroke) bg-(--bg-primary) rounded-md text-lg"
                 />
                 <InputOTPSlot
                   index={5}
-                  className="w-12 h-14 border border-gray-200 bg-gray-50 rounded-md text-lg"
+                  className="w-12 h-14 border border-(--border-stroke) bg-(--bg-primary) rounded-md text-lg"
                 />
               </InputOTPGroup>
             </InputOTP>
 
-            <div className="w-full p-4 bg-[#E8F4FC] border border-[#63B6EE] rounded-lg text-sm text-gray-700">
-              <strong className="block mb-1 text-gray-900">
+            <div className="theme-alert-info w-full p-4 rounded-lg text-sm">
+              <strong className="block mb-1 text-(--text-primary)">
                 Using authenticator app?
               </strong>
               Open your app (Google Authenticator, Authy, etc.) and enter the
@@ -106,7 +106,7 @@ export default function Verify2FAPage() {
           <Button
             onClick={() => router.push(ROUTES.AUTH.LOGIN)}
             variant="outline"
-            className="flex-1 h-12 rounded-full text-base border-gray-200"
+            className="flex-1 h-12 rounded-full text-base border-(--border-stroke)"
           >
             Cancel
           </Button>
@@ -114,7 +114,7 @@ export default function Verify2FAPage() {
 
         <Link
           href={ROUTES.AUTH.LOGIN}
-          className="flex items-center gap-2 text-sm text-gray-600 hover:text-foreground transition-colors mt-4"
+          className="flex items-center gap-2 text-sm text-(--text-secondary) hover:text-foreground transition-colors mt-4"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to log in

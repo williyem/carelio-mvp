@@ -190,7 +190,7 @@ const AppointmentsList = ({
       {/* Pagination Controls */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-4 w-full">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-(--text-muted)">
             Page {page} of {totalPages}
           </p>
           <div className="flex gap-2">

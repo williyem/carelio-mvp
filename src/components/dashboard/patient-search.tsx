@@ -53,7 +53,7 @@ export function PatientSearch() {
   return (
     <div className="relative w-full space-y-4">
       <div className="relative group">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-gray-500 transition-colors" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-(--text-muted) group-focus-within:text-(--text-muted) transition-colors" />
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -63,7 +63,7 @@ export function PatientSearch() {
         {query && (
           <button
             onClick={() => setQuery('')}
-            className="absolute right-4 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+            className="absolute right-4 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full flex items-center justify-center hover:bg-(--bg-light-gray) transition-colors text-(--text-muted) hover:text-(--text-secondary)"
           >
             <X className="h-4 w-4" />
           </button>
@@ -71,12 +71,12 @@ export function PatientSearch() {
       </div>
 
       {query && (
-        <Card className="absolute top-full left-0 right-0 mt-2 z-50 border border-gray-100/50 rounded-2xl overflow-hidden p-0 bg-white animate-in fade-in slide-in-from-top-2 duration-200 shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
+        <Card className="absolute top-full left-0 right-0 mt-2 z-50 border border-border/50 rounded-2xl overflow-hidden p-0 bg-(--bg-white) animate-in fade-in slide-in-from-top-2 duration-200 shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
           <div className="max-h-[400px] overflow-y-auto">
             {isLoading ? (
               <div className="p-12 flex flex-col items-center justify-center text-center space-y-3">
                 <Loader2 className="h-6 w-6 animate-spin text-brand-blue" />
-                <p className="text-gray-500 font-medium">Searching...</p>
+                <p className="text-(--text-muted) font-medium">Searching...</p>
               </div>
             ) : results.length > 0 ? (
               <div className="divide-y divide-gray-50">
@@ -85,7 +85,7 @@ export function PatientSearch() {
                     type="button"
                     key={patient.id}
                     onClick={() => handleSelect(patient)}
-                    className="flex items-center justify-between p-4 hover:bg-gray-50 cursor-pointer transition-colors group w-full text-left"
+                    className="flex items-center justify-between p-4 hover:bg-(--bg-primary) cursor-pointer transition-colors group w-full text-left"
                   >
                     <div className="flex items-center gap-4">
                       <div className="relative">
@@ -96,10 +96,10 @@ export function PatientSearch() {
                         </Avatar>
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900 leading-tight">
+                        <h3 className="font-semibold text-(--text-primary) leading-tight">
                           {patient.fullName || patient.patientId}
                         </h3>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-(--text-muted)">
                           {patient?.email || patient?.phoneNumber}
                         </p>
                         {patient?.isRegistrationComplete ? null : (
@@ -109,7 +109,7 @@ export function PatientSearch() {
                         )}
                       </div>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-0.5 transition-all" />
+                    <ChevronRight className="h-5 w-5 text-(--text-muted) group-hover:text-(--text-secondary) group-hover:translate-x-0.5 transition-all" />
                   </button>
                 ))}
               </div>

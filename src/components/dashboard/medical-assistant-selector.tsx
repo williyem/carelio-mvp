@@ -38,7 +38,7 @@ const MedicalAssistantSelector = ({
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="bg-(--bg-white) border border-(--border-stroke) flex items-center justify-between overflow-clip p-2 rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,20,0.03)] w-full lg:w-[293px] hover:bg-gray-50 transition-colors"
+          className="bg-(--bg-white) border border-(--border-stroke) flex items-center justify-between overflow-clip p-2 rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,20,0.03)] w-full lg:w-[293px] hover:bg-(--bg-primary) transition-colors"
         >
           <div className="flex items-center justify-center px-1 py-0">
             <div className="flex flex-col font-normal justify-center leading-0 text-(--text-primary) text-[14px] tracking-[-0.084px] whitespace-nowrap">

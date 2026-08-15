@@ -17,7 +17,7 @@ export function AppointmentSummarySkeleton() {
       </div>
 
       {/* HealthRecordRow card */}
-      <div className="flex items-center justify-between w-full p-4 rounded-xl border border-gray-200 bg-white">
+      <div className="flex items-center justify-between w-full p-4 rounded-xl border border-(--border-stroke) bg-(--bg-white)">
         <div className="flex items-center gap-4 flex-1">
           {/* Avatar */}
           <Skeleton className="h-10 w-10 rounded-full shrink-0" />
@@ -36,7 +36,7 @@ export function AppointmentSummarySkeleton() {
       </div>
 
       {/* Tabs bar */}
-      <div className="bg-[#F9F9F9] p-1 rounded-full flex gap-1 overflow-x-auto no-scrollbar">
+      <div className="bg-(--bg-primary) p-1 rounded-full flex gap-1 overflow-x-auto no-scrollbar">
         {['SOAP notes', 'Vitals'].map((label) => (
           <Skeleton
             key={label}

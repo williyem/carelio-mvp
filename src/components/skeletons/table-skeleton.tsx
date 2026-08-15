@@ -14,12 +14,12 @@ const TableSkeleton = ({ columnsCount, rowsCount = 4 }: TableSkeletonProps) => {
       {Array.from({ length: rowsCount }).map((_, idx) => (
         <div
           key={idx}
-          className="bg-white text-xs  font-medium border-b border-gray-200 flex items-center"
+          className="bg-(--bg-white) text-xs  font-medium border-b border-(--border-stroke) flex items-center"
         >
           {Array.from({ length: columnsCount }).map((_, cellIdx) => (
             <div
               key={cellIdx}
-              className="flex-1 border-0 px-4 py-[18px] max-md:text-xs text-sm text-gray-900"
+              className="flex-1 border-0 px-4 py-[18px] max-md:text-xs text-sm text-(--text-primary)"
             >
               <Skeleton className="h-4 w-[90%]" />
             </div>

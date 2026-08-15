@@ -55,7 +55,7 @@ const AppointmentsPageContent = () => {
         />
       )}
       <div className=" w-full  rounded-[16px] space-y-4.5 border border-(--border-stroke) p-5 ">
-        <div className="bg-white  flex flex-col gap-[18px] items-start overflow-clip  w-full">
+        <div className="bg-(--bg-white)  flex flex-col gap-[18px] items-start overflow-clip  w-full">
           <div className="flex flex-col  lg:flex-row justify-between gap-4 lg:gap-[200px] items-start w-full">
             <PatientSearchInput
               className="w-full lg:w-auto"

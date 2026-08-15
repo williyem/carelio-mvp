@@ -109,7 +109,7 @@ const PatientLoginForm = () => {
             </div>
             <Link
               href="/forgot-password?role=patient"
-              className="text-sm text-gray-600 hover:text-brand-blue hover:underline"
+              className="text-sm text-(--text-secondary) hover:text-brand-blue hover:underline"
             >
               Forgot password?
             </Link>

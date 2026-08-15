@@ -50,7 +50,7 @@ const HealthRecordsList = ({ patientId, onBack }: HealthRecordsListProps) => {
         {onBack ? (
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-gray-500 font-bold hover:text-gray-900 transition-colors w-fit cursor-pointer"
+            className="flex items-center gap-2 text-(--text-muted) font-bold hover:text-(--text-primary) transition-colors w-fit cursor-pointer"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Back</span>
@@ -58,7 +58,7 @@ const HealthRecordsList = ({ patientId, onBack }: HealthRecordsListProps) => {
         ) : null}
 
         <div>
-          <h3 className="font-bold text-gray-900">Visit history</h3>
+          <h3 className="font-bold text-(--text-primary)">Visit history</h3>
           <p className="text-sm text-(--text-secondary) mt-1">
             Each appointment includes SOAP notes and measurements from that
             visit.

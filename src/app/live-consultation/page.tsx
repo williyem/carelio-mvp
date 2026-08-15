@@ -33,7 +33,7 @@ export default function LiveConsultationPage() {
               selectedPatient?.patientId ||
               'Patient'}
           </span>
-          <div className="flex items-center gap-3 bg-[#E7F7E9] px-6 py-2.5 rounded-full">
+          <div className="flex items-center gap-3 bg-state-success-lighter px-6 py-2.5 rounded-full">
             <div className="w-2.5 h-2.5 rounded-full bg-[#0B7E17]" />
             <span className="text-[#0B7E17] text-[15px] font-bold tracking-tight">
               Live Consultation
@@ -172,7 +172,7 @@ export default function LiveConsultationPage() {
         </div>
 
         {/* Clinical Sidebar / Action Tray */}
-        <div className="w-full lg:w-[480px] bg-white p-6 md:p-8 rounded-t-[40px] lg:rounded-tr-none lg:rounded-tl-[40px] flex flex-col gap-6 overflow-y-auto no-scrollbar shadow-[-10px_0_40px_rgba(0,0,0,0.1)] relative shrink-0">
+        <div className="w-full lg:w-[480px] bg-(--bg-white) p-6 md:p-8 rounded-t-[40px] lg:rounded-tr-none lg:rounded-tl-[40px] flex flex-col gap-6 overflow-y-auto no-scrollbar shadow-[-10px_0_40px_rgba(0,0,0,0.1)] relative shrink-0">
           <VideoCallLiveVitals />
         </div>
       </div>

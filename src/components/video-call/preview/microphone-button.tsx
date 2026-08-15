@@ -39,7 +39,7 @@ export default function MicrophoneButton({
         variant="secondary"
         size="lg"
         className={cn(
-          'rounded-r-none relative cursor-pointer gap-2 h-[60px] rounded-[1000px] px-2.5  pr-7 justify-start border-[#E0E0E0] bg-white border transition-all'
+          'rounded-r-none relative cursor-pointer gap-2 h-[60px] rounded-[1000px] px-2.5  pr-7 justify-start border-(--border-stroke) bg-(--bg-white) border transition-all'
         )}
         onClick={onMicrophoneClick}
       >

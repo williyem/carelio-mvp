@@ -226,7 +226,7 @@ export default function ScheduleAvailabilitySettings({
                     'h-9 min-w-9 px-2 rounded-full text-sm font-medium border',
                     active
                       ? 'bg-brand-blue text-white border-brand-blue'
-                      : 'bg-white text-(--text-secondary) border-(--border-stroke)'
+                      : 'bg-(--bg-white) text-(--text-secondary) border-(--border-stroke)'
                   )}
                 >
                   {DAY_SHORT[index]}

@@ -34,7 +34,7 @@ export function Sidebar() {
   };
 
   return (
-    <div className="flex h-full w-[250px] flex-col bg-white dark:bg-card border-r border-gray-100 dark:border-border">
+    <div className="flex h-full w-[250px] flex-col bg-(--bg-white) dark:bg-card border-r border-(--border-stroke) dark:border-border">
       <div className="flex h-16 items-center px-6 pt-6 pb-2">
         <Link href={ROUTES.DASHBOARD.ROOT} className="flex items-center">
           <Image
@@ -62,7 +62,7 @@ export function Sidebar() {
                 'flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200',
                 isActive
                   ? 'bg-brand-blue text-white shadow-md shadow-brand-blue/20'
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-accent-foreground'
+                  : 'text-(--text-muted) hover:bg-(--bg-primary) hover:text-(--text-primary) dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-accent-foreground'
               )}
             >
               <Icon
@@ -70,7 +70,7 @@ export function Sidebar() {
                   'h-5 w-5',
                   isActive
                     ? 'text-white'
-                    : 'text-gray-400 group-hover:text-gray-600'
+                    : 'text-(--text-muted) group-hover:text-(--text-secondary)'
                 )}
               />
               {item.label}
@@ -82,9 +82,9 @@ export function Sidebar() {
       <div className="p-4 mt-auto border-t border-gray-50 dark:border-border/50">
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all duration-200 group"
+          className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-(--text-muted) hover:bg-state-error-lighter hover:text-red-600 rounded-xl transition-all duration-200 group"
         >
-          <LogOut className="h-5 w-5 text-gray-400 group-hover:text-red-500" />
+          <LogOut className="h-5 w-5 text-(--text-muted) group-hover:text-red-500" />
           Logout
         </button>
       </div>

@@ -68,7 +68,9 @@ export default function MeasurementRequestPanel({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="font-bold text-gray-900">Request a measurement</h3>
+        <h3 className="font-bold text-(--text-primary)">
+          Request a measurement
+        </h3>
         <p className="text-sm text-(--text-secondary) mt-1">
           The patient or health assistant will see how to use the device and can
           record the reading.
@@ -87,10 +89,10 @@ export default function MeasurementRequestPanel({
           return (
             <div
               key={item.slug}
-              className="rounded-[10px] border border-[#EBEBEB] p-3 space-y-3"
+              className="rounded-[10px] border border-(--border-stroke) p-3 space-y-3"
             >
               <div className="flex items-center gap-3">
-                <div className="relative w-14 h-14 rounded-[8px] overflow-hidden bg-gray-100 shrink-0">
+                <div className="relative w-14 h-14 rounded-[8px] overflow-hidden bg-(--bg-light-gray) shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={guideImage(item)}
@@ -99,7 +101,7 @@ export default function MeasurementRequestPanel({
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm text-gray-900">
+                  <p className="font-semibold text-sm text-(--text-primary)">
                     {item.shortLabel}
                   </p>
                   <p className="text-xs text-(--text-secondary) truncate">
@@ -134,7 +136,7 @@ export default function MeasurementRequestPanel({
                 </div>
               </div>
               {open ? (
-                <div className="space-y-2 border-t border-gray-100 pt-3">
+                <div className="space-y-2 border-t border-(--border-stroke) pt-3">
                   {embed ? (
                     <div className="aspect-video w-full overflow-hidden rounded-[8px] bg-black">
                       <iframe

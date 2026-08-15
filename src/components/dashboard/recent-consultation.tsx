@@ -46,11 +46,11 @@ export function RecentConsultation() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-base font-semibold text-gray-900">
+      <h2 className="text-base font-semibold text-(--text-primary)">
         Recent Consultation
       </h2>
       {isLoading ? (
-        <Card className="border border-gray-100 rounded-2xl overflow-hidden bg-white shadow-none">
+        <Card className="border border-(--border-stroke) rounded-2xl overflow-hidden bg-(--bg-white) shadow-none">
           <CardContent className="p-4 sm:p-5 flex items-center justify-center h-20">
             <Loader2 className="h-5 w-5 animate-spin text-brand-blue" />
           </CardContent>
@@ -60,7 +60,7 @@ export function RecentConsultation() {
           href={`/dashboard/patient/${recentConsultation.patientId}/${recentConsultation?.id}`}
           className="block"
         >
-          <Card className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer bg-white transition-colors hover:bg-gray-50/50 shadow-none">
+          <Card className="border border-(--border-stroke) rounded-2xl overflow-hidden cursor-pointer bg-(--bg-white) transition-colors hover:bg-(--bg-primary)/50 shadow-none">
             <CardContent className="p-4 sm:p-5 flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Avatar className="h-12 w-12 border border-blue-50">
@@ -69,13 +69,13 @@ export function RecentConsultation() {
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h3 className="font-bold text-gray-900 leading-tight">
+                  <h3 className="font-bold text-(--text-primary) leading-tight">
                     {recentConsultation.patient?.fullName ||
                       recentConsultation.patient?.patientId ||
                       'Patient'}
                   </h3>
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5">
-                    <div className="flex items-center gap-1.5 text-sm text-gray-500 font-medium">
+                    <div className="flex items-center gap-1.5 text-sm text-(--text-muted) font-medium">
                       <CalendarIcon className="h-3.5 w-3.5 opacity-60" />
                       <span>
                         {recentConsultation.startTime
@@ -86,7 +86,7 @@ export function RecentConsultation() {
                           : 'N/A'}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-sm text-gray-500 font-medium">
+                    <div className="flex items-center gap-1.5 text-sm text-(--text-muted) font-medium">
                       <Clock className="h-3.5 w-3.5 opacity-60" />
                       <span>
                         {formatDuration(
@@ -98,7 +98,7 @@ export function RecentConsultation() {
                   </div>
                 </div>
               </div>
-              <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
+              <ChevronRight className="h-5 w-5 text-(--text-muted) group-hover:text-(--text-secondary) transition-colors" />
             </CardContent>
           </Card>
         </Link>

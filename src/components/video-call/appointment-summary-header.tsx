@@ -35,7 +35,7 @@ const AppointmentSummaryHeader = ({
     : 'Doctor';
 
   return (
-    <div className="border border-(--border-stroke) rounded-[10px] bg-white px-5 py-4 w-full">
+    <div className="border border-(--border-stroke) rounded-[10px] bg-(--bg-white) px-5 py-4 w-full">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div className="space-y-3">
           <div className="flex items-center gap-3">

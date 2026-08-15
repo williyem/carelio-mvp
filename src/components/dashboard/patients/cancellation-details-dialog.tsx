@@ -27,7 +27,7 @@ const CancellationDetailsDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white rounded-[30px] p-6 max-w-[443px] w-full">
+      <DialogContent className="bg-(--bg-white) rounded-[30px] p-6 max-w-[443px] w-full">
         <DialogHeader>
           <DialogTitle className=" font-bold">Cancellation Detail</DialogTitle>
           <DialogDescription className="sr-only">
@@ -70,7 +70,7 @@ const CancellationDetailsDialog = ({
               {'N/A'}
             </span>
           </div>
-          <div className="flex col-span-2 p-2 rounded-[8px] bg-[#EBF8FF] flex-col gap-1">
+          <div className="flex col-span-2 p-2 rounded-[8px] bg-state-info-lighter flex-col gap-1">
             <span className="text-xs font-normal text-brand-blue">Reason</span>
             <span className="  text-primary text-xs">
               {appointment.cancellationReason || 'No reason provided'}
