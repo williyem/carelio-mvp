@@ -6,10 +6,13 @@ import {
   confirmMeasurementRequests,
   extractMeasurements,
   getMeasurementRequests,
+  getPatientAiSummary,
   respondToMeasurementRequest,
   setDeviceCaptureEnabled,
+  summarizePatientNotes,
+  summarizeVisit,
 } from './api';
-import type { MeasurementType } from './types';
+import type { MeasurementType, PatientAiSummary } from './types';
 
 export const measurementRequestsKey = (appointmentId: string) =>
   ['consultation', appointmentId, 'measurement-requests'] as const;
@@ -104,5 +107,44 @@ export function useRespondToMeasurementRequest(
       if (!appointmentId) return;
       queryClient.setQueryData(measurementRequestsKey(appointmentId), data);
     },
+  });
+}
+
+export function usePatientAiSummary(
+  patientId: string | undefined,
+  enabled = true
+) {
+  return useQuery({
+    queryKey: ['patient', patientId, 'ai-summary'] as const,
+    queryFn: async (): Promise<PatientAiSummary | null> => {
+      try {
+        return await getPatientAiSummary(patientId!);
+      } catch (error) {
+        const status = (error as { response?: { status?: number } })?.response
+          ?.status;
+        if (status === 404) return null;
+        throw error;
+      }
+    },
+    enabled: !!patientId && enabled,
+    retry: false,
+  });
+}
+
+export function useSummarizePatientNotes(patientId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (options?: { regenerate?: boolean }) =>
+      summarizePatientNotes(patientId!, options),
+    onSuccess: (data) => {
+      if (!patientId) return;
+      queryClient.setQueryData(['patient', patientId, 'ai-summary'], data);
+    },
+  });
+}
+
+export function useSummarizeVisit() {
+  return useMutation({
+    mutationFn: (appointmentId: string) => summarizeVisit(appointmentId),
   });
 }

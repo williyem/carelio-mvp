@@ -4,6 +4,8 @@ import type {
   ExtractMeasurementsResponse,
   MeasurementState,
   MeasurementType,
+  PatientAiSummary,
+  VisitAiSummary,
 } from './types';
 
 export async function getMeasurementRequests(appointmentId: string) {
@@ -63,6 +65,32 @@ export async function respondToMeasurementRequest(
   const response = await apiClient.patch<MeasurementState>(
     `/consultations/${appointmentId}/measurement-requests/${requestId}`,
     { status, patientResponse }
+  );
+  return extractResponseData(response);
+}
+
+export async function getPatientAiSummary(patientId: string) {
+  const response = await apiClient.get<PatientAiSummary>(
+    `/doctor/patients/${patientId}/ai/summary`
+  );
+  return extractResponseData(response);
+}
+
+export async function summarizePatientNotes(
+  patientId: string,
+  options?: { regenerate?: boolean }
+) {
+  const response = await apiClient.post<PatientAiSummary>(
+    `/doctor/patients/${patientId}/ai/summary`,
+    { regenerate: Boolean(options?.regenerate) }
+  );
+  return extractResponseData(response);
+}
+
+export async function summarizeVisit(appointmentId: string) {
+  const response = await apiClient.post<VisitAiSummary>(
+    `/consultations/${appointmentId}/ai/summary`,
+    {}
   );
   return extractResponseData(response);
 }

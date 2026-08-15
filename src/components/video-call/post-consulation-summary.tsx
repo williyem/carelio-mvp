@@ -18,6 +18,7 @@ import PostConsultationDetails, {
 import ConsultationNoteActions from './consultation-note-actions';
 import VitalsTab from './vitals-tab';
 import AppointmentSummaryHeader from './appointment-summary-header';
+import VisitAiSummaryTab from './visit-ai-summary-tab';
 import { Spinner } from '../ui/spinner';
 import ErrorWarningFill from '@/assets/icons/error-warning-fill';
 import { useCallParticipantRole } from '@/hooks/page-hooks/video-call/use-call-participant-role';
@@ -27,7 +28,7 @@ import { cn } from '@/lib/utils';
 import type { SoapNote } from '@/integration/appointments/types';
 import useUser from '@/hooks/useUser';
 
-type TabType = 'SOAP notes' | 'Vitals';
+type TabType = 'SOAP notes' | 'Vitals' | 'AI summary';
 
 const PostConsultationSummary = () => {
   const {
@@ -133,21 +134,23 @@ const PostConsultationSummary = () => {
               />
 
               <div className="bg-(--bg-primary) p-1 rounded-full flex overflow-x-auto no-scrollbar">
-                {(['SOAP notes', 'Vitals'] as TabType[]).map((tab) => (
-                  <button
-                    key={tab}
-                    type="button"
-                    onClick={() => setActiveTab(tab)}
-                    className={cn(
-                      'flex-1 py-3 px-6 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200',
-                      activeTab === tab
-                        ? 'bg-(--bg-white) border-(--border-stroke) border text-(--text-primary)'
-                        : 'text-(--text-primary) hover:text-(--text-gray)'
-                    )}
-                  >
-                    {tab}
-                  </button>
-                ))}
+                {(['SOAP notes', 'Vitals', 'AI summary'] as TabType[]).map(
+                  (tab) => (
+                    <button
+                      key={tab}
+                      type="button"
+                      onClick={() => setActiveTab(tab)}
+                      className={cn(
+                        'flex-1 py-3 px-6 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200',
+                        activeTab === tab
+                          ? 'bg-(--bg-white) border-(--border-stroke) border text-(--text-primary)'
+                          : 'text-(--text-primary) hover:text-(--text-gray)'
+                      )}
+                    >
+                      {tab}
+                    </button>
+                  )
+                )}
               </div>
 
               {activeTab === 'SOAP notes' && (
@@ -176,6 +179,14 @@ const PostConsultationSummary = () => {
                 <VitalsTab
                   appointmentId={postConsultationAppointmentId}
                   hideTitle
+                />
+              )}
+
+              {activeTab === 'AI summary' && postConsultationAppointmentId && (
+                <VisitAiSummaryTab
+                  appointmentId={postConsultationAppointmentId}
+                  note={currentNote ?? null}
+                  soapFields={soapFields}
                 />
               )}
             </>
