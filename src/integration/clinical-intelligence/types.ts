@@ -44,4 +44,6 @@ export type PatientAiSummary = {
 export type VisitAiSummary = {
   summary: string;
   generatedAt: string;
+  generatedByDoctorId?: string | null;
+  cached?: boolean;
 };

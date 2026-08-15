@@ -1,10 +1,13 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { toast } from 'sonner';
 import AiSummaryPanel from '@/components/dashboard/ai-summary-panel';
 import { getErrorMessage } from '@/integration';
-import { useSummarizeVisit } from '@/integration/clinical-intelligence';
+import {
+  useSummarizeVisit,
+  useVisitAiSummary,
+} from '@/integration/clinical-intelligence';
 import { useGetVitalsByAppointmentQuery } from '@/integration/vitals';
 import type {
   AppointmentNote,
@@ -34,10 +37,10 @@ export default function VisitAiSummaryTab({
   note?: AppointmentNote | null;
   soapFields?: Required<SoapNote>;
 }) {
-  const summarize = useSummarizeVisit();
+  const { data: savedSummary, isLoading: isLoadingSaved } =
+    useVisitAiSummary(appointmentId);
+  const summarize = useSummarizeVisit(appointmentId);
   const { data: vitals } = useGetVitalsByAppointmentQuery(appointmentId);
-  const [summary, setSummary] = useState<string | null>(null);
-  const [generatedAt, setGeneratedAt] = useState<string | null>(null);
 
   const hasConfirmedVitals = useMemo(
     () => (vitals ?? []).some((vital) => vital.status === 'confirmed'),
@@ -45,23 +48,30 @@ export default function VisitAiSummaryTab({
   );
 
   const canGenerate = hasSoapContent(note, soapFields) || hasConfirmedVitals;
+  const summary = savedSummary?.summary ?? null;
+  const generatedAt = savedSummary?.generatedAt ?? null;
 
   const handleGenerate = async () => {
     if (!canGenerate) return;
+    const regenerate = Boolean(summary);
     try {
-      const result = await summarize.mutateAsync(appointmentId);
-      setSummary(result.summary);
-      setGeneratedAt(result.generatedAt);
-      toast.success('Visit summary generated');
+      await summarize.mutateAsync({ regenerate });
+      toast.success(
+        regenerate ? 'Visit summary regenerated' : 'Visit summary generated'
+      );
     } catch (error) {
       toast.error(getErrorMessage(error, 'Could not generate visit summary'));
     }
   };
 
+  if (isLoadingSaved && !summary) {
+    return null;
+  }
+
   return (
     <AiSummaryPanel
       title="AI visit summary"
-      description="Summarizes this consultation’s SOAP notes and confirmed vitals."
+      description="Saved summary of this consultation’s SOAP notes and confirmed vitals. Regenerate only when notes change."
       summary={summary}
       generatedAt={generatedAt}
       isPending={summarize.isPending}

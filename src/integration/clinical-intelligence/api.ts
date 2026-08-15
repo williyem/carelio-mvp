@@ -87,10 +87,20 @@ export async function summarizePatientNotes(
   return extractResponseData(response);
 }
 
-export async function summarizeVisit(appointmentId: string) {
+export async function getVisitAiSummary(appointmentId: string) {
+  const response = await apiClient.get<VisitAiSummary>(
+    `/consultations/${appointmentId}/ai/summary`
+  );
+  return extractResponseData(response);
+}
+
+export async function summarizeVisit(
+  appointmentId: string,
+  options?: { regenerate?: boolean }
+) {
   const response = await apiClient.post<VisitAiSummary>(
     `/consultations/${appointmentId}/ai/summary`,
-    {}
+    { regenerate: Boolean(options?.regenerate) }
   );
   return extractResponseData(response);
 }
