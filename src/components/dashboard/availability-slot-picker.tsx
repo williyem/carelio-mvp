@@ -64,16 +64,16 @@ export default function AvailabilitySlotPicker({
       </Label>
       <div
         className={cn(
-          'bg-white border border-[#f2f2f2] flex flex-col gap-[28px] items-start overflow-hidden px-5 py-[22px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] w-full',
+          'bg-(--bg-white) border border-(--border-stroke) flex flex-col gap-[28px] items-start overflow-hidden px-5 py-[22px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] w-full',
           (!doctorSelected || disabled) && 'opacity-60'
         )}
       >
         <div className="flex items-start justify-between gap-4 w-full">
           <div className="flex flex-col gap-[6px] items-start min-w-0">
-            <p className="font-semibold text-[#101828] text-[16px] leading-[20px]">
+            <p className="font-semibold text-(--text-primary) text-[16px] leading-[20px]">
               {date ? format(date, 'EEE, MMM d') : 'Select a date'}
             </p>
-            <p className="font-medium text-[#717c9d] text-[12px] leading-[20px]">
+            <p className="font-medium text-(--text-muted) text-[12px] leading-[20px]">
               {formatTimezoneCaption(timezone)}
             </p>
           </div>
@@ -82,11 +82,11 @@ export default function AvailabilitySlotPicker({
               <button
                 type="button"
                 disabled={!doctorSelected || disabled}
-                className="bg-white border border-[#d0d5dd] cursor-pointer flex gap-2 items-center justify-center px-4 py-[10px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] shrink-0 disabled:cursor-not-allowed"
+                className="bg-(--bg-white) border border-(--border-light) cursor-pointer flex gap-2 items-center justify-center px-4 py-[10px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] shrink-0 disabled:cursor-not-allowed"
               >
-                <CalendarIcon className="size-4 text-[#667085]" />
+                <CalendarIcon className="size-4 text-(--text-muted)" />
 
-                <span className=" text-[#667085] text-[14px] leading-[20px] whitespace-nowrap">
+                <span className=" text-(--text-muted) text-[14px] leading-[20px] whitespace-nowrap">
                   Select date
                 </span>
               </button>
@@ -144,8 +144,8 @@ export default function AvailabilitySlotPicker({
                   className={cn(
                     'flex items-center justify-center px-[16px] py-4 text-[12px] font-bold leading-4 transition-colors',
                     selected
-                      ? 'bg-[#1792e6] text-white'
-                      : 'bg-[rgba(23,146,230,0.1)] text-[#1792e6] hover:bg-[rgba(23,146,230,0.18)]'
+                      ? 'bg-brand-blue text-white'
+                      : 'bg-brand-blue/10 text-brand-blue hover:bg-brand-blue/15'
                   )}
                 >
                   {slot.label}

@@ -3,7 +3,7 @@
 import { Label } from '@/components/ui/label';
 
 const FIELD_CLASS =
-  'border-0 border-b-2 border-dotted border-gray-400 w-full outline-none bg-transparent text-base h-11';
+  'border-0 border-b-2 border-dotted border-(--border-gray) w-full outline-none bg-transparent text-base h-11';
 
 export function ConsentSignRow({
   initialsId = 'patientInitials',
@@ -25,7 +25,7 @@ export function ConsentSignRow({
   mode?: 'initials' | 'printedName';
 }) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-gray-100">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-(--border-stroke)">
       <div className="flex flex-col gap-2 items-start w-full">
         {mode === 'printedName' ? (
           <>

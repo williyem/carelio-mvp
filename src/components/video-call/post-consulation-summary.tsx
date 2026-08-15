@@ -104,7 +104,7 @@ const PostConsultationSummary = () => {
         if (!open) handleClose();
       }}
     >
-      <DialogContent className="max-w-[90%] sm:max-w-[90%] w-[805px] bg-white p-0 overflow-hidden gap-0 border-none">
+      <DialogContent className="max-w-[90%] sm:max-w-[90%] w-[805px] bg-(--bg-white) p-0 overflow-hidden gap-0 border-none">
         <DialogHeader className="p-5">
           <div className=" w-full flex  items-center justify-center">
             <div className="bg-(--bg-info) size-10 w-[40px] flex items-center justify-center rounded-[10px]">
@@ -132,7 +132,7 @@ const PostConsultationSummary = () => {
                 }
               />
 
-              <div className="bg-[#F9F9F9] p-1 rounded-full flex overflow-x-auto no-scrollbar">
+              <div className="bg-(--bg-primary) p-1 rounded-full flex overflow-x-auto no-scrollbar">
                 {(['SOAP notes', 'Vitals'] as TabType[]).map((tab) => (
                   <button
                     key={tab}
@@ -141,8 +141,8 @@ const PostConsultationSummary = () => {
                     className={cn(
                       'flex-1 py-3 px-6 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200',
                       activeTab === tab
-                        ? 'bg-white border-(--border-stroke) border text-gray-900'
-                        : 'text-gray-900 hover:text-gray-700'
+                        ? 'bg-(--bg-white) border-(--border-stroke) border text-(--text-primary)'
+                        : 'text-(--text-primary) hover:text-(--text-gray)'
                     )}
                   >
                     {tab}

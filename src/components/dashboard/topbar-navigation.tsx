@@ -155,8 +155,9 @@ const TopbarNavigation = ({
                     height="5"
                     viewBox="0 0 9 5"
                     fill="none"
+                    className="text-(--text-gray-dark)"
                   >
-                    <path d="M4.5 4.5L0 0H9L4.5 4.5Z" fill="#5C5C5C" />
+                    <path d="M4.5 4.5L0 0H9L4.5 4.5Z" fill="currentColor" />
                   </svg>
                 </div>
               )}
@@ -165,8 +166,12 @@ const TopbarNavigation = ({
           <DropdownMenuContent align="end" className="w-[200px] mt-2">
             <div className="px-2 py-1.5 md:hidden">
               <p className="text-sm font-semibold">{fullName || 'User'}</p>
-              <p className="text-xs text-gray-500">Health assistant</p>
-              <p className="text-xs text-gray-500 truncate">{email}</p>
+              <p className="text-xs text-(--text-secondary)">
+                Health assistant
+              </p>
+              <p className="text-xs text-(--text-secondary) truncate">
+                {email}
+              </p>
             </div>
             <DropdownMenuSeparator className="md:hidden" />
             <DropdownMenuItem
@@ -186,7 +191,7 @@ const TopbarNavigation = ({
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="bg-white border border-(--border-stroke) h-[44px] w-[44px] p-0 shadow-[0px_1px_2px_0px_rgba(10,13,20,0.03)] hover:bg-(--bg-primary)"
+              className="bg-(--bg-white) border border-(--border-stroke) h-[44px] w-[44px] p-0 shadow-[0px_1px_2px_0px_rgba(10,13,20,0.03)] hover:bg-(--bg-primary)"
             >
               <Menu className="w-5 h-5 text-(--text-primary)" />
               <span className="sr-only">Open menu</span>
@@ -194,7 +199,7 @@ const TopbarNavigation = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="w-[200px] bg-white border border-(--border-stroke) shadow-[0px_1px_2px_0px_rgba(10,13,20,0.03)] rounded-[8px] p-1"
+            className="w-[200px] bg-popover border border-(--border-stroke) shadow-[0px_1px_2px_0px_rgba(10,13,20,0.03)] rounded-[8px] p-1"
           >
             {/* Home */}
             <DropdownMenuItem asChild>

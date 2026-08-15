@@ -179,7 +179,7 @@ const VideoCallLiveVitals = () => {
                 'text-sm cursor-pointer underline-offset-4',
                 doctorView === link.id
                   ? 'text-brand-blue font-semibold underline'
-                  : 'text-gray-500 hover:text-gray-900 underline'
+                  : 'text-(--text-muted) hover:text-(--text-primary) underline'
               )}
             >
               {link.label}
@@ -190,7 +190,9 @@ const VideoCallLiveVitals = () => {
         {doctorView === 'notes' ? (
           <div className="flex flex-col h-full min-h-0">
             <div className="mb-4">
-              <h3 className="font-bold text-gray-900">Clinical notes</h3>
+              <h3 className="font-bold text-(--text-primary)">
+                Clinical notes
+              </h3>
               <p className="text-sm text-(--text-secondary) mt-1">
                 Record SOAP notes for this visit. Save a draft anytime, or
                 finalize when the consultation is complete.
@@ -200,14 +202,14 @@ const VideoCallLiveVitals = () => {
               defaultValue="subjective"
               className="w-full flex-1 min-h-0 flex flex-col"
             >
-              <TabsList className="bg-[#F9F9F9] p-1 rounded-full flex gap-1 w-full h-auto">
+              <TabsList className="bg-(--bg-primary) p-1 rounded-full flex gap-1 w-full h-auto">
                 {(
                   ['subjective', 'objective', 'assessment', 'plan'] as const
                 ).map((key) => (
                   <TabsTrigger
                     key={key}
                     value={key}
-                    className="flex-1 py-3 px-3 rounded-full text-xs md:text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-gray-900 text-gray-500 hover:text-gray-700 capitalize"
+                    className="flex-1 py-3 px-3 rounded-full text-xs md:text-sm font-medium data-[state=active]:bg-(--bg-white) data-[state=active]:text-(--text-primary) text-(--text-muted) hover:text-(--text-gray) capitalize"
                   >
                     {key}
                   </TabsTrigger>
@@ -228,7 +230,7 @@ const VideoCallLiveVitals = () => {
                 ))}
               </div>
             </Tabs>
-            <div className="mt-auto pt-6 border-t border-gray-100 flex flex-col sm:flex-row gap-3">
+            <div className="mt-auto pt-6 border-t border-(--border-stroke) flex flex-col sm:flex-row gap-3">
               <Button
                 className="flex-1 bg-[#2E90FA] hover:bg-[#2E90FA]/90 text-white rounded-full h-12 font-bold cursor-pointer"
                 onClick={handleSaveNotes}
@@ -244,7 +246,9 @@ const VideoCallLiveVitals = () => {
               {doctorView === 'records' && (
                 <>
                   <div>
-                    <h3 className="font-bold text-gray-900">Patient info</h3>
+                    <h3 className="font-bold text-(--text-primary)">
+                      Patient info
+                    </h3>
                     <p className="text-sm text-(--text-secondary) mt-1">
                       Profile details for the patient on this call.
                     </p>
@@ -265,7 +269,9 @@ const VideoCallLiveVitals = () => {
                   <MeasurementRequestPanel appointmentId={appointmentId} />
                   <div className="space-y-3">
                     <div>
-                      <h3 className="font-bold text-gray-900">This visit</h3>
+                      <h3 className="font-bold text-(--text-primary)">
+                        This visit
+                      </h3>
                       <p className="text-sm text-(--text-secondary) mt-1">
                         Readings come in confirmed. Reject any that look wrong.
                       </p>

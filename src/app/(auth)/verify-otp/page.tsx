@@ -27,7 +27,7 @@ function VerifyOtpForm() {
   } = useVerifyOtpForm();
 
   return (
-    <div className="w-full flex flex-col items-center justify-center sm:p-6 bg-white dark:bg-background h-full">
+    <div className="w-full flex flex-col items-center justify-center sm:p-6 bg-(--bg-white) dark:bg-background h-full">
       <div className="w-full max-w-[450px] flex flex-col items-center gap-6">
         {/* Logo */}
         <div className="flex items-center justify-center mb-6">
@@ -65,7 +65,7 @@ function VerifyOtpForm() {
           className="mt-0 flex flex-col items-center gap-6 w-full"
         >
           <div className="w-full">
-            <div className="text-left text-sm text-gray-500 mb-2">
+            <div className="text-left text-sm text-(--text-muted) mb-2">
               Enter Code
             </div>
             <InputOTP
@@ -78,27 +78,27 @@ function VerifyOtpForm() {
               <InputOTPGroup className="gap-3 w-full justify-between">
                 <InputOTPSlot
                   index={0}
-                  className="w-12 h-14 border border-gray-200 bg-gray-50 rounded-md text-lg"
+                  className="w-12 h-14 border border-(--border-stroke) bg-(--bg-primary) rounded-md text-lg"
                 />
                 <InputOTPSlot
                   index={1}
-                  className="w-12 h-14 border border-gray-200 bg-gray-50 rounded-md text-lg"
+                  className="w-12 h-14 border border-(--border-stroke) bg-(--bg-primary) rounded-md text-lg"
                 />
                 <InputOTPSlot
                   index={2}
-                  className="w-12 h-14 border border-gray-200 bg-gray-50 rounded-md text-lg"
+                  className="w-12 h-14 border border-(--border-stroke) bg-(--bg-primary) rounded-md text-lg"
                 />
                 <InputOTPSlot
                   index={3}
-                  className="w-12 h-14 border border-gray-200 bg-gray-50 rounded-md text-lg"
+                  className="w-12 h-14 border border-(--border-stroke) bg-(--bg-primary) rounded-md text-lg"
                 />
                 <InputOTPSlot
                   index={4}
-                  className="w-12 h-14 border border-gray-200 bg-gray-50 rounded-md text-lg"
+                  className="w-12 h-14 border border-(--border-stroke) bg-(--bg-primary) rounded-md text-lg"
                 />
                 <InputOTPSlot
                   index={5}
-                  className="w-12 h-14 border border-gray-200 bg-gray-50 rounded-md text-lg"
+                  className="w-12 h-14 border border-(--border-stroke) bg-(--bg-primary) rounded-md text-lg"
                 />
               </InputOTPGroup>
             </InputOTP>
@@ -131,7 +131,7 @@ function VerifyOtpForm() {
 
         <Link
           href={ROUTES.AUTH.LOGIN}
-          className="flex items-center gap-2 text-sm text-gray-600 hover:text-foreground transition-colors mt-4"
+          className="flex items-center gap-2 text-sm text-(--text-secondary) hover:text-foreground transition-colors mt-4"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to log in
@@ -145,7 +145,7 @@ export default function VerifyOtpPage() {
   return (
     <Suspense
       fallback={
-        <div className="w-full flex flex-col items-center justify-center sm:p-6 bg-white dark:bg-background h-full">
+        <div className="w-full flex flex-col items-center justify-center sm:p-6 bg-(--bg-white) dark:bg-background h-full">
           <div className="w-full max-w-[500px] flex flex-col items-center gap-6">
             <div className="flex items-center justify-center mb-6">
               <Link

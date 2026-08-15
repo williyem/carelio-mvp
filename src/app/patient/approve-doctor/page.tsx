@@ -61,7 +61,7 @@ const ApproveDoctorContent = () => {
 
   return (
     <div className="flex items-center justify-center min-h-[80vh] p-4">
-      <div className="bg-white rounded-[24px] border border-(--border-stroke) shadow-[0px_2px_12px_0px_rgba(0,0,0,0.08)] p-8 md:p-12 max-w-lg w-full space-y-6">
+      <div className="bg-(--bg-white) rounded-[24px] border border-(--border-stroke) shadow-[0px_2px_12px_0px_rgba(0,0,0,0.08)] p-8 md:p-12 max-w-lg w-full space-y-6">
         <Image
           src="/images/carelio-logo.png"
           alt="Carelio"
@@ -77,10 +77,10 @@ const ApproveDoctorContent = () => {
             ) : (
               <XCircle className="h-10 w-10 text-red-500" />
             )}
-            <h1 className="text-xl font-bold text-gray-900">
+            <h1 className="text-xl font-bold text-(--text-primary)">
               {approved ? 'Access approved' : 'Access declined'}
             </h1>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-(--text-secondary)">
               {approved
                 ? `${data.doctorName} can now view ${data.patientName}’s records. Any booked appointment stays scheduled.`
                 : `Chart access for ${data.doctorName} was declined. Any booked appointment is still scheduled.`}
@@ -89,10 +89,10 @@ const ApproveDoctorContent = () => {
         ) : (
           <div className="flex flex-col items-center text-center space-y-5">
             <div className="space-y-2">
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="text-xl font-bold text-(--text-primary)">
                 Approve covering doctor
               </h1>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-(--text-secondary)">
                 {data.doctorName} is requesting covering-doctor access to{' '}
                 {data.patientName}’s chart. Declining does not cancel an
                 appointment if one was booked.

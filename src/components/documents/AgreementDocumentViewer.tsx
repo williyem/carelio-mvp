@@ -141,7 +141,7 @@ export function AgreementDocumentViewer({
         {loading && <DocumentLoadingSkeleton />}
 
         {error && (
-          <div className="w-full bg-red-50 border border-red-200 rounded-8 p-4 text-red-800">
+          <div className="w-full bg-state-error-lighter border border-red-200 rounded-8 p-4 text-red-800">
             <strong>Error loading document:</strong> {error}
           </div>
         )}
@@ -172,7 +172,7 @@ export function AgreementDocumentViewer({
                         {...field}
                         type="text"
                         placeholder="Printed Name"
-                        className="border-0 border-b-2 border-dotted border-gray-400 w-full max-w-[300px] outline-none bg-transparent text-base mb-2"
+                        className="border-0 border-b-2 border-dotted border-(--border-gray) w-full max-w-[300px] outline-none bg-transparent text-base mb-2"
                       />
                     )}
                   />
@@ -217,7 +217,7 @@ export function AgreementDocumentViewer({
                     Signature:
                   </div>
                   <div
-                    className="border-b-2 border-dotted border-gray-400 w-full max-w-[300px] h-[60px] relative mb-2 min-w-[200px] flex items-center"
+                    className="border-b-2 border-dotted border-(--border-gray) w-full max-w-[300px] h-[60px] relative mb-2 min-w-[200px] flex items-center"
                     data-ph-mask="signature-area"
                   >
                     <Controller
@@ -238,7 +238,7 @@ export function AgreementDocumentViewer({
                               data-ph-mask="signature-display"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                            <div className="w-full h-full flex items-center justify-center text-(--text-muted) text-sm">
                               Signature will appear here
                             </div>
                           )}
@@ -260,7 +260,7 @@ export function AgreementDocumentViewer({
                         {...field}
                         type="date"
                         disabled={true}
-                        className="border-0 border-b-2 border-dotted border-gray-400 w-full max-w-[300px] outline-none bg-transparent text-base mb-2"
+                        className="border-0 border-b-2 border-dotted border-(--border-gray) w-full max-w-[300px] outline-none bg-transparent text-base mb-2"
                       />
                     )}
                   />

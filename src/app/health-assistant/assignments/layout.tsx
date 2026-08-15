@@ -18,7 +18,7 @@ export default function AppointmentsLayout({
   };
 
   return (
-    <div className="bg-white overflow-clip relative rounded-[40px] w-full min-h-screen">
+    <div className="bg-(--bg-white) overflow-clip relative rounded-[40px] w-full min-h-screen">
       <HealthAssistantTopbar
         onDevicesClick={handleDevicesClick}
         onLogoutClick={handleLogoutClick}

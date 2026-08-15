@@ -159,7 +159,7 @@ const PatientSearch = ({
         />
 
         {shouldShowResults && (
-          <div className="absolute bg-white border border-(--border-stroke) flex flex-col gap-4 items-start left-0 px-5 py-[23px] rounded-[12px] shadow-[0px_2px_12px_0px_rgba(0,0,0,0.12)] animate-in fade-in slide-in-from-top-2 duration-200 space-y-2 top-[calc(100%+8px)] w-full z-50">
+          <div className="absolute bg-(--bg-white) border border-(--border-stroke) flex flex-col gap-4 items-start left-0 px-5 py-[23px] rounded-[12px] shadow-[0px_2px_12px_0px_rgba(0,0,0,0.12)] animate-in fade-in slide-in-from-top-2 duration-200 space-y-2 top-[calc(100%+8px)] w-full z-50">
             {isLoading ? (
               <div className="p-10 flex flex-col w-full items-center justify-center text-center space-y-3">
                 <Loader2 className="h-6 w-6 animate-spin text-brand-blue" />
@@ -205,7 +205,7 @@ const PatientSearch = ({
       />
       {!shouldShowResults && (
         <div className="w-full flex flex-col gap-4 mt-8">
-          <h2 className="text-base font-normal text-gray-900">
+          <h2 className="text-base font-normal text-(--text-primary)">
             Visits you booked
           </h2>
           <div className="flex flex-col gap-3">
@@ -233,7 +233,7 @@ const PatientSearch = ({
           {/* Pagination Controls */}
           {(upcomingAppointments?.totalPages ?? 0) > 1 && (
             <div className="flex items-center justify-between pt-2 w-full">
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-(--text-muted)">
                 Page {consultationPage} of {upcomingAppointments?.totalPages}
               </p>
               <div className="flex gap-2">

@@ -26,7 +26,7 @@ export const OnboardingStepCard: React.FC<OnboardingStepCardProps> = ({
   secondaryAction,
 }) => {
   return (
-    <div className="max-w-[808px] mx-auto mt-10 p-8 border border-(--border-stroke) rounded-[16px] bg-white shadow-none space-y-6">
+    <div className="max-w-[808px] mx-auto mt-10 p-8 border border-(--border-stroke) rounded-[16px] bg-(--bg-white) shadow-none space-y-6">
       <div className="space-y-2 text-center">
         <h2 className="text-[28px] font-bold text-text-strong-950">{title}</h2>
         {description && (

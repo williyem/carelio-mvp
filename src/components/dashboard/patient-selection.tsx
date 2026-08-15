@@ -65,10 +65,10 @@ export function PatientSelection({
     <div className="space-y-6">
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-(--text-muted)" />
         <Input
           placeholder="Search by patient name or Patient ID..."
-          className="h-14 pl-12 rounded-full border-gray-200 text-base"
+          className="h-14 pl-12 rounded-full border-(--border-stroke) text-base"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -76,7 +76,7 @@ export function PatientSelection({
 
       {/* Select Patient */}
       <div className="space-y-3">
-        <Label className="text-sm font-medium text-gray-700">
+        <Label className="text-sm font-medium text-(--text-gray)">
           Select Patient
         </Label>
         <div className="space-y-3 w-full min-h-[100px]">
@@ -98,7 +98,7 @@ export function PatientSelection({
               {/* Pagination Controls */}
               {totalPages > 1 && (
                 <div className="flex items-center justify-between pt-4">
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-(--text-muted)">
                     Page {page} of {totalPages}
                   </p>
                   <div className="flex gap-2">

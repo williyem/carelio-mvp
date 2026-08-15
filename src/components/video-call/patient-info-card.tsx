@@ -32,40 +32,46 @@ const PatientInfoCard = ({ patient }: PatientInfoCardProps) => {
   }, [patient?.dob, patient?.dateOfBirth]);
 
   return (
-    <Card className="border-[#EBEBEB] shadow-none rounded-[14px] overflow-hidden bg-white h-fit">
+    <Card className="border-(--border-stroke) shadow-none rounded-[14px] overflow-hidden bg-(--bg-white) h-fit">
       <CardContent className="p-8 space-y-6">
         <div className="space-y-4">
           <div className="space-y-1">
             <p className="font-normal text-(--text-secondary)">Name</p>
-            <p className="font-bold text-gray-900 text-sm">
+            <p className="font-bold text-(--text-primary) text-sm">
               {patient?.fullName || patient?.name || 'N/A'}
             </p>
           </div>
           <div className="space-y-1">
             <p className="font-normal text-(--text-secondary)">Date of Birth</p>
-            <p className="font-bold text-gray-900 text-sm">{formattedDob}</p>
+            <p className="font-bold text-(--text-primary) text-sm">
+              {formattedDob}
+            </p>
           </div>
           <div className="space-y-1">
             <p className="font-normal text-(--text-secondary)">Blood Type</p>
-            <p className="font-bold text-gray-900 text-sm">
+            <p className="font-bold text-(--text-primary) text-sm">
               {patient?.bloodType || 'N/A'}
             </p>
           </div>
           <div className="space-y-1">
             <p className="font-normal text-(--text-secondary)">Allergies</p>
-            <p className="font-bold text-gray-900 text-sm">{allergies}</p>
+            <p className="font-bold text-(--text-primary) text-sm">
+              {allergies}
+            </p>
           </div>
           <div className="space-y-1">
             <p className="font-normal text-(--text-secondary)">
               Medical conditions
             </p>
-            <p className="font-bold text-gray-900 text-sm">{conditions}</p>
+            <p className="font-bold text-(--text-primary) text-sm">
+              {conditions}
+            </p>
           </div>
           <div className="space-y-1">
             <p className="font-normal text-(--text-secondary)">
               Emergency contact
             </p>
-            <p className="font-bold text-sm text-gray-900">
+            <p className="font-bold text-sm text-(--text-primary)">
               {emergencyContact}
             </p>
           </div>

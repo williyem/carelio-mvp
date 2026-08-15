@@ -54,7 +54,7 @@ export default function ReleaseOfInformationStep() {
           </p>
         </div>
 
-        <div className="pt-4 space-y-4 border-t border-gray-100">
+        <div className="pt-4 space-y-4 border-t border-(--border-stroke)">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-4">
               <Label htmlFor="patientInitials">Patient Initials</Label>
@@ -67,7 +67,7 @@ export default function ReleaseOfInformationStep() {
                     {...field}
                     type="text"
                     placeholder="Initials"
-                    className="border-0 border-b-2 border-dotted border-gray-400 w-full max-w-[300px] outline-none bg-transparent text-base mb-2"
+                    className="border-0 border-b-2 border-dotted border-(--border-gray) w-full max-w-[300px] outline-none bg-transparent text-base mb-2"
                   />
                 )}
               />
@@ -82,7 +82,7 @@ export default function ReleaseOfInformationStep() {
                     {...field}
                     type="date"
                     readOnly={true}
-                    className="border-0 border-b-2 border-dotted border-gray-400 w-full max-w-[300px] outline-none bg-transparent text-base mb-2"
+                    className="border-0 border-b-2 border-dotted border-(--border-gray) w-full max-w-[300px] outline-none bg-transparent text-base mb-2"
                   />
                 )}
               />{' '}

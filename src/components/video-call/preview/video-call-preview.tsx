@@ -27,7 +27,7 @@ const VideoCallPreview = ({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-50 bg-white h-screen overflow-y-auto"
+            className="fixed inset-0 z-50 bg-(--bg-white) h-screen overflow-y-auto"
           >
             {/* Content */}
             <div>

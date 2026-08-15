@@ -6,7 +6,7 @@ export interface DataTablePaginationProps<TData> {
 export function PerPage<TData>({ table }: DataTablePaginationProps<TData>) {
   return (
     <div className="flex flex-row space-x-5 items-center px-5 py-5">
-      <h1 className=" text-gray-900  max-sm:hidden font-semibold text-sm min-w-[100px]  ">
+      <h1 className=" text-(--text-primary)  max-sm:hidden font-semibold text-sm min-w-[100px]  ">
         Rows Per Page
       </h1>
       <select

@@ -10,7 +10,7 @@ export function PortalChip({
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full border border-(--border-stroke) bg-[#F7F8FA] px-3 py-1 text-xs font-semibold text-(--text-secondary)',
+        'inline-flex items-center rounded-full border border-(--border-stroke) bg-(--bg-primary) px-3 py-1 text-xs font-semibold text-(--text-secondary)',
         className
       )}
     >

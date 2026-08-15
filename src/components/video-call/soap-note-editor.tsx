@@ -87,7 +87,7 @@ const SoapNoteEditor = ({
           {type?.charAt(0).toUpperCase()}
         </div>
         <div className="flex flex-col">
-          <p className="capitalize font-bold text-gray-900 leading-none mb-1">
+          <p className="capitalize font-bold text-(--text-primary) leading-none mb-1">
             {type}
           </p>
         </div>
@@ -102,8 +102,8 @@ const SoapNoteEditor = ({
         onInput={handleInput}
         onKeyDown={handleKeyDown}
         className={cn(
-          'w-full h-64 bg-[#F9F9FB] border border-[#ECEDEE] rounded-[8px] p-4 text-gray-700 text-[15px] focus:outline-none focus:ring-2 focus:ring-brand-blue focus:ring-offset-2 overflow-y-auto font-normal leading-relaxed min-h-[16rem]',
-          'empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400 empty:before:pointer-events-none'
+          'w-full h-64 bg-(--bg-input) border border-(--border-input) rounded-[8px] p-4 text-(--text-gray) text-[15px] focus:outline-none focus:ring-2 focus:ring-brand-blue focus:ring-offset-2 overflow-y-auto font-normal leading-relaxed min-h-[16rem]',
+          'empty:before:content-[attr(data-placeholder)] empty:before:text-(--text-muted) empty:before:pointer-events-none'
         )}
         data-placeholder={placeholder}
       />

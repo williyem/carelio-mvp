@@ -118,7 +118,7 @@ const PatientRegistrationContent = ({
                     onValueChange={field.onChange}
                     disabled={isPending}
                   >
-                    <SelectTrigger className=" bg-transparent border-(--border-light) h-[44px] data-placeholder:text-[#262626]/60 data-placeholder:font-light rounded-[8px] shadow-[0_1px_2px_0_rgba(16,24,40,0.05)] border  text-(--text-primary) focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                    <SelectTrigger className=" bg-transparent border-(--border-light) h-[44px] data-placeholder:text-(--text-muted) data-placeholder:font-light rounded-[8px] shadow-[0_1px_2px_0_rgba(16,24,40,0.05)] border  text-(--text-primary) focus:ring-2 focus:ring-primary focus:ring-offset-2">
                       <SelectValue placeholder="Select gender" />
                     </SelectTrigger>
                     <SelectContent>
@@ -224,7 +224,7 @@ const PatientRegistrationContent = ({
                     onValueChange={field.onChange}
                     disabled={isPending}
                   >
-                    <SelectTrigger className=" bg-transparent border-(--border-light) data-placeholder:text-[#262626]/60 data-placeholder:font-light data-placeholder:sm:text-[14px] leading-[16px] h-[44px] rounded-[8px] shadow-[0_1px_2px_0_rgba(16,24,40,0.05)] border  text-(--text-primary) focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                    <SelectTrigger className=" bg-transparent border-(--border-light) data-placeholder:text-(--text-muted) data-placeholder:font-light data-placeholder:sm:text-[14px] leading-[16px] h-[44px] rounded-[8px] shadow-[0_1px_2px_0_rgba(16,24,40,0.05)] border  text-(--text-primary) focus:ring-2 focus:ring-primary focus:ring-offset-2">
                       <SelectValue placeholder="Select blood type" />
                     </SelectTrigger>
                     <SelectContent>

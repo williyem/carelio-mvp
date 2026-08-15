@@ -49,22 +49,22 @@ export default function LoginPage() {
           onValueChange={(value) => setLoginRole(value as LoginRole)}
           className="w-full gap-0"
         >
-          <TabsList className="h-auto w-full border border-gray-200 p-[5px]">
+          <TabsList className="h-auto w-full border border-(--border-stroke) p-[5px]">
             <TabsTrigger
               value="doctor"
-              className="h-auto flex-1 cursor-pointer p-[10px] text-[13px] leading-[1.2] text-[#020f17] data-[state=active]:bg-white data-[state=active]:border-[#ebebeb]"
+              className="h-auto flex-1 cursor-pointer p-[10px] text-[13px] leading-[1.2] text-(--text-primary) data-[state=active]:bg-(--bg-white) data-[state=active]:border-(--border-stroke)"
             >
               Doctor
             </TabsTrigger>
             <TabsTrigger
               value="patient"
-              className="h-auto flex-1 cursor-pointer p-[10px] text-[13px] leading-[1.2] text-[#020f17] data-[state=active]:bg-white data-[state=active]:border-[#ebebeb]"
+              className="h-auto flex-1 cursor-pointer p-[10px] text-[13px] leading-[1.2] text-(--text-primary) data-[state=active]:bg-(--bg-white) data-[state=active]:border-(--border-stroke)"
             >
               Patient
             </TabsTrigger>
             <TabsTrigger
               value="health-assistant"
-              className="h-auto flex-1 cursor-pointer p-[10px] text-[13px] leading-[1.2] text-[#020f17] data-[state=active]:bg-white data-[state=active]:border-[#ebebeb]"
+              className="h-auto flex-1 cursor-pointer p-[10px] text-[13px] leading-[1.2] text-(--text-primary) data-[state=active]:bg-(--bg-white) data-[state=active]:border-(--border-stroke)"
             >
               Health Assistant
             </TabsTrigger>
@@ -82,7 +82,10 @@ export default function LoginPage() {
           >
             {patientForm.pendingPatientId ? (
               <div className="grid gap-2">
-                <Label htmlFor="otp" className="text-gray-500 font-normal">
+                <Label
+                  htmlFor="otp"
+                  className="text-(--text-muted) font-normal"
+                >
                   Email code
                 </Label>
                 <Input
@@ -91,7 +94,7 @@ export default function LoginPage() {
                   inputMode="numeric"
                   placeholder="6-digit code"
                   disabled={patientForm.isPending}
-                  className="placeholder:text-gray-400"
+                  className="placeholder:text-(--text-muted)"
                   {...patientForm.otpRegister('otp')}
                 />
                 <ErrorMessage
@@ -103,18 +106,18 @@ export default function LoginPage() {
                 <div className="grid gap-2">
                   <Label
                     htmlFor="identifier"
-                    className="text-gray-500 font-normal"
+                    className="text-(--text-muted) font-normal"
                   >
                     Patient ID or email
                   </Label>
                   <div className="relative">
-                    <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-(--text-muted)" />
                     <Input
                       id="identifier"
                       type="text"
                       placeholder="PAT-1001 or you@email.com"
                       disabled={patientForm.isPending}
-                      className="pl-9 placeholder:text-gray-400"
+                      className="pl-9 placeholder:text-(--text-muted)"
                       {...patientForm.register('identifier')}
                     />
                   </div>
@@ -125,17 +128,17 @@ export default function LoginPage() {
                 <div className="grid gap-2">
                   <Label
                     htmlFor="patient-password"
-                    className="text-gray-500 font-normal"
+                    className="text-(--text-muted) font-normal"
                   >
                     Password
                   </Label>
                   <div className="relative w-full">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-(--text-muted)" />
                     <Input
                       id="patient-password"
                       type={patientForm.showPassword ? 'text' : 'password'}
                       placeholder="Enter your password"
-                      className="pl-9 placeholder:text-gray-400"
+                      className="pl-9 placeholder:text-(--text-muted)"
                       disabled={patientForm.isPending}
                       {...patientForm.register('password')}
                     />
@@ -144,7 +147,7 @@ export default function LoginPage() {
                       onClick={() =>
                         patientForm.setShowPassword(!patientForm.showPassword)
                       }
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-(--text-muted) hover:text-(--text-secondary) focus:outline-none"
                       tabIndex={-1}
                     >
                       {patientForm.showPassword ? (
@@ -184,17 +187,20 @@ export default function LoginPage() {
         ) : (
           <form className="grid gap-4" onSubmit={staffForm.handleSubmit}>
             <div className="grid gap-2">
-              <Label htmlFor="email" className="text-gray-500 font-normal">
+              <Label
+                htmlFor="email"
+                className="text-(--text-muted) font-normal"
+              >
                 Email Address
               </Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-(--text-muted)" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="Enter your email"
                   disabled={staffForm.isPending}
-                  className="pl-9 placeholder:text-gray-400"
+                  className="pl-9 placeholder:text-(--text-muted)"
                   {...staffForm.register('email')}
                 />
               </div>
@@ -203,16 +209,19 @@ export default function LoginPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="password" className="text-gray-500 font-normal">
+              <Label
+                htmlFor="password"
+                className="text-(--text-muted) font-normal"
+              >
                 Password
               </Label>
               <div className="relative w-full">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-(--text-muted)" />
                 <Input
                   id="password"
                   type={staffForm.showPassword ? 'text' : 'password'}
                   placeholder="Enter your password"
-                  className="pl-9 placeholder:text-gray-400"
+                  className="pl-9 placeholder:text-(--text-muted)"
                   disabled={staffForm.isPending}
                   {...staffForm.register('password')}
                 />
@@ -221,7 +230,7 @@ export default function LoginPage() {
                   onClick={() =>
                     staffForm.setShowPassword(!staffForm.showPassword)
                   }
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-(--text-muted) hover:text-(--text-secondary) focus:outline-none"
                   tabIndex={-1}
                 >
                   {staffForm.showPassword ? (
@@ -254,7 +263,7 @@ export default function LoginPage() {
                 ? '/forgot-password?role=patient'
                 : '/forgot-password'
             }
-            className="text-sm text-gray-600 hover:text-brand-blue hover:underline"
+            className="text-sm text-(--text-secondary) hover:text-brand-blue hover:underline"
           >
             Forgot password?
           </Link>

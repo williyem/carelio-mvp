@@ -62,11 +62,11 @@ export function WeekView({
       <div className="min-w-[800px]">
         {/* Header */}
         <div className="flex border-b">
-          <div className="w-24 shrink-0 bg-gray-50 border-r"></div>
+          <div className="w-24 shrink-0 bg-(--bg-primary) border-r"></div>
           {days.map((day, i) => (
             <div
               key={i}
-              className="flex-1 py-3 px-4 text-sm font-medium text-gray-900 border-r last:border-r-0 bg-gray-50"
+              className="flex-1 py-3 px-4 text-sm font-medium text-(--text-primary) border-r last:border-r-0 bg-(--bg-primary)"
             >
               {format(day, 'd EEE')}
             </div>
@@ -76,11 +76,11 @@ export function WeekView({
         {/* Grid Container */}
         <div className="relative flex">
           {/* Time gutter labels */}
-          <div className="w-24 shrink-0 bg-gray-50 border-r">
+          <div className="w-24 shrink-0 bg-(--bg-primary) border-r">
             {hours.map((time, index) => (
               <div
                 key={`${time}-${index}`}
-                className="h-16 flex justify-center py-2 text-xs font-medium text-gray-500 border-b last:border-b-0 bg-gray-50/30"
+                className="h-16 flex justify-center py-2 text-xs font-medium text-(--text-muted) border-b last:border-b-0 bg-(--bg-primary)/30"
               >
                 {time}
               </div>
@@ -109,7 +109,7 @@ export function WeekView({
             return (
               <div
                 key={j}
-                className="flex-1 border-r last:border-r-0 relative bg-[#F9FBFC]"
+                className="flex-1 border-r last:border-r-0 relative bg-(--bg-primary)"
               >
                 {/* Visual grid lines */}
                 {hours.map((time, index) => (
@@ -125,7 +125,7 @@ export function WeekView({
                     className="absolute left-0 right-0 flex items-center pointer-events-none"
                     style={{ top: `${timeLineTop}px` }}
                   >
-                    <div className="flex-1 h-[5px] bg-[#10B121]" />
+                    <div className="flex-1 h-[5px] bg-state-success-base" />
                   </div>
                 )}
 

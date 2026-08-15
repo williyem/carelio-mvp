@@ -61,13 +61,13 @@ export default function AppointmentSummaryPage({
       <div className="space-y-6">
         <Link
           href={`/dashboard/patient/${id}`}
-          className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors w-fit"
+          className="flex items-center gap-2 text-(--text-muted) hover:text-(--text-primary) transition-colors w-fit"
         >
           <ArrowLeft className="h-4 w-4" />
           <span className="text-sm font-medium">Back</span>
         </Link>
 
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-(--text-primary)">
           Post-Consultation Summary
         </h1>
       </div>
@@ -77,7 +77,7 @@ export default function AppointmentSummaryPage({
         patientName={patient?.fullName}
       />
 
-      <div className="bg-[#F9F9F9] p-1 rounded-full flex overflow-x-auto no-scrollbar">
+      <div className="bg-(--bg-primary) p-1 rounded-full flex overflow-x-auto no-scrollbar">
         {(['SOAP notes', 'Vitals'] as TabType[]).map((tab) => (
           <button
             key={tab}
@@ -85,8 +85,8 @@ export default function AppointmentSummaryPage({
             className={cn(
               'flex-1 py-3 px-6 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200',
               activeTab === tab
-                ? 'bg-white border-(--border-stroke) border text-gray-900'
-                : 'text-gray-900 hover:text-gray-700'
+                ? 'bg-(--bg-white) border-(--border-stroke) border text-(--text-primary)'
+                : 'text-(--text-primary) hover:text-(--text-gray)'
             )}
           >
             {tab}

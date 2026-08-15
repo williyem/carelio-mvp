@@ -75,7 +75,7 @@ const useDoctorPatientsCols = ({
             className={`px-3 py-1 rounded-full text-[12px] font-medium ${
               isComplete
                 ? 'bg-(--bg-success-light) text-(--text-green-dark)'
-                : 'bg-red-50 text-[#E42826]'
+                : 'bg-state-error-lighter text-state-error-base'
             }`}
           >
             {isComplete ? 'Complete' : 'Incomplete'}
@@ -96,7 +96,7 @@ const useDoctorPatientsCols = ({
                   className={`px-3 py-1 rounded-full text-[12px] font-medium ${
                     isActive
                       ? 'bg-(--bg-success-light) text-(--text-green-dark)'
-                      : 'bg-red-50 text-[#E42826] '
+                      : 'bg-state-error-lighter text-state-error-base '
                   }`}
                 >
                   {isActive ? 'Active' : 'Revoked'}
@@ -122,7 +122,7 @@ const useDoctorPatientsCols = ({
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-[38px] w-[38px] rounded-[8px] border-[#D4D5D6] bg-white"
+                  className="h-[38px] w-[38px] rounded-[8px] border-(--border-gray) bg-(--bg-white)"
                   aria-label="Patient actions"
                 >
                   <MoreHorizontal className="h-4 w-4" />
@@ -167,8 +167,8 @@ const useDoctorPatientsCols = ({
             className={cn(
               'h-[38px] px-[15px] flex-1 w-full max-w-[120px] rounded-[8px] font-normal text-[14px] leading-[1.2]',
               isLinked
-                ? 'border-brand-blue text-brand-blue bg-white hover:bg-brand-blue/5'
-                : 'border-[#D4D5D6] bg-[#F6F6F6] text-(--text-primary)'
+                ? 'border-brand-blue text-brand-blue bg-(--bg-white) hover:bg-brand-blue/5'
+                : 'border-(--border-gray) bg-(--bg-light-gray) text-(--text-primary)'
             )}
           >
             {isLinked ? 'View Details' : 'Verify access'}

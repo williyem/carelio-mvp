@@ -183,7 +183,7 @@ export default function PatientProfilePage() {
             </Label>
             <Input
               placeholder="e.g., Penicillin, Peanuts"
-              className="h-[48px] bg-white"
+              className="h-[48px] bg-(--bg-white)"
               {...register('allergies')}
             />
             <p className="text-(--text-secondary) text-[12px]">
@@ -197,7 +197,7 @@ export default function PatientProfilePage() {
             </Label>
             <Input
               placeholder="e.g., Asthma, Hypertension"
-              className="h-[48px] bg-white"
+              className="h-[48px] bg-(--bg-white)"
               {...register('conditions')}
             />
             <p className="text-(--text-secondary) text-[12px]">
@@ -212,7 +212,7 @@ export default function PatientProfilePage() {
             </Label>
             <Input
               placeholder="Full name"
-              className="h-[48px] bg-white"
+              className="h-[48px] bg-(--bg-white)"
               {...register('emergencyName')}
             />
           </div>
@@ -235,8 +235,8 @@ export default function PatientProfilePage() {
                   onChange={field.onChange}
                   placeholder="+233 24 000 0000"
                   className="w-full"
-                  inputClassName="bg-white border-(--border-light) h-[44px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]"
-                  countryButtonClassName="bg-white border-(--border-light) hover:bg-white"
+                  inputClassName="bg-(--bg-white) border-(--border-light) h-[44px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]"
+                  countryButtonClassName="bg-(--bg-white) border-(--border-light) hover:bg-(--bg-white)"
                 />
               )}
             />

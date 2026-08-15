@@ -10,7 +10,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky",
+    "prepare": "node ./scripts/prepare-husky.js",
     "test": "vitest",
     "test:ui": "vitest --ui"
   },
@@ -41,7 +41,6 @@
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "framer-motion": "^12.34.0",
-    "husky": "^9.1.7",
     "input-otp": "^1.4.2",
     "livekit-client": "^2.21.0",
     "lucide-react": "^0.562.0",
@@ -64,6 +63,7 @@
     "zustand": "^5.0.9"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
     "@tailwindcss/postcss": "^4",
     "@tanstack/eslint-plugin-query": "^5.91.2",
     "@testing-library/dom": "^10.4.1",

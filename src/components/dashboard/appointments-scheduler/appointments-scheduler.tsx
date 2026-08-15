@@ -92,10 +92,10 @@ export function AppointmentsScheduler() {
       {/* Header Controls */}
       <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center justify-between">
         <div className="flex flex-col">
-          <h2 className="text-base font-semibold text-gray-900">
+          <h2 className="text-base font-semibold text-(--text-primary)">
             Appointments
           </h2>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-(--text-muted) mt-1">
             All times are displayed in Eastern Standard Time (EST)
           </p>
         </div>
@@ -107,18 +107,18 @@ export function AppointmentsScheduler() {
               <Button
                 variant="outline"
                 className={cn(
-                  'h-9 px-3 gap-2 rounded-[8px] border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold text-sm transition-all '
+                  'h-9 px-3 gap-2 rounded-[8px] border-(--border-stroke) hover:bg-(--bg-primary) text-(--text-gray) font-semibold text-sm transition-all '
                 )}
               >
-                <CalendarIcon className="h-4 w-4 text-gray-500" />
+                <CalendarIcon className="h-4 w-4 text-(--text-muted)" />
                 <span>{getDateLabel()}</span>
-                <MoreVertical className="h-4 w-4 text-gray-400 ml-1" />
+                <MoreVertical className="h-4 w-4 text-(--text-muted) ml-1" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-3" align="end">
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-2 border-b pb-2 mb-2">
-                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  <span className="text-xs font-bold text-(--text-muted) uppercase tracking-wider">
                     Quick Navigation
                   </span>
                   <Button
@@ -154,8 +154,8 @@ export function AppointmentsScheduler() {
                 onClick={() => setView(item)}
                 className={`h-8 px-4 font-semibold cursor-pointer text-xs shadow-none transition-all rounded-[6px] ${
                   view === item
-                    ? 'bg-white  text-primary hover:text-primary/80 hover:bg-white'
-                    : 'text-gray-500 hover:text-gray-900'
+                    ? 'bg-(--bg-white)  text-primary hover:text-primary/80 hover:bg-(--bg-white)'
+                    : 'text-(--text-muted) hover:text-(--text-primary)'
                 }`}
               >
                 {item}
@@ -165,13 +165,13 @@ export function AppointmentsScheduler() {
         </div>
       </div>
 
-      <div className="bg-[#F9FBFC] overflow-y-auto h-[600px]">
+      <div className="bg-(--bg-primary) overflow-y-auto h-[600px]">
         {isLoading ? (
           <div className="h-[600px] flex items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-brand-blue" />
           </div>
         ) : error ? (
-          <div className="h-[600px] flex items-center justify-center text-gray-500">
+          <div className="h-[600px] flex items-center justify-center text-(--text-muted)">
             Failed to load appointments
           </div>
         ) : (

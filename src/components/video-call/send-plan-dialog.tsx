@@ -225,7 +225,7 @@ const SendPlanDialog = ({
 }: SendPlanDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[440px] bg-white">
+      <DialogContent className="sm:max-w-[440px] bg-(--bg-white)">
         {open ? (
           <SendPlanForm
             note={note}

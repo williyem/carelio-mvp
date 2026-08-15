@@ -42,23 +42,25 @@ function SuccessModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-[383px] scale-100 transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all animate-in zoom-in-95 duration-200 mx-4">
+      <div className="w-full max-w-[383px] scale-100 transform overflow-hidden rounded-2xl bg-(--bg-white) p-6 shadow-xl transition-all animate-in zoom-in-95 duration-200 mx-4">
         <div className="flex flex-col items-center text-center space-y-4">
           <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center text-brand-blue">
             <CalendarCheck className="h-6 w-6" />
           </div>
 
           <div className="space-y-2">
-            <h3 className="text-xl font-bold text-gray-900">
+            <h3 className="text-xl font-bold text-(--text-primary)">
               Appointment Confirmed
             </h3>
-            <p className="text-sm text-gray-500 max-w-xs mx-auto">
+            <p className="text-sm text-(--text-muted) max-w-xs mx-auto">
               Appointment confirmed for{' '}
-              <span className="font-semibold text-gray-900">{patientName}</span>
+              <span className="font-semibold text-(--text-primary)">
+                {patientName}
+              </span>
             </p>
           </div>
 
-          <div className="w-full border-t border-dashed border-gray-200 my-2" />
+          <div className="w-full border-t border-dashed border-(--border-stroke) my-2" />
 
           <div className="w-full pt-2">
             <Button
@@ -240,7 +242,7 @@ export function ScheduleAppointmentForm() {
       />
 
       <div className="space-y-4">
-        <Label className="text-sm font-medium text-gray-700 mb-4">
+        <Label className="text-sm font-medium text-(--text-gray) mb-4">
           Schedule Time
         </Label>
 
@@ -250,7 +252,7 @@ export function ScheduleAppointmentForm() {
             'mt-2 w-full h-14 rounded-full text-base font-medium transition-all',
             isScheduleNow
               ? 'bg-brand-blue text-white hover:bg-brand-blue/90 hover:text-white  border-transparent'
-              : 'border-gray-200 text-gray-900 hover:bg-gray-50 bg-white'
+              : 'border-(--border-stroke) text-(--text-primary) hover:bg-(--bg-primary) bg-(--bg-white)'
           )}
           onClick={() => setIsScheduleNow(!isScheduleNow)}
         >
@@ -260,9 +262,11 @@ export function ScheduleAppointmentForm() {
 
         <div className="relative flex items-center justify-center">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-200"></div>
+            <div className="w-full border-t border-(--border-stroke)"></div>
           </div>
-          <div className="relative bg-white px-4 text-sm text-gray-500">Or</div>
+          <div className="relative bg-(--bg-white) px-4 text-sm text-(--text-muted)">
+            Or
+          </div>
         </div>
 
         <div

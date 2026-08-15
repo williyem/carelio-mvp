@@ -45,7 +45,7 @@ const SoapSection = ({
   const config = SOAP_CONFIG[type];
 
   return (
-    <div className="space-y-3 bg-white border border-(--border-stroke) rounded-[10px] p-4">
+    <div className="space-y-3 bg-(--bg-white) border border-(--border-stroke) rounded-[10px] p-4">
       <div className="flex items-center gap-3">
         <div
           style={{ backgroundColor: config.bg, color: config.text }}
@@ -54,18 +54,20 @@ const SoapSection = ({
           {type.charAt(0).toUpperCase()}
         </div>
         <div className="flex flex-col">
-          <p className="capitalize font-bold text-gray-900 leading-none mb-1">
+          <p className="capitalize font-bold text-(--text-primary) leading-none mb-1">
             {type}
           </p>
         </div>
       </div>
-      <p className="text-sm text-gray-600 font-normal">{config.label}</p>
+      <p className="text-sm text-(--text-secondary) font-normal">
+        {config.label}
+      </p>
 
-      <div className="w-full bg-[#F9F9FB] border border-[#ECEDEE] rounded-[8px] p-4 text-gray-700 text-[15px] font-normal leading-relaxed">
+      <div className="w-full bg-(--bg-input) border border-(--border-input) rounded-[8px] p-4 text-(--text-gray) text-[15px] font-normal leading-relaxed">
         {content ? (
           <div dangerouslySetInnerHTML={{ __html: content }} />
         ) : (
-          <p className="text-gray-400">No {type} notes recorded</p>
+          <p className="text-(--text-muted)">No {type} notes recorded</p>
         )}
       </div>
     </div>
@@ -78,7 +80,7 @@ const HealthRecordDetail = ({ note, onBack }: HealthRecordDetailProps) => {
       <div className="flex flex-col gap-6 h-full">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-gray-500 font-bold hover:text-gray-900 transition-colors w-fit cursor-pointer"
+          className="flex items-center gap-2 text-(--text-muted) font-bold hover:text-(--text-primary) transition-colors w-fit cursor-pointer"
         >
           <ArrowLeft className="w-5 h-5" />
           <span>Back</span>
@@ -102,9 +104,9 @@ const HealthRecordDetail = ({ note, onBack }: HealthRecordDetailProps) => {
                 />
               )
             )}
-            <div className="space-y-3 bg-white border border-(--border-stroke) rounded-[10px] p-4">
-              <p className="font-bold text-gray-900">Measurements</p>
-              <p className="text-sm text-gray-600 font-normal">
+            <div className="space-y-3 bg-(--bg-white) border border-(--border-stroke) rounded-[10px] p-4">
+              <p className="font-bold text-(--text-primary)">Measurements</p>
+              <p className="text-sm text-(--text-secondary) font-normal">
                 Readings recorded during this appointment.
               </p>
               <VitalsTab

@@ -212,7 +212,7 @@ const DeviceCapturePanel = ({
       className={
         lockedSlug
           ? 'border-0 shadow-none bg-transparent'
-          : 'border-[#EBEBEB] shadow-none rounded-[14px] overflow-hidden bg-white h-fit'
+          : 'border-(--border-stroke) shadow-none rounded-[14px] overflow-hidden bg-(--bg-white) h-fit'
       }
     >
       <CardContent
@@ -227,7 +227,7 @@ const DeviceCapturePanel = ({
               else if (step === 'capture' || step === 'manual')
                 setStep(guide ? 'tutorial' : 'pick');
             }}
-            className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900"
+            className="flex items-center gap-1 text-sm text-(--text-muted) hover:text-(--text-primary)"
           >
             <ArrowLeft className="w-4 h-4" />
             Back
@@ -266,7 +266,9 @@ const DeviceCapturePanel = ({
         {step === 'pick' && (
           <div className="space-y-4">
             <div>
-              <h3 className="font-bold text-gray-900">Choose a device</h3>
+              <h3 className="font-bold text-(--text-primary)">
+                Choose a device
+              </h3>
               <p className="text-sm text-(--text-secondary) mt-1">
                 Pick the device you will use for this reading.
               </p>
@@ -281,9 +283,9 @@ const DeviceCapturePanel = ({
                     setVideoFailed(false);
                     setStep('tutorial');
                   }}
-                  className="flex items-center gap-3 rounded-[10px] border border-[#EBEBEB] p-3 text-left hover:border-brand-blue/40 hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-3 rounded-[10px] border border-(--border-stroke) p-3 text-left hover:border-brand-blue/40 hover:bg-(--bg-primary) transition-colors"
                 >
-                  <div className="relative w-16 h-16 rounded-[8px] overflow-hidden bg-gray-100 shrink-0">
+                  <div className="relative w-16 h-16 rounded-[8px] overflow-hidden bg-(--bg-light-gray) shrink-0">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={guideImage(item)}
@@ -292,7 +294,7 @@ const DeviceCapturePanel = ({
                     />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm text-gray-900">
+                    <p className="font-semibold text-sm text-(--text-primary)">
                       {item.title}
                     </p>
                     <p className="text-xs text-(--text-secondary)">
@@ -308,13 +310,13 @@ const DeviceCapturePanel = ({
         {step === 'tutorial' && guide && (
           <div className="space-y-4">
             <div>
-              <h3 className="font-bold text-gray-900">{guide.title}</h3>
+              <h3 className="font-bold text-(--text-primary)">{guide.title}</h3>
               <p className="text-sm text-(--text-secondary) mt-1">
                 {guide.description}
               </p>
             </div>
 
-            <div className="relative w-full aspect-video rounded-[10px] overflow-hidden bg-gray-100 border border-[#EBEBEB]">
+            <div className="relative w-full aspect-video rounded-[10px] overflow-hidden bg-(--bg-light-gray) border border-(--border-stroke)">
               {toYouTubeEmbedUrl(guide.youtubeUrl) ? (
                 <iframe
                   title={`${guide.title} how-to`}
@@ -360,8 +362,10 @@ const DeviceCapturePanel = ({
             </div>
 
             {guide.tips.length > 0 && (
-              <div className="rounded-[8px] bg-[#F7F9FC] p-3 space-y-1">
-                <p className="text-xs font-semibold text-gray-800">Tips</p>
+              <div className="rounded-[8px] bg-(--bg-primary) p-3 space-y-1">
+                <p className="text-xs font-semibold text-(--text-primary)">
+                  Tips
+                </p>
                 {guide.tips.map((tip) => (
                   <p key={tip} className="text-xs text-(--text-secondary)">
                     {tip}
@@ -394,13 +398,13 @@ const DeviceCapturePanel = ({
         {step === 'capture' && guide && (
           <div className="space-y-4">
             <div>
-              <h3 className="font-bold text-gray-900">Listening…</h3>
+              <h3 className="font-bold text-(--text-primary)">Listening…</h3>
               <p className="text-sm text-(--text-secondary) mt-1">
                 Use the {guide.title.toLowerCase()} as shown in the tutorial.
                 New readings appear below for confirmation.
               </p>
             </div>
-            <div className="relative w-full h-36 rounded-[10px] overflow-hidden bg-gray-100">
+            <div className="relative w-full h-36 rounded-[10px] overflow-hidden bg-(--bg-light-gray)">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={guideImage(guide)}
@@ -408,9 +412,9 @@ const DeviceCapturePanel = ({
                 className="size-full object-cover"
               />
             </div>
-            <div className="flex items-center gap-2 bg-[#E7F7E9] h-[34px] px-2.5 rounded-full w-fit">
+            <div className="flex items-center gap-2 bg-state-success-lighter h-[34px] px-2.5 rounded-full w-fit">
               <div className="w-[10px] h-[10px] rounded-full bg-[#0B7E17] animate-pulse" />
-              <span className="text-[#096112] text-xs font-normal">
+              <span className="text-(--text-green-dark) text-xs font-normal">
                 Waiting for {guide.shortLabel.toLowerCase()} reading
               </span>
             </div>
@@ -436,7 +440,9 @@ const DeviceCapturePanel = ({
         {step === 'manual' && (
           <div className="space-y-3">
             <div>
-              <h3 className="font-bold text-gray-900">Record manually</h3>
+              <h3 className="font-bold text-(--text-primary)">
+                Record manually
+              </h3>
               <p className="text-xs text-(--text-secondary) mt-1">
                 Type the reading shown on the patient&apos;s device or screen.
                 Manual entries are confirmed immediately.
@@ -484,7 +490,7 @@ const DeviceCapturePanel = ({
         )}
 
         {pending.length > 0 && (
-          <div className="space-y-3 border-t border-gray-100 pt-4">
+          <div className="space-y-3 border-t border-(--border-stroke) pt-4">
             <p className="text-sm font-semibold">Pending device readings</p>
             {pending.map((vital) => (
               <div
@@ -518,7 +524,7 @@ const DeviceCapturePanel = ({
         )}
 
         {confirmed.length > 0 && (
-          <div className="space-y-2 border-t border-gray-100 pt-4">
+          <div className="space-y-2 border-t border-(--border-stroke) pt-4">
             <p className="text-sm font-semibold">Confirmed this visit</p>
             {confirmed.map((vital) => (
               <p key={vital.id} className="text-sm text-(--text-secondary)">

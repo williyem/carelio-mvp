@@ -56,7 +56,7 @@ export default function Setup2FAPage() {
   };
 
   return (
-    <div className="w-full flex flex-col items-center justify-center sm:p-6 bg-white dark:bg-background h-full">
+    <div className="w-full flex flex-col items-center justify-center sm:p-6 bg-(--bg-white) dark:bg-background h-full">
       <div className="w-full max-w-[500px] flex flex-col items-center gap-6">
         <div className="flex flex-col items-center justify-center text-center space-y-2">
           <div className="flex items-center justify-center mb-6">
@@ -81,8 +81,10 @@ export default function Setup2FAPage() {
             Two-Factor Authentication
           </h1>
 
-          <div className="w-full p-4 bg-[#E8F4FC] border border-[#63B6EE] text-left rounded-lg text-sm text-gray-700">
-            <strong className="block mb-1 text-gray-900">Scan QR Code</strong>
+          <div className="theme-alert-info w-full p-4 text-left rounded-lg text-sm">
+            <strong className="block mb-1 text-(--text-primary)">
+              Scan QR Code
+            </strong>
             Open your authenticator app and scan the QR code below, or manually
             enter the secret key.{' '}
           </div>
@@ -95,11 +97,11 @@ export default function Setup2FAPage() {
         ) : (
           <>
             <div className="w-full">
-              <div className=" rounded-[8px] border border-[#ECEDEE] bg-(--bg-input) p-4 flex flex-col items-center gap-6">
+              <div className=" rounded-[8px] border border-(--border-input) bg-(--bg-input) p-4 flex flex-col items-center gap-6">
                 <div className="space-y-6 pt-4 w-full">
                   {/* QR Code */}
                   <div className="flex justify-center">
-                    <div className="bg-white p-3 sm:p-4 rounded-lg border">
+                    <div className="bg-(--bg-white) p-3 sm:p-4 rounded-lg border">
                       {qrCodeData ? (
                         <Image
                           width={118}
@@ -109,8 +111,8 @@ export default function Setup2FAPage() {
                           className="w-[118px] h-[118px]"
                         />
                       ) : (
-                        <div className="w-40 h-40 sm:w-48 sm:h-48 bg-gray-200 flex items-center justify-center">
-                          <QrCode className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400" />
+                        <div className="w-40 h-40 sm:w-48 sm:h-48 bg-(--bg-disabled) flex items-center justify-center">
+                          <QrCode className="h-10 w-10 sm:h-12 sm:w-12 text-(--text-muted)" />
                         </div>
                       )}
                     </div>
@@ -130,7 +132,7 @@ export default function Setup2FAPage() {
                           id="secretKey"
                           value={secretKey}
                           readOnly
-                          className="font-mono text-xs bg-white w-full px-4 rounded-[8px] border border-input h-[46px] text-(--text-muted) sm:text-sm"
+                          className="font-mono text-xs bg-(--bg-white) w-full px-4 rounded-[8px] border border-input h-[46px] text-(--text-muted) sm:text-sm"
                         />
                         <Button
                           variant="outline"
@@ -164,7 +166,7 @@ export default function Setup2FAPage() {
 
         <Link
           href={ROUTES.AUTH.ROOT}
-          className="flex items-center gap-2 text-sm text-gray-600 hover:text-foreground transition-colors mt-4"
+          className="flex items-center gap-2 text-sm text-(--text-secondary) hover:text-foreground transition-colors mt-4"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to log in

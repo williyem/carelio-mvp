@@ -24,7 +24,7 @@ const HealthRecordCard = ({
   return (
     <div
       className={cn(
-        'border border-[var(--border-stroke)] flex flex-col items-start px-4 sm:px-5 py-4 sm:py-[23px] rounded-[10px] w-full cursor-pointer hover:bg-gray-50 transition-colors',
+        'border border-[var(--border-stroke)] flex flex-col items-start px-4 sm:px-5 py-4 sm:py-[23px] rounded-[10px] w-full cursor-pointer hover:bg-(--bg-primary) transition-colors',
         className
       )}
       onClick={handleClick}

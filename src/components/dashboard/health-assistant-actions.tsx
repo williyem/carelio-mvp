@@ -51,7 +51,7 @@ const HealthAssistantActions = ({
         onClick={onViewRecords}
         variant="outline"
         size={undefined}
-        className="flex-1 border cursor-pointer  border-(--brand-blue) max-md:w-full min-h-[50px] h-[50px] px-4 py-[10px] rounded-[100px] gap-2 bg-white hover:bg-white"
+        className="flex-1 border cursor-pointer  border-(--brand-blue) max-md:w-full min-h-[50px] h-[50px] px-4 py-[10px] rounded-[100px] gap-2 bg-(--bg-white) hover:bg-(--bg-white)"
       >
         <FileText className="w-4 h-4 text-(--brand-blue)" />
         <span className="text-[16px] max-md:text-sm font-normal leading-[1.2] text-(--text-blue)">

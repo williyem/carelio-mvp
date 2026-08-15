@@ -49,19 +49,21 @@ function SuccessModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="mx-4 w-full max-w-md scale-100 transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all animate-in zoom-in-95 duration-200">
+      <div className="mx-4 w-full max-w-md scale-100 transform overflow-hidden rounded-2xl bg-(--bg-white) p-6 shadow-xl transition-all animate-in zoom-in-95 duration-200">
         <div className="flex flex-col items-center space-y-4 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-brand-blue">
             <Send className="h-6 w-6" />
           </div>
           <div className="space-y-2">
-            <h3 className="text-xl font-bold text-gray-900">
+            <h3 className="text-xl font-bold text-(--text-primary)">
               Invitation Sent Successfully
             </h3>
-            <p className="mx-auto max-w-xs text-sm text-gray-500">
+            <p className="mx-auto max-w-xs text-sm text-(--text-muted)">
               An email has been sent to{' '}
-              <span className="font-semibold text-gray-900">{email}</span> with
-              instructions to complete their profile.
+              <span className="font-semibold text-(--text-primary)">
+                {email}
+              </span>{' '}
+              with instructions to complete their profile.
             </p>
           </div>
           <div className="flex w-full flex-col gap-3 pt-2 sm:flex-row">
@@ -144,17 +146,17 @@ export function AddPatientForm() {
               <div className="flex flex-col basis-full gap-2">
                 <Label
                   htmlFor="email"
-                  className="text-sm font-bold text-gray-900"
+                  className="text-sm font-bold text-(--text-primary)"
                 >
                   Patient Email Address
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-(--text-muted)" />
                   <Input
                     id="email"
                     type="email"
                     placeholder="Email Address"
-                    className="h-12 rounded-lg border-gray-200 bg-gray-50 pl-10"
+                    className="h-12 rounded-lg border-(--border-stroke) bg-(--bg-primary) pl-10"
                     disabled={isPending}
                     {...register('email')}
                   />
@@ -162,7 +164,7 @@ export function AddPatientForm() {
                 <ErrorMessage message={errors.email?.message} />
               </div>
             </div>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-(--text-muted)">
               An invitation email with a registration link will be sent to the
               patient. Phone number is stored on their profile only and is not
               used for delivery.
@@ -174,10 +176,10 @@ export function AddPatientForm() {
           <CardContent className="space-y-6 p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label className="text-sm font-bold text-gray-900">
+                <Label className="text-sm font-bold text-(--text-primary)">
                   Schedule Appointment
                 </Label>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-(--text-muted)">
                   Include an appointment request with the invite
                 </p>
               </div>

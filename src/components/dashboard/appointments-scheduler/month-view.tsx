@@ -57,7 +57,7 @@ export function MonthView({
           {weekDays.map((d) => (
             <div
               key={d}
-              className="p-4 text-sm font-semibold text-gray-900 border-r last:border-r-0 bg-gray-50"
+              className="p-4 text-sm font-semibold text-(--text-primary) border-r last:border-r-0 bg-(--bg-primary)"
             >
               {d}
             </div>
@@ -88,11 +88,11 @@ export function MonthView({
             return (
               <div
                 key={i}
-                className="border-b border-r p-2 relative hover:bg-gray-50/30 transition-colors"
+                className="border-b border-r p-2 relative hover:bg-(--bg-primary)/30 transition-colors"
               >
                 {day && (
                   <>
-                    <span className="absolute top-2 right-3 text-sm text-gray-500 font-medium">
+                    <span className="absolute top-2 right-3 text-sm text-(--text-muted) font-medium">
                       {format(day, 'd')}
                     </span>
 
@@ -132,7 +132,7 @@ export function MonthView({
                         </Popover>
                       ))}
                       {dayAppointments.length > 2 && (
-                        <div className="text-xs text-gray-500 font-medium">
+                        <div className="text-xs text-(--text-muted) font-medium">
                           +{dayAppointments.length - 2} more
                         </div>
                       )}

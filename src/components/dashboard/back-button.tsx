@@ -23,8 +23,8 @@ const BackButton = ({
         className
       )}
     >
-      <div className="bg-[#fbfbfb] relative rounded-full w-8 h-8 flex items-center justify-center">
-        <ArrowLeft className="w-6 h-6 text-[#656060]" />
+      <div className="bg-(--bg-back-button) relative rounded-full w-8 h-8 flex items-center justify-center">
+        <ArrowLeft className="w-6 h-6 text-(--text-secondary)" />
       </div>
       <span className="font-bold leading-[38.21px] text-[16px]">{label}</span>
     </button>

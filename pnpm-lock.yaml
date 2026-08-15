@@ -86,9 +86,6 @@ importers:
       framer-motion:
         specifier: ^12.34.0
         version: 12.34.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      husky:
-        specifier: ^9.1.7
-        version: 9.1.7
       input-otp:
         specifier: ^1.4.2
         version: 1.4.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -183,6 +180,9 @@ importers:
       eslint-config-next:
         specifier: 16.1.1
         version: 16.1.1(@typescript-eslint/parser@8.55.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      husky:
+        specifier: ^9.1.7
+        version: 9.1.7
       jsdom:
         specifier: ^27.4.0
         version: 27.4.0

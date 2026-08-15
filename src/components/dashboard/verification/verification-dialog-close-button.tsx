@@ -10,7 +10,7 @@ const VerificationDialogCloseButton = ({
   return (
     <button
       onClick={onClose}
-      className="absolute right-5 top-5 w-6 h-6 flex items-center justify-center hover:bg-gray-100 cursor-pointer rounded-full transition-colors"
+      className="absolute right-5 top-5 w-6 h-6 flex items-center justify-center hover:bg-(--bg-light-gray) cursor-pointer rounded-full transition-colors"
       aria-label="Close dialog"
     >
       <CloseSvg />

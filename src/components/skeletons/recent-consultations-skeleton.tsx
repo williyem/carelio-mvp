@@ -6,7 +6,7 @@ const RecentConsultationsSkeleton = () => {
       {[1, 2, 3].map((i) => (
         <div
           key={i}
-          className="flex items-center justify-between w-full p-4 rounded-xl border border-gray-200 bg-white"
+          className="flex items-center justify-between w-full p-4 rounded-xl border border-(--border-stroke) bg-(--bg-white)"
         >
           <div className="flex items-center w-full gap-4">
             <Skeleton className="h-10 w-10 rounded-full" />

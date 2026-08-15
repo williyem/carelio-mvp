@@ -21,7 +21,7 @@ export default function HealthAssistantSettingsLayout({
   const handleLogoutClick = useLogout();
 
   return (
-    <div className="bg-white relative w-full min-h-screen">
+    <div className="bg-(--bg-white) relative w-full min-h-screen">
       <HealthAssistantTopbar
         onDevicesClick={() => setIsDeviceSheetOpen(true)}
         onLogoutClick={handleLogoutClick}

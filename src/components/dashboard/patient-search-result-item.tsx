@@ -25,7 +25,7 @@ const PatientSearchResultItem = ({
   return (
     <div
       className={cn(
-        'flex items-center justify-between w-full cursor-pointer hover:bg-gray-50 transition-colors ',
+        'flex items-center justify-between w-full cursor-pointer hover:bg-(--bg-primary) transition-colors ',
         className
       )}
       onClick={handleClick}

@@ -294,7 +294,7 @@ export default function DeviceCatalogSettings() {
                 sorted.map((guide) => (
                   <TableRow key={guide.slug}>
                     <TableCell>
-                      <div className="relative size-12 rounded-[8px] overflow-hidden bg-gray-100 border border-(--border-stroke)">
+                      <div className="relative size-12 rounded-[8px] overflow-hidden bg-(--bg-light-gray) border border-(--border-stroke)">
                         {guideImage(guide) ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img

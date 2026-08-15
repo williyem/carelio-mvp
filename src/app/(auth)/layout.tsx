@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { Mic, PhoneOff, Video } from 'lucide-react';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 
 export default function AuthLayout({
   children,
@@ -9,11 +10,7 @@ export default function AuthLayout({
   return (
     <div className="min-h-screen w-full md:grid md:grid-cols-2 bg-background font-sans antialiased">
       {/* Left Sidebar (Video Call Pane) */}
-      {/* Background color #E8F4FC */}
-      <div
-        className="hidden md:flex relative h-full w-full overflow-hidden flex-col items-end justify-center py-12 pr-0 pl-12"
-        style={{ backgroundColor: '#E8F4FC' }}
-      >
+      <div className="hidden md:flex relative h-full w-full overflow-hidden flex-col items-end justify-center py-12 pr-0 pl-12 bg-state-info-lighter">
         {/* The Device Frame Container */}
         {/* Background #101726, large border radius to look like a frame */}
         {/* Translated slightly to the right to bleed into the next column if desired, or just huge enough */}
@@ -64,7 +61,10 @@ export default function AuthLayout({
       </div>
 
       {/* Right Content Area */}
-      <div className="flex min-h-screen w-full flex-col items-center justify-center  p-4 sm:p-6 bg-white dark:bg-background relative z-10">
+      <div className="flex min-h-screen w-full flex-col items-center justify-center  p-4 sm:p-6 bg-(--bg-white) dark:bg-background relative z-10">
+        <div className="absolute right-4 top-4">
+          <ThemeToggle />
+        </div>
         {children}
       </div>
     </div>

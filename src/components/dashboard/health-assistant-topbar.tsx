@@ -6,6 +6,7 @@ import TopbarNavigation from './topbar-navigation';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/routes';
 import { PortalChip } from './portal-identity';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 
 interface HealthAssistantTopbarProps {
   className?: string;
@@ -21,14 +22,14 @@ const HealthAssistantTopbar = ({
   return (
     <div
       className={cn(
-        'bg-white border-b border-(--border-stroke) flex items-center justify-between max-h-[84px] px-4 md:px-[44px] py-[20px] w-full sticky top-0 z-50',
+        'bg-(--bg-white) border-b border-(--border-stroke) flex items-center justify-between max-h-[84px] px-4 md:px-[44px] py-[20px] w-full sticky top-0 z-50',
         className
       )}
     >
       <div className="flex items-center gap-3">
         <Link
           href={ROUTES.HEALTH_ASSISTANT.PATIENT.ROOT}
-          className="relative h-9 md:h-11 w-[120px] md:w-[140px]"
+          className="theme-logo-plate relative h-9 md:h-11 w-[120px] md:w-[140px]"
         >
           <Image
             src="/images/carelio-logo.png"
@@ -41,10 +42,13 @@ const HealthAssistantTopbar = ({
         <PortalChip label="Health assistant portal" />
       </div>
 
-      <TopbarNavigation
-        onDevicesClick={onDevicesClick}
-        onLogoutClick={onLogoutClick}
-      />
+      <div className="flex items-center gap-3">
+        <TopbarNavigation
+          onDevicesClick={onDevicesClick}
+          onLogoutClick={onLogoutClick}
+        />
+        <ThemeToggle className="hidden sm:inline-flex" />
+      </div>
     </div>
   );
 };

@@ -77,7 +77,7 @@ const AssignDoctorDialog = ({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="bg-white rounded-[30px] p-6 max-w-[443px] w-full">
+      <AlertDialogContent className="bg-(--bg-white) rounded-[30px] p-6 max-w-[443px] w-full">
         <VerificationDialogCloseButton onClose={handleClose} />
         <AlertDialogHeader className="items-start text-left p-0 pr-8">
           <AlertDialogTitle className="font-bold leading-[20px] text-(--text-dark) text-[16px]">

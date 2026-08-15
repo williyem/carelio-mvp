@@ -76,7 +76,7 @@ export default function NewHealthAssistantLogin() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-(--text-muted) hover:text-(--text-secondary) focus:outline-none"
                       tabIndex={-1}
                     >
                       {showPassword ? (
@@ -102,7 +102,7 @@ export default function NewHealthAssistantLogin() {
               <div className=" w-full text-center">
                 <Link
                   href="/forgot-password"
-                  className="text-sm text-gray-600 hover:text-brand-blue hover:underline"
+                  className="text-sm text-(--text-secondary) hover:text-brand-blue hover:underline"
                 >
                   Forgot password?
                 </Link>

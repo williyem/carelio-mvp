@@ -140,7 +140,7 @@ export default function FinalAcknowledgmentStep({
           </p>
         </div>
 
-        <div className="pt-4 space-y-6 border-t border-gray-100">
+        <div className="pt-4 space-y-6 border-t border-(--border-stroke)">
           {/* --- Patient Section --- */}
           <div className="space-y-4">
             {/* 1. Printed Name */}
@@ -149,7 +149,7 @@ export default function FinalAcknowledgmentStep({
               <input
                 id="printedName"
                 {...register('printedName')}
-                className="border-0 border-b-2 border-dotted border-gray-400 w-full max-w-[300px] outline-none bg-transparent text-base mb-2"
+                className="border-0 border-b-2 border-dotted border-(--border-gray) w-full max-w-[300px] outline-none bg-transparent text-base mb-2"
                 placeholder="Enter your full name"
               />
               {errors.printedName && (
@@ -194,7 +194,7 @@ export default function FinalAcknowledgmentStep({
               <div className="typography-paragraph-medium font-normal mb-1">
                 Patient Signature:
               </div>
-              <div className="border-b-2 border-dotted border-gray-400 w-full max-w-[300px] h-[60px] relative mb-2 min-w-[200px] flex items-center">
+              <div className="border-b-2 border-dotted border-(--border-gray) w-full max-w-[300px] h-[60px] relative mb-2 min-w-[200px] flex items-center">
                 <Controller
                   name="patientSignature"
                   control={control}
@@ -209,7 +209,7 @@ export default function FinalAcknowledgmentStep({
                           className="w-full h-[60px] object-contain absolute left-0 top-0 rounded-[4px]"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-start text-gray-400 text-sm italic">
+                        <div className="w-full h-full flex items-center justify-start text-(--text-muted) text-sm italic">
                           Signature will appear here
                         </div>
                       )}
@@ -232,7 +232,7 @@ export default function FinalAcknowledgmentStep({
                     {...field}
                     type="date"
                     readOnly={true}
-                    className="border-0 border-b-2 border-dotted border-gray-400 w-full max-w-[300px] outline-none bg-transparent text-base mb-2 font-medium"
+                    className="border-0 border-b-2 border-dotted border-(--border-gray) w-full max-w-[300px] outline-none bg-transparent text-base mb-2 font-medium"
                   />
                 )}
               />
@@ -241,7 +241,7 @@ export default function FinalAcknowledgmentStep({
 
           {/* --- Parent/Guardian Section (if minor) --- */}
           {isMinor && (
-            <div className="space-y-4 pt-6 border-t border-gray-100/50">
+            <div className="space-y-4 pt-6 border-t border-border/50">
               <h3 className="font-semibold text-sm text-text-strong-950">
                 Parent/Guardian Acknowledgment
               </h3>
@@ -255,7 +255,7 @@ export default function FinalAcknowledgmentStep({
                   id="parentGuardianPrintedName"
                   {...register('parentGuardianPrintedName')}
                   placeholder="Parent/Guardian full name"
-                  className="border-0 border-b-2 border-dotted border-gray-400 w-full max-w-[300px] outline-none bg-transparent text-base mb-2"
+                  className="border-0 border-b-2 border-dotted border-(--border-gray) w-full max-w-[300px] outline-none bg-transparent text-base mb-2"
                 />
                 {errors.parentGuardianPrintedName && (
                   <p className="text-red-600 text-xs">
@@ -299,7 +299,7 @@ export default function FinalAcknowledgmentStep({
                 <div className="typography-paragraph-medium font-normal mb-1">
                   Parent/Guardian Signature:
                 </div>
-                <div className="border-b-2 border-dotted border-gray-400 w-full max-w-[300px] h-[60px] relative mb-2 min-w-[200px] flex items-center">
+                <div className="border-b-2 border-dotted border-(--border-gray) w-full max-w-[300px] h-[60px] relative mb-2 min-w-[200px] flex items-center">
                   <Controller
                     name="parentGuardianSignature"
                     control={control}
@@ -314,7 +314,7 @@ export default function FinalAcknowledgmentStep({
                             className="w-full h-[60px] object-contain absolute left-0 top-0 rounded-[4px]"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-start text-gray-400 text-sm italic">
+                          <div className="w-full h-full flex items-center justify-start text-(--text-muted) text-sm italic">
                             Signature will appear here
                           </div>
                         )}

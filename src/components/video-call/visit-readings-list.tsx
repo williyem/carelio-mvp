@@ -66,12 +66,14 @@ export default function VisitReadingsList({
         return (
           <div
             key={vital.id}
-            className="rounded-[10px] border border-[#EBEBEB] p-3 space-y-2"
+            className="rounded-[10px] border border-(--border-stroke) p-3 space-y-2"
           >
             <div className="flex items-start justify-between gap-2">
               <div>
-                <p className="font-semibold text-sm text-gray-900">{label}</p>
-                <p className="text-base font-bold text-gray-900 mt-0.5">
+                <p className="font-semibold text-sm text-(--text-primary)">
+                  {label}
+                </p>
+                <p className="text-base font-bold text-(--text-primary) mt-0.5">
                   {formatVitalValue(vital)}
                 </p>
               </div>
@@ -117,7 +119,7 @@ export default function VisitReadingsList({
                 <span>
                   {label}: {formatVitalValue(vital)}
                 </span>
-                <span className="text-xs rounded-full px-2 py-0.5 bg-red-50 text-red-700">
+                <span className="text-xs rounded-full px-2 py-0.5 bg-state-error-lighter text-red-700">
                   Rejected
                 </span>
               </div>

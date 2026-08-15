@@ -705,7 +705,7 @@ function HospitalDeviceGuides({ guides }: { guides: DeviceGuide[] }) {
               className="bg-(--bg-white) border border-(--border-stroke) rounded-[10px] p-3 sm:p-4 w-full space-y-3"
             >
               <div className="flex gap-3 items-start">
-                <div className="relative size-16 rounded-[8px] overflow-hidden bg-gray-100 shrink-0 border border-(--border-stroke)">
+                <div className="relative size-16 rounded-[8px] overflow-hidden bg-(--bg-light-gray) shrink-0 border border-(--border-stroke)">
                   {guideImage(guide) ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img

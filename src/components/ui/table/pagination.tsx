@@ -158,7 +158,7 @@ export function Pagination({
             'flex items-center justify-center overflow-clip p-1.5 rounded-[8px] shrink-0 transition-colors',
             currentPage === 1
               ? 'opacity-50 cursor-not-allowed'
-              : 'hover:bg-gray-100 cursor-pointer'
+              : 'hover:bg-(--bg-light-gray) cursor-pointer'
           )}
         >
           <ChevronLeftDoubleSvg />
@@ -172,7 +172,7 @@ export function Pagination({
             'flex items-center justify-center overflow-clip p-1.5 rounded-[8px] shrink-0 transition-colors',
             currentPage === 1
               ? 'opacity-50 cursor-not-allowed'
-              : 'hover:bg-gray-100 cursor-pointer'
+              : 'hover:bg-(--bg-light-gray) cursor-pointer'
           )}
         >
           <ChevronLeftSvg />
@@ -203,7 +203,7 @@ export function Pagination({
                   'flex flex-col items-start overflow-clip p-1.5 rounded-[8px] shrink-0 transition-colors',
                   isActive
                     ? 'bg-(--bg-lighter-gray)'
-                    : 'bg-(--bg-white) border border-(--border-stroke) hover:bg-gray-50'
+                    : 'bg-(--bg-white) border border-(--border-stroke) hover:bg-(--bg-primary)'
                 )}
               >
                 <p
@@ -229,7 +229,7 @@ export function Pagination({
             'flex items-center justify-center overflow-clip p-1.5 rounded-[8px] shrink-0 transition-colors',
             currentPage === totalPages
               ? 'opacity-50 cursor-not-allowed'
-              : 'hover:bg-gray-100 cursor-pointer'
+              : 'hover:bg-(--bg-light-gray) cursor-pointer'
           )}
         >
           <ChevronRightSvg />
@@ -243,7 +243,7 @@ export function Pagination({
             'flex items-center justify-center overflow-clip p-1.5 rounded-[8px] shrink-0 transition-colors',
             currentPage === totalPages
               ? 'opacity-50 cursor-not-allowed'
-              : 'hover:bg-gray-100 cursor-pointer'
+              : 'hover:bg-(--bg-light-gray) cursor-pointer'
           )}
         >
           <ChevronRightDoubleSvg />

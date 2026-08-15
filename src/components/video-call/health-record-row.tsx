@@ -61,17 +61,19 @@ const HealthRecordRow = ({
         'flex  items-center justify-between w-full p-4 rounded-xl border cursor-pointer transition-all',
         selectedNote?.id === note?.id && !viewOnly
           ? 'border-brand-blue bg-blue-50/50'
-          : 'border-gray-200 hover:border-gray-300 bg-white'
+          : 'border-(--border-stroke) hover:border-(--border-gray) bg-(--bg-white)'
       )}
     >
       <div className={cn('flex items-center w-full gap-4 ')}>
-        <Avatar className="h-10 w-10 bg-gray-100">
-          <AvatarFallback className="text-gray-500">
+        <Avatar className="h-10 w-10 bg-(--bg-light-gray)">
+          <AvatarFallback className="text-(--text-muted)">
             <UserSvg />
           </AvatarFallback>
         </Avatar>
         <div>
-          <h3 className="font-semibold text-gray-900">{patient?.fullName}</h3>
+          <h3 className="font-semibold text-(--text-primary)">
+            {patient?.fullName}
+          </h3>
           <div className="text-sm flex items-center gap-2 text-(--text-secondary) font-normal">
             <div className="flex items-center gap-1">
               <CalendarSvg />
@@ -88,7 +90,7 @@ const HealthRecordRow = ({
         </div>
       </div>
       {!viewOnly ? (
-        <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-0.5 transition-all" />
+        <ChevronRight className="h-5 w-5 text-(--text-muted) group-hover:text-(--text-secondary) group-hover:translate-x-0.5 transition-all" />
       ) : (
         <DocumentTextSvg />
       )}

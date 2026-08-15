@@ -29,7 +29,7 @@ const StatusBadge = ({
     case 'CANCELLED':
       label = 'Cancelled';
       className =
-        'bg-red-50 text-red-600 border-red-100/50 px-2.5 py-[5px] rounded-full text-[12px] font-normal border ';
+        'bg-state-error-lighter text-red-600 border-red-100/50 px-2.5 py-[5px] rounded-full text-[12px] font-normal border ';
       break;
 
     case 'IN_PROGRESS':
@@ -64,12 +64,12 @@ const StatusBadge = ({
     case 'MISSED':
       label = 'Missed';
       className =
-        'bg-gray-50 text-gray-400 border-gray-200 px-2.5 py-[5px] rounded-full text-[12px] font-normal border ';
+        'bg-(--bg-primary) text-(--text-muted) border-(--border-stroke) px-2.5 py-[5px] rounded-full text-[12px] font-normal border ';
       break;
 
     default:
       className =
-        'bg-gray-50 text-gray-500 border-gray-200 px-2.5 py-[5px] rounded-full text-[12px] font-normal border ';
+        'bg-(--bg-primary) text-(--text-muted) border-(--border-stroke) px-2.5 py-[5px] rounded-full text-[12px] font-normal border ';
   }
 
   return (

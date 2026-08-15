@@ -66,16 +66,19 @@ export default function PatientForgotPasswordForm() {
       <form className="w-full grid gap-4" onSubmit={onSubmit}>
         {step === 'identifier' && (
           <div className="grid gap-2">
-            <Label htmlFor="identifier" className="text-gray-500 font-normal">
+            <Label
+              htmlFor="identifier"
+              className="text-(--text-muted) font-normal"
+            >
               Patient ID or email
             </Label>
             <div className="relative">
-              <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-(--text-muted)" />
               <Input
                 id="identifier"
                 type="text"
                 placeholder="PAT-1001 or you@email.com"
-                className="pl-9 placeholder:text-gray-400"
+                className="pl-9 placeholder:text-(--text-muted)"
                 disabled={isPending}
                 {...identifierRegister('identifier')}
               />
@@ -88,7 +91,7 @@ export default function PatientForgotPasswordForm() {
 
         {step === 'otp' && (
           <div className="grid gap-2">
-            <Label htmlFor="otp" className="text-gray-500 font-normal">
+            <Label htmlFor="otp" className="text-(--text-muted) font-normal">
               Email code
             </Label>
             <Input
@@ -97,7 +100,7 @@ export default function PatientForgotPasswordForm() {
               inputMode="numeric"
               placeholder="6-digit code"
               disabled={isPending}
-              className="placeholder:text-gray-400"
+              className="placeholder:text-(--text-muted)"
               {...otpRegister('otp')}
             />
             <ErrorMessage message={otpFormState.errors.otp?.message} />
@@ -107,23 +110,26 @@ export default function PatientForgotPasswordForm() {
         {step === 'password' && (
           <>
             <div className="grid gap-2">
-              <Label htmlFor="password" className="text-gray-500 font-normal">
+              <Label
+                htmlFor="password"
+                className="text-(--text-muted) font-normal"
+              >
                 New password
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-(--text-muted)" />
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="At least 8 characters"
-                  className="pl-9 placeholder:text-gray-400"
+                  className="pl-9 placeholder:text-(--text-muted)"
                   disabled={isPending}
                   {...passwordRegister('password')}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((value) => !value)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-(--text-muted) hover:text-(--text-secondary)"
                   tabIndex={-1}
                 >
                   {showPassword ? (
@@ -140,7 +146,7 @@ export default function PatientForgotPasswordForm() {
             <div className="grid gap-2">
               <Label
                 htmlFor="confirmPassword"
-                className="text-gray-500 font-normal"
+                className="text-(--text-muted) font-normal"
               >
                 Confirm password
               </Label>
@@ -148,7 +154,7 @@ export default function PatientForgotPasswordForm() {
                 id="confirmPassword"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Re-enter password"
-                className="placeholder:text-gray-400"
+                className="placeholder:text-(--text-muted)"
                 disabled={isPending}
                 {...passwordRegister('confirmPassword')}
               />
@@ -171,7 +177,7 @@ export default function PatientForgotPasswordForm() {
 
       <Link
         href="/login"
-        className="flex items-center gap-2 text-sm text-gray-600 hover:text-foreground transition-colors"
+        className="flex items-center gap-2 text-sm text-(--text-secondary) hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to log in

@@ -97,15 +97,15 @@ export function AppointmentDetailsPopup({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100/50 p-6 w-[280px] flex flex-col items-start text-left space-y-5 animate-in fade-in zoom-in duration-200">
-      <div className="w-14 h-14 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
-        <User className="h-7 w-7 text-gray-400" strokeWidth={1.5} />
+    <div className="bg-(--bg-white) rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-border/50 p-6 w-[280px] flex flex-col items-start text-left space-y-5 animate-in fade-in zoom-in duration-200">
+      <div className="w-14 h-14 rounded-full bg-(--bg-primary) flex items-center justify-center border border-(--border-stroke)">
+        <User className="h-7 w-7 text-(--text-muted)" strokeWidth={1.5} />
       </div>
 
       <div className="space-y-4 w-full">
         <div className="flex justify-between items-start">
           <div className="flex flex-col gap-y-1">
-            <h3 className="text-xl font-bold text-gray-900 leading-tight">
+            <h3 className="text-xl font-bold text-(--text-primary) leading-tight">
               {patientName}
             </h3>
             {!appointment.patient?.isRegistrationComplete && (
@@ -116,7 +116,7 @@ export function AppointmentDetailsPopup({
           </div>
           <div className="flex flex-col items-end gap-1">
             {appointment.status === 'CANCELLED' && (
-              <span className="text-[10px] bg-red-50 text-red-600 px-2 py-0.5 rounded-full font-bold uppercase">
+              <span className="text-[10px] bg-state-error-lighter text-red-600 px-2 py-0.5 rounded-full font-bold uppercase">
                 Cancelled
               </span>
             )}
@@ -131,7 +131,7 @@ export function AppointmentDetailsPopup({
               </span>
             )}
             {appointment.status === 'MISSED' && (
-              <span className="text-[10px] bg-gray-50 text-gray-500 px-2 py-0.5 rounded-full font-bold uppercase">
+              <span className="text-[10px] bg-(--bg-primary) text-(--text-muted) px-2 py-0.5 rounded-full font-bold uppercase">
                 Missed
               </span>
             )}
@@ -152,17 +152,17 @@ export function AppointmentDetailsPopup({
         </div>
 
         <div className="space-y-2.5">
-          <div className="flex items-center gap-3 text-gray-500 font-medium">
+          <div className="flex items-center gap-3 text-(--text-muted) font-medium">
             <CalendarIcon className="h-5 w-5 opacity-70" />
             <span className="text-[15px]">{dateStr}</span>
           </div>
           {patientContact ? (
-            <div className="flex items-center gap-3 text-gray-500 font-medium">
+            <div className="flex items-center gap-3 text-(--text-muted) font-medium">
               <ContactIcon className="h-5 w-5 opacity-70" />
               <span className="text-[15px]">{patientContact}</span>
             </div>
           ) : null}
-          <div className="flex items-center gap-3 text-gray-500 font-medium">
+          <div className="flex items-center gap-3 text-(--text-muted) font-medium">
             <Clock className="h-5 w-5 opacity-70" />
             <span className="text-[15px]">
               {timeStr} {durationStr && `(${durationStr})`}
@@ -170,22 +170,22 @@ export function AppointmentDetailsPopup({
           </div>
           {appointment.status?.toUpperCase() === 'CANCELLED' &&
             appointment.cancellationReason && (
-              <div className="text-sm text-gray-500 mt-2 bg-red-50/50 p-2 rounded-lg border border-red-100/50">
+              <div className="text-sm text-(--text-muted) mt-2 bg-state-error-lighter/50 p-2 rounded-lg border border-red-100/50">
                 <span className="font-semibold text-red-700">
                   Cancellation Reason:
                 </span>{' '}
-                <p className="mt-1 text-gray-700 italic">
+                <p className="mt-1 text-(--text-gray) italic">
                   &ldquo;{appointment.cancellationReason}&rdquo;
                 </p>
               </div>
             )}
           {appointment.reschedulingReason &&
             appointment.status?.toUpperCase() !== 'CANCELLED' && (
-              <div className="text-sm text-gray-500 mt-2 bg-blue-50/50 p-2 rounded-lg border border-blue-100/50">
+              <div className="text-sm text-(--text-muted) mt-2 bg-blue-50/50 p-2 rounded-lg border border-blue-100/50">
                 <span className="font-semibold text-brand-blue">
                   Reschedule Reason:
                 </span>{' '}
-                <p className="mt-1 text-gray-700 italic">
+                <p className="mt-1 text-(--text-gray) italic">
                   &ldquo;{appointment.reschedulingReason}&rdquo;
                 </p>
               </div>
@@ -238,7 +238,7 @@ export function AppointmentDetailsPopup({
                 {canCancel && (
                   <Button
                     variant="outline"
-                    className="flex-1 text-red-600 border-red-100 hover:text-red-600/80 h-10 hover:bg-red-50 rounded-xl font-normal text-sm"
+                    className="flex-1 text-red-600 border-red-100 hover:text-red-600/80 h-10 hover:bg-state-error-lighter rounded-xl font-normal text-sm"
                     onClick={() => {
                       onAction?.();
                       onCancel?.(appointment);
