@@ -39,7 +39,7 @@ const HealthAssistantActions = ({
       <Button
         onClick={onRecordVitals}
         size={undefined}
-        className="flex-1 bg-black cursor-pointer max-md:w-full border border-black min-h-[50px] h-[50px] px-4 py-[10px] rounded-[100px] gap-2 hover:bg-black/90 text-white"
+        className="flex-1 bg-(--bg-button-primary) cursor-pointer max-md:w-full border border-(--bg-button-primary) min-h-[50px] h-[50px] px-4 py-[10px] rounded-[100px] gap-2 hover:bg-(--bg-button-primary)/90 text-white"
       >
         <User className="w-6 h-6" />
         <span className="text-[16px] max-md:text-sm font-bold leading-[1.2] text-white">
