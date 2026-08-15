@@ -12,6 +12,10 @@ const BASE_TABS = [
 ];
 
 const TEAM_TAB = { name: 'Team', href: ROUTES.DASHBOARD.SETTINGS.TEAM };
+const DEVICES_TAB = {
+  name: 'Devices',
+  href: ROUTES.DASHBOARD.SETTINGS.DEVICES,
+};
 
 export default function DoctorSettingsLayout({
   children,
@@ -19,7 +23,9 @@ export default function DoctorSettingsLayout({
   children: React.ReactNode;
 }) {
   const { user } = useUser();
-  const tabs = user?.isAdmin ? [...BASE_TABS, TEAM_TAB] : BASE_TABS;
+  const tabs = user?.isAdmin
+    ? [...BASE_TABS, TEAM_TAB, DEVICES_TAB]
+    : BASE_TABS;
 
   return (
     <div>

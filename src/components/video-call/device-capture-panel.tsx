@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import Image from 'next/image';
 import { ArrowLeft, Bluetooth, Video } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,10 +13,11 @@ import { useCallVitalsStore, type CallVital } from '@/stores/call-vitals-store';
 import useVitalsMutations from '@/integration/vitals/mutations';
 import useDeviceConnection from '@/hooks/page-hooks/video-call/useDeviceConnection';
 import {
-  DEVICE_GUIDES,
-  getDeviceGuide,
+  guideImage,
+  toYouTubeEmbedUrl,
   type DeviceGuideSlug,
 } from '@/lib/device-guides';
+import { useDeviceGuides, useDeviceGuide } from '@/hooks/use-device-guides';
 import { toast } from 'sonner';
 
 const EMPTY_VITALS: CallVital[] = [];
@@ -62,6 +62,7 @@ const DeviceCapturePanel = ({
   const { confirmVitalsMutation, createVitalMutation } = useVitalsMutations();
   const { startListening, stopListening, reset } = useDeviceConnection();
 
+  const { data: guides } = useDeviceGuides();
   const [step, setStep] = useState<PanelStep>(lockedSlug ? 'tutorial' : 'idle');
   const [selectedSlug, setSelectedSlug] = useState<DeviceGuideSlug | null>(
     lockedSlug ?? null
@@ -76,7 +77,7 @@ const DeviceCapturePanel = ({
   const [videoFailed, setVideoFailed] = useState(false);
 
   const syncedKeysRef = useRef<Set<string>>(new Set());
-  const guide = selectedSlug ? getDeviceGuide(selectedSlug) : undefined;
+  const guide = useDeviceGuide(selectedSlug);
 
   const pending = useMemo(
     () => callVitals.filter((vital) => vital.status === 'pending'),
@@ -98,7 +99,9 @@ const DeviceCapturePanel = ({
       addVital(appointmentId, {
         appointmentId,
         type: slug,
-        label: getDeviceGuide(slug)?.shortLabel || slug.replace('-', ' '),
+        label:
+          guides.find((item) => item.slug === slug)?.shortLabel ||
+          slug.replace('-', ' '),
         value: reading.value,
         source: 'device',
         status: 'pending',
@@ -107,7 +110,15 @@ const DeviceCapturePanel = ({
       void syncReading(slug, reading.raw ?? { value: reading.value });
       toast.success('Device reading received');
     });
-  }, [addVital, appointmentId, liveReadings, selectedSlug, step, syncReading]);
+  }, [
+    addVital,
+    appointmentId,
+    guides,
+    liveReadings,
+    selectedSlug,
+    step,
+    syncReading,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -261,7 +272,7 @@ const DeviceCapturePanel = ({
               </p>
             </div>
             <div className="grid grid-cols-1 gap-3">
-              {DEVICE_GUIDES.map((item) => (
+              {guides.map((item) => (
                 <button
                   key={item.slug}
                   type="button"
@@ -273,12 +284,11 @@ const DeviceCapturePanel = ({
                   className="flex items-center gap-3 rounded-[10px] border border-[#EBEBEB] p-3 text-left hover:border-brand-blue/40 hover:bg-gray-50 transition-colors"
                 >
                   <div className="relative w-16 h-16 rounded-[8px] overflow-hidden bg-gray-100 shrink-0">
-                    <Image
-                      src={item.image}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={guideImage(item)}
                       alt={item.title}
-                      fill
-                      className="object-cover"
-                      sizes="64px"
+                      className="size-full object-cover"
                     />
                   </div>
                   <div>
@@ -305,29 +315,36 @@ const DeviceCapturePanel = ({
             </div>
 
             <div className="relative w-full aspect-video rounded-[10px] overflow-hidden bg-gray-100 border border-[#EBEBEB]">
-              {!videoFailed && guide.video ? (
+              {toYouTubeEmbedUrl(guide.youtubeUrl) ? (
+                <iframe
+                  title={`${guide.title} how-to`}
+                  src={toYouTubeEmbedUrl(guide.youtubeUrl) || undefined}
+                  className="size-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : !videoFailed && guide.video ? (
                 <video
                   className="w-full h-full object-cover"
                   controls
                   playsInline
-                  poster={guide.image}
+                  poster={guideImage(guide)}
                   onError={() => setVideoFailed(true)}
                 >
                   <source src={guide.video} type="video/mp4" />
                 </video>
               ) : (
                 <div className="relative w-full h-full">
-                  <Image
-                    src={guide.image}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={guideImage(guide)}
                     alt={`${guide.title} reference`}
-                    fill
-                    className="object-cover"
-                    sizes="400px"
+                    className="size-full object-cover"
                   />
                   <div className="absolute inset-x-0 bottom-0 bg-black/55 text-white text-xs px-3 py-2 flex items-center gap-2">
                     <Video className="w-3.5 h-3.5" />
-                    Demo video placeholder — drop demo.mp4 into
-                    public/device-guides/{guide.slug}/
+                    Add a YouTube how-to in Admin → Devices, or a local demo
+                    video.
                   </div>
                 </div>
               )}
@@ -384,12 +401,11 @@ const DeviceCapturePanel = ({
               </p>
             </div>
             <div className="relative w-full h-36 rounded-[10px] overflow-hidden bg-gray-100">
-              <Image
-                src={guide.image}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={guideImage(guide)}
                 alt={guide.title}
-                fill
-                className="object-cover"
-                sizes="400px"
+                className="size-full object-cover"
               />
             </div>
             <div className="flex items-center gap-2 bg-[#E7F7E9] h-[34px] px-2.5 rounded-full w-fit">

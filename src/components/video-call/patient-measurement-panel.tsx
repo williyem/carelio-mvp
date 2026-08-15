@@ -8,6 +8,7 @@ import {
   useRespondToMeasurementRequest,
 } from '@/integration/clinical-intelligence';
 import { getDeviceGuide, type DeviceGuideSlug } from '@/lib/device-guides';
+import { useDeviceGuide } from '@/hooks/use-device-guides';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import DeviceCapturePanel from './device-capture-panel';
@@ -49,6 +50,10 @@ export default function PatientMeasurementPanel({
   const active =
     requested.find((item) => item.id === selectedId) ?? requested[0];
 
+  const guideFromStore = useDeviceGuide(active?.vitalType);
+  const guide =
+    guideFromStore || (active ? getDeviceGuide(active.vitalType) : undefined);
+
   useEffect(() => {
     if (!data) return;
 
@@ -69,7 +74,6 @@ export default function PatientMeasurementPanel({
       toast.message(`Please record ${newest.label.toLowerCase()}`);
     }
   }, [data]);
-  const guide = active ? getDeviceGuide(active.vitalType) : undefined;
 
   const handleNoDevice = async (requestId: string) => {
     try {

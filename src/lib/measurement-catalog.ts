@@ -1,4 +1,4 @@
-import { DEVICE_GUIDES, type DeviceGuideSlug } from '@/lib/device-guides';
+import { DEVICE_GUIDES } from '@/lib/device-guides';
 
 export const MEASUREMENT_TYPES = [
   'thermometer',
@@ -8,7 +8,7 @@ export const MEASUREMENT_TYPES = [
   'weight-scale',
 ] as const;
 
-export type MeasurementType = DeviceGuideSlug;
+export type MeasurementType = (typeof MEASUREMENT_TYPES)[number];
 
 export const MEASUREMENT_KEYWORDS: Record<MeasurementType, string[]> = {
   'blood-pressure': [
