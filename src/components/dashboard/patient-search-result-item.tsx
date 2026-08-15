@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Mail, Phone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import UserSvg from '@/assets/icons/user-svg';
 import { AssignedPatient } from '@/integration/patient/type';
@@ -22,32 +22,40 @@ const PatientSearchResultItem = ({
     }
   };
 
+  const contact = patient?.email || patient?.phoneNumber || patient?.phone;
+  const ContactIcon = patient?.email ? Mail : Phone;
+
   return (
     <div
       className={cn(
-        'flex items-center justify-between w-full cursor-pointer hover:bg-(--bg-primary) transition-colors ',
+        'group flex w-full cursor-pointer items-center justify-between gap-3 rounded-2xl border border-(--border-stroke) bg-(--bg-white) p-3 shadow-[0px_1px_2px_0px_rgba(10,13,20,0.03)] transition-all hover:-translate-y-0.5 hover:border-brand-blue/35 hover:bg-(--bg-primary) hover:shadow-[0px_10px_28px_0px_rgba(10,13,20,0.08)]',
         className
       )}
       onClick={handleClick}
     >
-      <div className="flex gap-3 items-center">
-        <div className="rounded-full bg-(--offset-bg) h-[40px] w-[40px] sm:h-[71px] sm:w-[71px] flex items-center justify-center p-[6px] sm:p-[8px] outline-solid ou outline-offset-2 outline-[#DCE0E6] sm:outline-offset-[2.6px] outline-2 sm:outline-[2.3px]">
-          <UserSvg className="w-[28px] h-[28px]  sm:w-[35px] sm:h-[35px]" />
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-brand-blue/15 bg-brand-blue/10 text-brand-blue transition-colors group-hover:bg-brand-blue group-hover:text-white sm:h-12 sm:w-12">
+          <UserSvg className="h-5 w-5 sm:h-6 sm:w-6" />
         </div>
-        <div className="flex flex-col gap-[2px] sm:gap-[3px] items-start w-[140px] sm:w-[169px] min-w-0">
-          <p className="font-normal leading-[1.2] text-(--text-primary) text-[16px] sm:text-[18px] w-full truncate">
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <p className="w-full truncate text-[15px] font-semibold leading-[1.2] text-(--text-primary) sm:text-[16px]">
             {patient?.fullName || patient?.patientId}
           </p>
-          <p className="font-normal leading-[1.2] text-(--text-secondary) text-[10px] sm:text-[12px] w-full truncate">
-            {patient?.email || patient?.phoneNumber}
-          </p>
+          {contact ? (
+            <p className="flex w-full items-center gap-1.5 truncate text-[12px] font-normal leading-[1.2] text-(--text-secondary)">
+              <ContactIcon className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">{contact}</span>
+            </p>
+          ) : null}
           {patient?.isRegistrationComplete ? null : (
-            <p className="text-xs text-red-500">Incomplete Registration</p>
+            <span className="mt-1 w-fit rounded-full border border-state-warning-base/25 bg-state-warning-bg px-2 py-0.5 text-[11px] font-medium text-state-warning-base">
+              Incomplete registration
+            </span>
           )}
         </div>
       </div>
-      <div className="flex items-center shrink-0">
-        <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-(--text-secondary)" />
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-(--bg-primary) text-(--text-secondary) transition-colors group-hover:bg-brand-blue group-hover:text-white">
+        <ChevronRight className="h-4 w-4" />
       </div>
     </div>
   );

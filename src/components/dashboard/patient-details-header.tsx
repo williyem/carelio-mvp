@@ -46,15 +46,15 @@ const PatientDetailsHeader = ({
           Patient Details
         </h1>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
           {portal === 'health-assistant' && patientId ? (
             <Button
               onClick={() => setAssignDoctorOpen(true)}
               variant="outline"
-              className="h-[50px] px-4 py-[10px] rounded-[100px] w-full sm:w-[200px] border-brand-blue text-brand-blue"
+              className="h-[50px] w-full min-w-0 rounded-[100px] border-brand-blue px-4 py-[10px] text-brand-blue hover:bg-brand-blue/5 hover:text-brand-blue sm:w-auto sm:min-w-[224px]"
             >
-              <UserPlus className="w-4 h-4 mr-2" />
-              <span className="text-[14px] leading-[1.2] font-normal">
+              <UserPlus className="mr-2 h-4 w-4 shrink-0" />
+              <span className="truncate text-[14px] font-normal leading-[1.2]">
                 Request covering doctor
               </span>
             </Button>
@@ -62,10 +62,10 @@ const PatientDetailsHeader = ({
           <Button
             onClick={handleSchedule}
             variant="brand"
-            className="bg-brand-blue border border-brand-blue h-[50px] px-4 py-[10px] rounded-[100px] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] w-full sm:w-[250px] text-white hover:bg-brand-blue-dark"
+            className="h-[50px] w-full rounded-[100px] border border-brand-blue bg-brand-blue px-4 py-[10px] text-white shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] hover:bg-brand-blue-dark sm:w-[250px]"
           >
-            <Calendar className="w-4 h-4 mr-2" />
-            <span className="text-[14px] leading-[1.2] font-normal">
+            <Calendar className="mr-2 h-4 w-4 shrink-0" />
+            <span className="truncate text-[14px] font-normal leading-[1.2]">
               Schedule Appointment
             </span>
           </Button>
